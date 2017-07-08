@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html><head>
-<meta http-equiv="content-type" content="text/html; charset=windows-1252">
-
-<title>HTRC Extracted Feature Solr Search</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+<title>HTRC Page-Level Extracted Feature Solr Search</title>
 <!--
         <link rel="shortcut icon" href="https://analytics.hathitrust.org/assets/images/favicon.ico">
 -->
@@ -14,16 +14,16 @@
         <link href="assets/flat.css" rel="stylesheet" media="screen">
         <link href="assets/font-awesome.css" rel="stylesheet">
         <link href="assets/tomorrow.css" rel="stylesheet">
-		<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
+	<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
 	
         <link href="index.css" rel="stylesheet">
 	
         <script src="assets/highlight.js"></script>
-        <script src="assets/jquery.js"></script>
-	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
         <script src="assets/stupidtable.js"></script>
         <script src="assets/bootstrap.js"></script>
         <script src="assets/bowser.js"></script>
+        <script src="assets/jquery.js"></script>
+	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
         <script type="text/javascript" src="assets/htrcwarnings.js"></script>
         <script type="text/javascript" src="assets/uploadws.js"></script>
         <script type="text/javascript" src="assets/ga-download-tracking.js"></script>
@@ -183,49 +183,60 @@
 		    <td>Volume Metadata:</td>
 		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
 			       placeholder="metaname:metavalue e.g., title_t:farming"
-			       style="width: 600px;"/><br />
+			       style="width: 600px;"/>
+		      <span id="volume-help" style="cursor: help">&#x1f6c8; Help</span>
+				      
+		      <br />
 		      <input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on">&nbsp;Search all volume fields
 		    </td>
 		  </tr>
 		  <tr>
 		    <td></td>
 		    <td style="color: #aaaaaa; width: 400px; font-size: 14px; line-height: 16px; padding-bottom: 10px;">
-		      Indexed volume metadata fields:
-		      <!--
+		      
+		      <div id="volume-help-dialog"
+			   title="Help: Query Volume Metadata"
+			   style="height: 500px;">
+			<div>
+			  <!--
 		      accessProfile_t, genre_t,
 		      imprint_t, isbn_t, issn_t, issuance_t,
 		      language_t, lccn_t, names_t, oclc_t,
 		      pubPlace_t, pubDate_t, rightsAttributes_t,
 		      title_t, typeOfResource_t
--->
+			-->
 
-		      accessProfile_t,
-		      bibliographicFormat_t,
-		      classification_dcc_t,
-		      classification_lcc_t,
-		      dateCreated_t,              
-		      genre_t,
-		      handleUrl_t,
-		      hathitrustRecordNumber_t,  
-		      htBibUrl_t,
-		      imprint_t,
-      		      isbn_t,
-		      issn_t,
-		      issuance_t,
-		      language_t,
-		      lastUpdateDate_t,		      
-      		      lccn_t,
-      		      names_t,
-		      oclc_t,
-		      pubDate_t,
-		      pubPlace_t,
-		      rightsAttributes_t,
-		      schemaVersion_t,
-		      sourceInstitution_t,
-		      sourceInstitutionRecordNumber_t,
-		      title_t,
-		      typeOfResource_t,
-		      volumeIdentifier_t
+			  Indexed volume metadata fields:<br />
+			  
+			  accessProfile_t,
+			  bibliographicFormat_t,
+			  classification_dcc_t,
+			  classification_lcc_t,
+			  dateCreated_t,              
+			  genre_t,
+			  handleUrl_t,
+			  hathitrustRecordNumber_t,  
+			  htBibUrl_t,
+			  imprint_t,
+      			  isbn_t,
+			  issn_t,
+			  issuance_t,
+			  language_t,
+			  lastUpdateDate_t,		      
+      			  lccn_t,
+      			  names_t,
+			  oclc_t,
+			  pubDate_t,
+			  pubPlace_t,
+			  rightsAttributes_t,
+			  schemaVersion_t,
+			  sourceInstitution_t,
+			  sourceInstitutionRecordNumber_t,
+			  title_t,
+			  typeOfResource_t,
+			  volumeIdentifier_t
+			</div>
+		      </div>
 		      
 		    </td>
 		  </tr>
@@ -310,8 +321,8 @@
     <div class="container">
       <h4>Additional Resources</h4>
       <ul>
-	<li><a href="admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
-	<li><a href="luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
+	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
+	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
 	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>
       </ul>
@@ -331,7 +342,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title">Create Workset</h4>
                     </div>
                     <div class="modal-body">
@@ -358,7 +369,7 @@ working on a technical solution to eliminate this requirement.</p>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title">Please Sign in</h4>
                     </div>
                     <div class="modal-body">

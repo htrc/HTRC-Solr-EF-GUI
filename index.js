@@ -1,3 +1,41 @@
+$(document).ready(function(){
+    // make the dialog
+    $("#volume-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	//height: screen.height - 300,
+	//position: {
+	//    my: "left top",
+	//    at: "left top",
+	//    of: "#Table1"
+	//},
+	width: 790,
+	//height: 300,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
+
+    $("#volume-help").click(function () {
+	$("#volume-help-dialog").dialog( "open" );
+    });
+
+});
+
+
+
+
+
 var langs_with_pos = ["en", "de", "pt", "da", "nl", "sv"];
 
 var langs_without_pos = [
@@ -725,6 +763,11 @@ function submit_action(event) {
 		rows: arg_rows,
 		facet: "on"
 	};
+
+    	if (group_by_vol_checked) {
+		store_search_args.sort = "id asc";
+	}
+
 	var url = "";
 	for (k in store_search_args) {
 		url += k + '=' + store_search_args[k] + "&";
@@ -738,9 +781,6 @@ function submit_action(event) {
 		url += 'fq=' + _k[0] + ':("' + _k[1] + '")&';
 	}
 
-	if (group_by_vol_checked) {
-		store_search_args.sort = "id asc";
-	}
 	//console.log("Solr URL:\n");
 
 	//console.log(store_search_action + "?" + url);
