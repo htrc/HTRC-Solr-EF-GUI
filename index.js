@@ -1,3 +1,4 @@
+// test
 $(document).ready(function(){
     // make the dialog
     $("#volume-help-dialog").dialog({
