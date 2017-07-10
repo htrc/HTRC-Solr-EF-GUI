@@ -50,7 +50,7 @@ var filters = [];
 var facet = ['genre_ss', 'language_t', 'pubPlace_s', 'bibliographicFormat_s'];
 var facet_display_name = {'genre_ss':'Genre', 'language_t': 'Language', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
 // Global variable show_facet to control if faceting is used.
-var show_facet = 1;
+var show_facet = 0;
 
 function lang_pos_toggle(event) {
 	var $this = $(this);
@@ -388,8 +388,11 @@ function show_results(jsonData) {
 	if (show_facet == 1) {
 		$(".narrowsearch").show();
 		$("#facetlist").html(facet_html);
-	} else {
+		show_facet = 0;
+	} else if (show_facet == 0){
 		$(".narrowsearch").hide();
+		facet_html = "";
+		$("#facetlist").html(facet_html);
 	}
 
 	$('.search-in-progress').css("cursor", "auto");
@@ -737,7 +740,6 @@ function submit_action(event) {
 	//console.log("*** arg_q = " + arg_q);
 
 	if (arg_q == "") {
-		show_facet = 1;
 		if (arg_vq == "") {
 			// arg_vq was empty to start with, but attempt to expand non-empty arg_q
 			//   lead to an empty arg_q being returned
@@ -747,9 +749,9 @@ function submit_action(event) {
 		} else {
 			arg_q = arg_vq;
 			doc_units = " volumes ";
+			show_facet = 1;
 		}
 	} else {
-		show_facet = 0;
 		if (arg_vq != "") {
 			// join the two with an AND
 			arg_q = "(" + arg_vq + ")" + " OR " + "(" + arg_q + ")";
@@ -758,6 +760,7 @@ function submit_action(event) {
 			group_by_vol_checked = true;
 		}
 		doc_units = " pages ";
+		show_facet = 0;
 	}
 
 	if ($('#vq').attr("data-key") == undefined) {
