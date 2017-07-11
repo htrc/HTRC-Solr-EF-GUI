@@ -1,16 +1,29 @@
+
+
+var langs_with_pos = ["en", "de", "pt", "da", "nl", "sv"];
+
+var langs_without_pos = [
+	"af", "ar", "bg", "bn", "cs", "el", "es", "et", "fa", "fi", "fr", "he", "hi", "hr", "hu",
+	"id", "it", "ja", "kn", "ko", "lt", "lv", "mk", "ml", "mr", "ne", "no", "pa", "pl",
+	"ro", "ru", "sk", "sl", "so", "sq", "sv", "sw", "ta", "te", "th", "tl", "tr",
+	"uk", "ur", "vi", "zh-cn", "zh-tw"
+];
+
+var num_rows = 20;
+var filters = [];
+var facet = ['genre_ss', 'language_t', 'pubPlace_s', 'bibliographicFormat_s'];
+var facet_display_name = {'genre_ss':'Genre', 'language_t': 'Language', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
+
+// Global variable show_facet to control if faceting is used.
+var show_facet = 0;
+
+var explain_search = { 'group_by_vol': null, 'query_level': null };
+
 $(document).ready(function(){
-    // make the dialog
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
-	//height: screen.height - 300,
-	//position: {
-	//    my: "left top",
-	//    at: "left top",
-	//    of: "#Table1"
-	//},
 	width: 790,
-	//height: 300,
 	modal: true,
 	buttons: {
 	    "OK": function () {
@@ -32,25 +45,6 @@ $(document).ready(function(){
 
 });
 
-
-
-
-
-var langs_with_pos = ["en", "de", "pt", "da", "nl", "sv"];
-
-var langs_without_pos = [
-	"af", "ar", "bg", "bn", "cs", "el", "es", "et", "fa", "fi", "fr", "he", "hi", "hr", "hu",
-	"id", "it", "ja", "kn", "ko", "lt", "lv", "mk", "ml", "mr", "ne", "no", "pa", "pl",
-	"ro", "ru", "sk", "sl", "so", "sq", "sv", "sw", "ta", "te", "th", "tl", "tr",
-	"uk", "ur", "vi", "zh-cn", "zh-tw"
-];
-
-var num_rows = 20;
-var filters = [];
-var facet = ['genre_ss', 'language_t', 'pubPlace_s', 'bibliographicFormat_s'];
-var facet_display_name = {'genre_ss':'Genre', 'language_t': 'Language', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
-// Global variable show_facet to control if faceting is used.
-var show_facet = 0;
 
 function lang_pos_toggle(event) {
 	var $this = $(this);
@@ -399,8 +393,17 @@ function show_results(jsonData) {
 
 	var $search_results = $('#search-results');
 
+        var explain_html = "<p>Search explanation: " + explain_search.query_level;
+        if (explain_search.group_by_vol != null) {
+	    explain_html += " THEN " + explain_search.group_by_vol;
+	}
+        explain_html += "</p>";
+    
 	if (num_docs > 0) {
-		$search_results.html("<p>Results: " + num_found + doc_units + "matched</p>");
+	    $search_results.html("<p>Results: " + num_found + doc_units + "matched</p>");
+
+	    $search_results.append(explain_html);
+	    
 		var from = parseInt(store_search_args.start) + 1;
 		var to = from + num_rows - 1;
 		if (to > num_found) {
@@ -415,7 +418,7 @@ function show_results(jsonData) {
 
 		$search_results.append(showing_matches);
 	} else {
-		$search_results.html("<p>No pages matched your query</p>");
+		$search_results.html(explain_html + "<p>No pages matched your query</p>");
 	}
 
 	// Example form of URL
@@ -739,6 +742,8 @@ function submit_action(event) {
 	//console.log("*** arg_vq = " + arg_vq);
 	//console.log("*** arg_q = " + arg_q);
 
+        explain_search = { 'group_by_vol': null, 'query_level': null };
+    
 	if (arg_q == "") {
 		if (arg_vq == "") {
 			// arg_vq was empty to start with, but attempt to expand non-empty arg_q
@@ -749,7 +754,12 @@ function submit_action(event) {
 		} else {
 			arg_q = arg_vq;
 			doc_units = " volumes ";
-			show_facet = 1;
+		        show_facet = 1;
+		    explain_search.query_level  = "[Volume metadata]";
+		    if (group_by_vol_checked) {
+		        explain_search.group_by_vol = "Search results sorted by volume ID";		            
+		    }
+
 		}
 	} else {
 		if (arg_vq != "") {
@@ -757,7 +767,15 @@ function submit_action(event) {
 			arg_q = "(" + arg_vq + ")" + " OR " + "(" + arg_q + ")";
 
 			// also implies
-			group_by_vol_checked = true;
+		        group_by_vol_checked = true;
+		    explain_search.query_level  = "[Volume metadata] OR [page-level POS terms]";
+		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		}
+	        else {
+		    explain_search.query_level  = "[page-level POS terms]";
+		    if (group_by_vol_checked) {
+		        explain_search.group_by_vol = "Search results sorted by volume ID";		            
+		    }		    
 		}
 		doc_units = " pages ";
 		show_facet = 0;
