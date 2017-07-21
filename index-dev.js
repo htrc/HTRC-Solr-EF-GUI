@@ -198,6 +198,8 @@ function show_new_results(delta) {
 		url += 'fq=' + _k[0] + ':("' + _k[1] + '")&';
 	}
 
+        store_search_url = store_search_action + "?" + url;
+    
 
 	$.ajax({
 		type: 'GET',
@@ -248,9 +250,9 @@ function generate_item(line, id, id_pages) {
 				id + '"><span style="cursor: progress;">Loading ...</span></span><br>';
 
 			if (page > 0) {
-				html_item += '<a target="_blank" href="' + babel_url + '">' + id + ', seq ' + seqnum + '</a>';
+				html_item += id + ': <a target="_blank" href="' + babel_url + '">seq ' + seqnum + '</a>';
 			} else {
-				html_item += '<a target="_blank" href="' + babel_url + '">' + id + ', all pages</a>';
+				html_item += id + ': <a target="_blank" href="' + babel_url + '">all pages</a>';
 			}
 
 		        html_item += download_span;
@@ -446,7 +448,7 @@ function show_results(jsonData) {
     
     if (query_level_mix != null) {
 	if (page_level_desc != null) {
-	    query_level_mix += " OR " + page_level_desc; // **** used to be OR
+	    query_level_mix += " AND " + page_level_desc; // **** used to be OR
 	}
     }
     else {
@@ -457,8 +459,44 @@ function show_results(jsonData) {
     if (explain_search.group_by_vol != null) {
 	explain_html += "<br /> THEN " + explain_search.group_by_vol;
     }
-    explain_html += "</p>";
+
+    //var a2a_config = a2a_config || {};
+    //a2a_config.linkname = "HathiTrust Research Center (HTRC) Extracted Feature Search";
+    //var base_url = location.protocol + '//' + location.host + location.pathname;
+    // //a2a_config.linkurl = base_url + "?pub-name=" + published_id.replace(/ /g,"+");
+    //a2a_config.linkurl = store_search_url;
+
+    explain_html += '<br />\n';
+
+    var data_a2a = "";
+    data_a2a += 'data-a2a-url="'+store_search_url+'"';
+    data_a2a += ' data-a2a-title="HathiTrust Research Center (HTRC) Extracted Feature Search"';
     
+    var a2a_html = "";
+    a2a_html += '<div style="float:right;">\n';
+    a2a_html += '  <div class="a2a_kit a2a_kit_size_32 a2a_default_style"' + data_a2a + '>\n';
+    a2a_html += '    <a class="a2a_button_email"></a>\n';
+    a2a_html += '    <a class="a2a_button_facebook"></a>\n';
+    a2a_html += '    <a class="a2a_button_google_plus"></a>\n';
+    //a2a_html += '  <a class="a2a_button_twitter"></a>\n';
+    a2a_html += '    <a class="a2a_dd" href="https://www.addtoany.com/share"></a>\n';
+    //a2a_html += '  <a class="a2a_dd" href="https://www.addtoany.com/share_save"></a>\n';
+    a2a_html += '  </div>\n';
+    a2a_html += '</div>\n';
+    a2a_html += '\n';
+    a2a_html += '<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>\n';
+
+    explain_html += a2a_html;
+
+    explain_html += '<div style="float:left;">\n';
+    explain_html += '  <button id="show-hide-solr-q">Show full query ...</button>\n';
+
+    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '"</div>\n';
+    explain_html += "</div>\n";
+    explain_html += "</p>\n";
+
+    explain_html += '<p style="clear:both"></p>\n';
+
     if (num_docs > 0) {
 	$search_results.html("<p>Results: " + num_found + doc_units + "matched</p>");
 	
@@ -480,7 +518,9 @@ function show_results(jsonData) {
     } else {
 	$search_results.html(explain_html + "<p>No pages matched your query</p>");
     }
-    
+
+    show_hide_solr_q();
+
     // Example form of URL
     //   https://babel.hathitrust.org/cgi/pt?id=hvd.hnnssu;view=1up;seq=11
     
@@ -591,9 +631,9 @@ function show_results(jsonData) {
 	start: 0,
 	    rows: ids.length,
     };
-    
+
     $.ajax({
-	type: 'GET',
+	type: "POST", // **** used to be 'GET'
 	url: solr_search_action,
 	data: url_args,
 	dataType: 'json',
@@ -607,6 +647,7 @@ function show_results(jsonData) {
 
 var store_search_args = null;
 var store_search_action = null;
+var store_search_url = null;
 
 var group_by_vol_checked = 0;
 var doc_units = "";
@@ -631,8 +672,13 @@ function expand_vfield(q_term, all_vfields, query_level) {
 		if (q_term.match(/:/)) {
 			vfields.push(q_term);
 		} else {
-			// make searching by title the default
-			vfields.push("title_t:" + q_term);
+		        // make searching by title the default
+		        var vfield = "title_t";
+		        if (query_level == "page") {
+		            vfield = "volume"+ vfield + "xt";
+			}
+
+			vfields.push(vfield + ":" + q_term);
 		}
 	}
 
@@ -702,7 +748,9 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
 	}
     }
     else {
-	explain_search.volume_level_terms = "metadata-term AND+OR metadata-term ...";
+	if (op_count>1) {
+	    explain_search.volume_level_terms = "metadata-term AND+OR metadata-term ...";
+	}
     }
     
     var bool_query = bool_query_term.join(" ");
@@ -862,21 +910,21 @@ function submit_action(event) {
 	} else {
 		if (arg_vq != "") {
 		    // join the two with an AND
-		    arg_q = "(" + arg_vq + ")" + " OR " + "(" + arg_q + ")"; // **** used to be OR
+		    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; // **** used to be OR
 		    
-		    // also implies
-		    group_by_vol_checked = true;
+		    // used to imply the following, but not any more with newer index
+		    //group_by_vol_checked = true; // **** Used to have to switch this on
 		    
 		    explain_search.volume_level_desc = "[Volume: TERMS]";
 		    explain_search.page_level_desc   = "[Page-level: TERMS]";
-		    explain_search.group_by_vol = "Search results sorted by volume ID";
 		}
 	        else {
 		    explain_search.page_level_desc  = "[Page-level: POS-terms]";
-		    if (group_by_vol_checked) {
-		        explain_search.group_by_vol = "Search results sorted by volume ID";
-		    }		    
 		}
+	        if (group_by_vol_checked) {
+		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		}		    
+
 		doc_units = " pages ";
 		show_facet = 1;  // used to be 0 // ****
 	}
@@ -931,6 +979,8 @@ function submit_action(event) {
 
 	//console.log(store_search_action + "?" + url);
 
+        store_search_url = store_search_action + "?" + url;
+    
 	$.ajax({
 		type: 'GET',
 		url: store_search_action,
@@ -1046,7 +1096,7 @@ function generate_pos_langs() {
 		}
 	}
 
-	show_hide_lang()
+    show_hide_lang();
 }
 
 function show_hide_lang() {
@@ -1065,6 +1115,25 @@ function show_hide_lang() {
 		}
 	});
 }
+
+
+function show_hide_solr_q() {
+	$("#show-hide-solr-q").click(function (event) {
+		event.preventDefault();
+		if ($('.show-hide-solr-q:visible').length) {
+			$('.show-hide-solr-q').hide("slide", {
+				direction: "up"
+			}, 1000);
+			$('#show-hide-solr-q').html("Show full query ...");
+		} else {
+			$('.show-hide-solr-q').show("slide", {
+				direction: "up"
+			}, 1000);
+			$('#show-hide-solr-q').html("Hide full query ...");
+		}
+	});
+}
+
 
 function generate_other_langs() {
 	// setup other languages
