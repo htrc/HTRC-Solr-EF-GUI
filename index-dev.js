@@ -217,11 +217,22 @@ function generate_item(line, id, id_pages) {
 	var html_item = "";
 
         // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
-    
-        var download_span = '<br /><span title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></span>';
 
-    
-	var id_pages_len = id_pages.length;
+    	var id_pages_len = id_pages.length;
+
+        var download_text = "Download Extracted Features";
+        if (id_pages_len==1) {
+            if (id_pages[0]>0)  {
+		// single page item working at the page level => clarify download is the complete volume
+		download_text += " (complete volume)";
+	    }
+	}
+        else if (id_pages_len>1) {
+	    // multiple pages in the item => clarify dowload is the complete volume
+	    download_text += " (complete volume)";
+	}
+        var download_span = '<br /><span title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="icomoon icomoon-download"></span>' +download_text+ '</a></span>';
+
 
 	for (var pi = 0; pi < id_pages_len; pi++) {
 		var page = id_pages[pi];
@@ -369,8 +380,8 @@ function show_results(jsonData) {
 	var kv = k;
 	if (facet_level == "page") {
 	    kv = kv.replace(/^volume/,"");
-	    kv = kv.replace(/_htrcstrings$/,"_ss");
-	    kv = kv.replace(/_htrcstring$/,"_s");
+	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
+	    kv = kv.replace(/_htrcstring$/,"_s"); 
 	}
 	//console.log("**** kv = " + kv);
 	
@@ -396,7 +407,7 @@ function show_results(jsonData) {
 			    displayed_item = format_dic[displayed_item];
 			}
 		    }
-		    if (kv == "language_t") {
+		    if (kv == "language_s") {
 			if (displayed_item in language_dic) {
 			    displayed_item = language_dic[displayed_item];
 			}
@@ -406,6 +417,7 @@ function show_results(jsonData) {
 			    displayed_item = place_dic[displayed_item];
 			}
 		    }
+		    displayed_item = displayed_item.replace(/\.$/,""); // tidy up spurious full-stop at end of string
 		    facet_html += '<dd class="' + _class + ' ' + kv + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + displayed_item + '</a><span dir="ltr"> (' + item[j + 1] + ') </span></dd>';
 		    ii++;
 		}
