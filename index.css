@@ -38,7 +38,7 @@ input[type=text]+label {
  .con .main {
     min-height: 400px ;
     min-height: 40rem ;
-    width: 80%;
+    /* width: 80%; */
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;
@@ -59,8 +59,8 @@ input[type=text]+label {
  
 
 .con .sidebar,.con .logo {
-    width: 225px ;
-    width: 22.5rem ;
+    /* width: 225px ; */
+    width: 25.5rem ; /* *** used to be 22.5 */
     display: table-cell;
     vertical-align: top;
     padding-right: 20px ;
