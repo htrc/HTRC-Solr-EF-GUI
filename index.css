@@ -38,7 +38,8 @@ input[type=text]+label {
  .con .main {
     min-height: 400px ;
     min-height: 40rem ;
-    /* width: 80%; */
+    width: 80%;
+    /* min-width: 75%; */
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;
@@ -103,4 +104,18 @@ input[type=text]+label {
 
 dd.showfacet, dd.hidefacet {
     text-transform: capitalize;
+}
+
+span.workset {
+    color: #924a0b;
+}
+
+span.workset a {
+    color: #924a0b;
+    text-decoration: underline;
+}
+
+span.workset a:hover {
+    color: #d56d11;
+    text-decoration: none;
 }
