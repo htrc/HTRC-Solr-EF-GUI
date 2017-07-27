@@ -3,8 +3,8 @@ var num_results = 20;
 var store_result_page_starts = [];
 
 var filters = [];
-var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'pubPlace_s', 'bibliographicFormat_s'];
-var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
+var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'pubPlace_s', 'bibliographicFormat_s', 'names_ss'];
+var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format', 'names_ss': 'Author'};
 
 // Global variable show_facet to control if faceting is used.
 var show_facet = 0;
@@ -420,6 +420,8 @@ function pretty_print_facet_value(kv,displayed_item)
 	}
     }
     if (kv == "pubPlace_s") {
+    // fix the place code ending with whitespace
+    displayed_item = displayed_item.trim();
 	if (displayed_item in place_dic) {
 	    displayed_item = place_dic[displayed_item];
 	}
