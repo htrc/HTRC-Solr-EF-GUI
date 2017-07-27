@@ -716,7 +716,7 @@ var place_dic = {
     'mq': 'Martinique',
     '-ac': 'Ashmore and Cartier Islands',
     'mbc': 'Manitoba',
-    'xx ': 'No place',
+    'xx': 'No place',
     'gd': 'Grenada',
     'fp': 'French Polynesia',
     'mtu': 'Montana',
