@@ -168,10 +168,20 @@ function add_worksets(json_data) {
 
 }
 
-function ajax_solr_text_search()
+function escape_query(query)
+{
+
+    var pattern = /([\!\*\+\-\=\<\>\&\|\(\)\[\]\{\}\^\~\?\:\\\/\"])/g;
+    
+    var escaped_query = query.replace(pattern, "\\$1");
+
+    return escaped_query;
+}
+
+function ajax_solr_text_search(appendData)
 {
     var url_args = [];
-    
+
     for (k in store_search_args) {
 	url_args.push(k + '=' + store_search_args[k]);
     }
@@ -187,8 +197,12 @@ function ajax_solr_text_search()
     }
     
     for (k in filters) {
-	var ks = filters[k].split("-");
-	url_args.push('fq=' + ks[0] + ':("' + ks[1] + '")');
+	var ks = filters[k].split("--");
+	var ks0 = ks[0];
+	var ks1 = ks[1];
+	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
+
+	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
     }
 
     var data_str = url_args.join("&");
@@ -200,7 +214,7 @@ function ajax_solr_text_search()
 	url: store_search_action,
 	data: data_str,
 	dataType: 'json',
-	success: show_results,
+	success: function(jsonData) { show_results(jsonData,appendData); },
 	error: ajax_error
     });
 }
@@ -214,40 +228,7 @@ function show_new_results(delta) {
     
     store_search_args.start = start + parseInt(delta);
     
-    ajax_solr_text_search();
-    /*
-        var url = "";
-	for (k in store_search_args) {
-		url += k + '=' + store_search_args[k] + "&";
-	}
-
-	for (k in facet) {
-	    var facet_val = facet[k];
-	    if (facet_level == "page") {
-		facet_val = "volume" + facet_val;
-		facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
-		facet_val = facet_val.replace(/_s$/,"_htrcstring");
-	    }
-	    url += 'facet.field=' + facet_val + "&";
-	}
-    
-	for (k in filters) {
-		var ks = filters[k].split("-");
-		url += 'fq=' + ks[0] + ':("' + ks[1] + '")&';
-	}
-
-        store_search_url = store_search_action + "?" + url;
-    
-
-	$.ajax({
-		type: 'GET',
-		url: store_search_action,
-		data: url,
-		dataType: 'json',
-		success: show_results,
-		error: ajax_error
-	});
-*/
+    ajax_solr_text_search(false);
 }
 
 function generate_item(line, id, id_pages) {
@@ -434,88 +415,8 @@ function pretty_print_facet_value(kv,displayed_item)
     return displayed_item;
 }
 
-function show_results(jsonData) {
-    var response = jsonData.response;
-    var num_found = response.numFound;
-    var docs = response.docs;
-    var num_docs = docs.length;
-    
-    var facet_fields = jsonData.facet_counts.facet_fields;
-    
-    //
-    var facet_html = "";
-    var _class = '';
-    for (k in facet_fields) {
-	//console.log("**** show results: k = " + k);
-	facet_html += "<dl>";
-	var kv = k;
-	if (facet_level == "page") {
-	    kv = kv.replace(/^volume/,"");
-	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
-	    kv = kv.replace(/_htrcstring$/,"_s"); 
-	}
-	//console.log("**** kv = " + kv);
-	
-	facet_html += "<dt class=\"facetField\">" + facet_display_name[kv] + "</dt> ";
-	item = facet_fields[k];
-	ii = 0;
-	for (var j = 0; j <= item.length / 2; j = j + 2) {
-	    
-	    if (item[j + 1] > 0) {
-		if (filters.indexOf(kv + "-" + item[j]) < 0) {
-		    _class = "showfacet";
-		    if (ii > 5) {
-			_class = "hidefacet";
-		    }
-		    var displayed_item = pretty_print_facet_value(kv,item[j]);
-		    
-		    facet_html += '<dd class="' + _class + ' ' + kv + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + displayed_item + '</a><span dir="ltr">&nbsp;(' + item[j + 1] + ') </span></dd>';
-		    ii++;
-		}
-		
-	    }
-	    
-	}
-	if (ii > 5) {
-	    facet_html += '<dd><a href="" class="' + kv + ' morefacets"><span class="moreless">more...</span></a><a href="" class="' + kv + ' lessfacets" style="display: none;"><span class="moreless">less...</span></a></dd>'
-	}
-	facet_html += "</dl>";
-    }
-    if (show_facet == 1) {
-	$(".narrowsearch").show();
-	$("#facetlist").html(facet_html);
-    } else if (show_facet == 0){
-	$(".narrowsearch").hide();
-	facet_html = "";
-	$("#facetlist").html(facet_html);
-    }
-    
-    $('.search-in-progress').css("cursor", "auto");
-    
-    var $search_results = $('#search-results');
-    
-    var volume_level_desc = explain_search.volume_level_desc;
-    if (volume_level_desc != null) {
-	var volume_level_terms = explain_search.volume_level_terms;
-	volume_level_desc = volume_level_desc.replace("TERMS",volume_level_terms);
-    }
-
-    var page_level_desc = explain_search.page_level_desc;
-    if (page_level_desc != null) {
-	var page_level_terms = explain_search.page_level_terms;
-	page_level_desc = page_level_desc.replace("TERMS",page_level_terms);
-    }
-
-    var query_level_mix = volume_level_desc;
-    
-    if (query_level_mix != null) {
-	if (page_level_desc != null) {
-	    query_level_mix += " AND " + page_level_desc; 
-	}
-    }
-    else {
-	query_level_mix = page_level_desc;
-    }
+function show_results_explain_html(query_level_mix,store_search_url)
+{
     
     var explain_html = "<p>Search explanation: " + query_level_mix;
     if (explain_search.group_by_vol != null) {
@@ -559,10 +460,105 @@ function show_results(jsonData) {
 
     explain_html += '<p style="clear:both"></p>\n';
 
-    if (num_docs > 0) {
-	$search_results.html("<p>Results: " + num_found + doc_units + "matched</p>");
+    return explain_html;
+}
+
+function show_results_facet_html(facet_fields)
+{
+    var facet_html = "";    
+    var _class = '';
+    
+    for (k in facet_fields) {
+	//console.log("**** show results: k = " + k);
+	facet_html += "<dl>";
+	var kv = k;
+	if (facet_level == "page") {
+	    kv = kv.replace(/^volume/,"");
+	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
+	    kv = kv.replace(/_htrcstring$/,"_s"); 
+	}
+	//console.log("**** kv = " + kv);
 	
-	$search_results.append(explain_html);
+	facet_html += "<dt class=\"facetField\">" + facet_display_name[kv] + "</dt> ";
+	item = facet_fields[k];
+	ii = 0;
+	for (var j = 0; j <= item.length / 2; j = j + 2) {
+	    
+	    if (item[j + 1] > 0) {
+		if (filters.indexOf(kv + "--" + item[j]) < 0) {
+		    _class = "showfacet";
+		    if (ii > 5) {
+			_class = "hidefacet";
+		    }
+		    var displayed_item = pretty_print_facet_value(kv,item[j]);
+		    
+		    facet_html += '<dd class="' + _class + ' ' + kv + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + displayed_item + '</a><span dir="ltr">&nbsp;(' + item[j + 1] + ') </span></dd>';
+		    ii++;
+		}
+		
+	    }
+	    
+	}
+	if (ii > 5) {
+	    facet_html += '<dd><a href="" class="' + kv + ' morefacets"><span class="moreless">more...</span></a><a href="" class="' + kv + ' lessfacets" style="display: none;"><span class="moreless">less...</span></a></dd>'
+	}
+	facet_html += "</dl>";
+    }
+
+    return facet_html;
+}
+
+function show_results(jsonData,appendData) {
+    var response = jsonData.response;
+    var num_found = response.numFound;
+    var docs = response.docs;
+    var num_docs = docs.length;
+
+    $('.search-in-progress').css("cursor", "auto");
+
+    var facet_fields = jsonData.facet_counts.facet_fields;
+    
+    var facet_html = show_results_facet_html(facet_fields);
+    if (show_facet == 1) {
+	$(".narrowsearch").show();
+	$("#facetlist").html(facet_html);
+    } else if (show_facet == 0){
+	$(".narrowsearch").hide();
+	facet_html = "";
+	$("#facetlist").html(facet_html);
+    }
+
+    
+    var volume_level_desc = explain_search.volume_level_desc;
+    if (volume_level_desc != null) {
+	var volume_level_terms = explain_search.volume_level_terms;
+	volume_level_desc = volume_level_desc.replace("TERMS",volume_level_terms);
+    }
+
+    var page_level_desc = explain_search.page_level_desc;
+    if (page_level_desc != null) {
+	var page_level_terms = explain_search.page_level_terms;
+	page_level_desc = page_level_desc.replace("TERMS",page_level_terms);
+    }
+
+    var query_level_mix = volume_level_desc;
+    
+    if (query_level_mix != null) {
+	if (page_level_desc != null) {
+	    query_level_mix += " AND " + page_level_desc; 
+	}
+    }
+    else {
+	query_level_mix = page_level_desc;
+    }
+
+    var explain_html = show_results_explain_html(query_level_mix,store_search_url)
+    
+    if (num_docs > 0) {
+	$('#search-results-total').show();
+	$('#search-results-total').html("<p>Results: " + num_found + doc_units + "matched</p>");
+	
+	$('#search-explain').html(explain_html);
 	
 	var from = parseInt(store_search_args.start) + 1;
 	//var to = from + num_results - 1;
@@ -578,13 +574,23 @@ function show_results(jsonData) {
 	showing_matches += "-";
 	showing_matches += '<span id="sm-to">' + to + '</span>';
 	showing_matches += "</p>";
+
+	$('#search-showing').html(showing_matches);
 	
-	$search_results.append(showing_matches);
+	$('#next-prev').show();
+
     } else {
-	$search_results.html(explain_html + "<p>No pages matched your query</p>");
+	$('#search-results-total').hide();
+	$('#search-explain').html(explain_html);
+	$('#search-showing').html("<p>No pages matched your query</p>");
+	
+	$('#next-prev').hide();
     }
 
     show_hide_solr_q();
+
+    var $search_results = $('#search-results');
+    $search_results.html("");
 
     // Example form of URL
     //   https://babel.hathitrust.org/cgi/pt?id=hvd.hnnssu;view=1up;seq=11
@@ -596,7 +602,7 @@ function show_results(jsonData) {
     var prev_pages = [];
     
     var i = 0;
-    var line_num = 1;
+    var line_num = 1;    
     while ((i < num_docs) && (line_num < num_results)) {
 	var doc = docs[i];
 	var id_and_page = doc.id.split(".page-");
@@ -654,7 +660,8 @@ function show_results(jsonData) {
 
     var next_prev = '<p style="width:100%;"><div id="search-prev" style="float: left;"><a>&lt; Previous</a></div><div id="search-next" style="float: right;"><a>Next &gt;</a></div></p>';
     
-    $search_results.append(next_prev);
+    //$search_results.append(next_prev);
+    $('#next-prev').html(next_prev);
 
     $('#search-prev').click(function (event) {
 	var start = store_search_args.start;
@@ -1038,44 +1045,7 @@ function submit_action(event) {
 		store_search_args.sort = "id asc";
 	}
 
-    ajax_solr_text_search();
-    /*
-	var url = "";
-	for (k in store_search_args) {
-		url += k + '=' + store_search_args[k] + "&";
-	}
-
-        for (k in facet) {
-	        var facet_val = facet[k];
-	        if (facet_level == "page") {
-		    facet_val = "volume" + facet_val;
-		    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
-		    facet_val = facet_val.replace(/_s$/,"_htrcstring");
-		}
-
-		url += 'facet.field=' + facet_val + "&";
-	}
-    
-	for (k in filters) {
-		var ks = filters[k].split("-");
-		url += 'fq=' + ks[0] + ':("' + ks[1] + '")&';
-	}
-
-	//console.log("Solr URL:\n");
-	//console.log(store_search_action + "?" + url);
-
-        store_search_url = store_search_action + "?" + url;
-    
-	$.ajax({
-		type: 'GET',
-		url: store_search_action,
-		data: url,
-		dataType: 'json',
-		success: show_results,
-		error: ajax_error
-	});
-    */
-    
+    ajax_solr_text_search(false);    
 }
 
 function generate_pos_langs() {
@@ -1289,8 +1259,8 @@ $(function () {
 
 			var obj = $(this).attr("data-obj");
 			var key = $(this).attr("data-key");
-			if (filters.indexOf(obj + "-" + key) < 0) {
-				filters.push(obj + "-" + key);
+			if (filters.indexOf(obj + "--" + key) < 0) {
+				filters.push(obj + "--" + key);
 			}
 			$(this).parent().remove();
 			facetlist_set();
@@ -1312,7 +1282,7 @@ $(function () {
 function facetlist_set() {
     var facetlist_html = '';
     for (k in filters) {
-	var ks = filters[k].split("-");
+	var ks = filters[k].split("--");
 
 	var kv0 = ks[0];
 	var kv1 = ks[1];
