@@ -3,8 +3,9 @@ var num_results = 20;
 var store_result_page_starts = [];
 
 var filters = [];
-var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'pubPlace_s', 'bibliographicFormat_s', 'names_ss'];
-var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format', 'names_ss': 'Author'};
+var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'names_ss', 'pubPlace_s', 'bibliographicFormat_s'];
+var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status',
+			  'names_ss': 'Author', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
 
 // Global variable show_facet to control if faceting is used.
 var show_facet = 0;
@@ -38,6 +39,9 @@ $(document).ready(function(){
 	$("#volume-help-dialog").dialog( "open" );
     });
 
+    $( "#search-lm-progressbar" ).progressbar({
+	value: false
+    });
 });
 
 
@@ -231,74 +235,84 @@ function show_new_results(delta) {
     ajax_solr_text_search(false);
 }
 
-function generate_item(line, id, id_pages) {
-	var css_class = (line % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
-
-	var html_item = "";
-
-        // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
-
-    	var id_pages_len = id_pages.length;
-
-        var download_text = "Download Extracted Features";
-        if (id_pages_len==1) {
-            if (id_pages[0]>0)  {
-		// single page item working at the page level => clarify download is the complete volume
-		download_text += " (complete volume)";
-	    }
-	}
-        else if (id_pages_len>1) {
-	    // multiple pages in the item => clarify dowload is the complete volume
+function generate_item(line_num, id, id_pages)
+{
+    var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
+    
+    var html_item = "";
+    
+    // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
+    
+    var id_pages_len = id_pages.length;
+    
+    var download_text = "Download Extracted Features";
+    if (id_pages_len==1) {
+        if (id_pages[0]>0)  {
+	    // single page item working at the page level => clarify download is the complete volume
 	    download_text += " (complete volume)";
 	}
-        var download_span = '<br /><span title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="icomoon icomoon-download"></span>' +download_text+ '</a></span>';
-
-
-	for (var pi = 0; pi < id_pages_len; pi++) {
-		var page = id_pages[pi];
-
-		var seqnum = (page == 0) ? 1 : page;
-		var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
-
-		if (id_pages_len > 1) {
-
-			if (pi == 0) {
-				html_item += '<p ' + css_class + '>';
-				html_item += '<span style="font-style: italic;" name="' +
-					id + '"><span style="cursor: progress;">Loading ...</span></span><br>';
-				if (page > 0) {
-					html_item += id + ': <nobr><a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
-				} else {
-					// skip linking to the 'phony' page 0
-					html_item += "<nobr>" + id;
-				}
-			} else {
-				html_item += ',</nobr> <a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
-			}
-		} else {
-			html_item += '<p ' + css_class + '>';
-			html_item += ' <span style="font-style: italic;" name="' +
-				id + '"><span style="cursor: progress;">Loading ...</span></span><br>';
-
-			if (page > 0) {
-				html_item += id + ': <a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a>';
-			} else {
-				html_item += id + ': <a target="_blank" href="' + babel_url + '">all pages</a>';
-			}
-
-		        html_item += download_span;
-			html_item += '</p>';
-		}
-
-	}
-
+    }
+    else if (id_pages_len>1) {
+	// multiple pages in the item => clarify dowload is the complete volume
+	download_text += " (complete volume)";
+    }
+    var download_span = '<br /><span title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="icomoon icomoon-download"></span>' +download_text+ '</a></span>';
     
-        if (id_pages_len > 1) {
-	        html_item += download_span;
-		html_item += "</p>";
+    var show_more = false;
+    
+    for (var pi = 0; pi < id_pages_len; pi++) {
+	var page = id_pages[pi];
+	
+	var seqnum = (page == 0) ? 1 : page;
+	var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
+	
+	if (id_pages_len > 1) {
+	    
+	    if (pi == 0) {
+		html_item += '<p ' + css_class + '>';
+		html_item += '<span style="font-style: italic;" name="' +
+		    id + '"><span style="cursor: progress;">Loading ...</span></span><br />';
+		if (page > 0) {
+		    html_item += id + ': <nobr><a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+		} else {
+		    // skip linking to the 'phony' page 0
+		    html_item += "<nobr>" + id;
+		}
+	    } else {
+		html_item += ',</nobr>';
+		if ((pi == 3) && (id_pages_len > 3)) {
+		    var sid_label = "show-hide-more-seqs-"+line_num;
+		    var sid_block = sid_label + "-block";
+		    html_item += ' <a><span id="'+sid_label+'">Show more ...</span></a><span id="'+sid_block+'" style="display: none;"><br />';
+		    show_more = true;
+		}
+		html_item += ' <a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+	    }
+	} else {
+	    html_item += '<p ' + css_class + '>';
+	    html_item += ' <span style="font-style: italic;" name="' +
+		id + '"><span style="cursor: progress;">Loading ...</span></span><br />';
+	    
+	    if (page > 0) {
+		html_item += id + ': <a target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a>';
+	    } else {
+		html_item += id + ': <a target="_blank" href="' + babel_url + '">all pages</a>';
+	    }
+	    
+	    html_item += download_span;
+	    html_item += '</p>';
 	}
-
-
+	
+    }
+    
+    if (id_pages_len > 1) {
+	if (show_more) {
+	    html_item += '</span>';
+	}
+	
+	html_item += download_span;
+	html_item += "</p>";
+    }
     
     return html_item;
 }
@@ -508,6 +522,11 @@ function show_results_facet_html(facet_fields)
     return facet_html;
 }
 
+var rep_i = 0;
+var rep_limit = 10;
+
+var curr_line_num;
+
 function show_results(jsonData,appendData) {
     var response = jsonData.response;
     var num_found = response.numFound;
@@ -516,19 +535,25 @@ function show_results(jsonData,appendData) {
 
     $('.search-in-progress').css("cursor", "auto");
 
-    var facet_fields = jsonData.facet_counts.facet_fields;
-    
-    var facet_html = show_results_facet_html(facet_fields);
-    if (show_facet == 1) {
-	$(".narrowsearch").show();
-	$("#facetlist").html(facet_html);
-    } else if (show_facet == 0){
-	$(".narrowsearch").hide();
-	facet_html = "";
-	$("#facetlist").html(facet_html);
-    }
+    var search_start = parseInt(store_search_args.start);
 
+    if (!appendData) {
+	// freshly minted page
+	curr_line_num = 1;
+	
+	var facet_fields = jsonData.facet_counts.facet_fields;
     
+	var facet_html = show_results_facet_html(facet_fields);
+	if (show_facet == 1) {
+	    $(".narrowsearch").show();
+	    $("#facetlist").html(facet_html);
+	} else if (show_facet == 0){
+	    $(".narrowsearch").hide();
+	    facet_html = "";
+	    $("#facetlist").html(facet_html);
+	}
+    }
+   
     var volume_level_desc = explain_search.volume_level_desc;
     if (volume_level_desc != null) {
 	var volume_level_terms = explain_search.volume_level_terms;
@@ -552,48 +577,55 @@ function show_results(jsonData,appendData) {
 	query_level_mix = page_level_desc;
     }
 
-    var explain_html = show_results_explain_html(query_level_mix,store_search_url)
-    
-    if (num_docs > 0) {
-	$('#search-results-total').show();
-	$('#search-results-total').html("<p>Results: " + num_found + doc_units + "matched</p>");
+    if (!appendData) {
+	// Freshly minted page!
+	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
 	
-	$('#search-explain').html(explain_html);
-	
-	var from = parseInt(store_search_args.start) + 1;
-	//var to = from + num_results - 1;
-	var to = from + store_search_args.rows - 1;
-	
-	if (to > num_found) {
-	    // cap value
-	    to = num_found;
+	if (num_docs > 0) {
+	    $('#search-results-total').show();
+	    $('#search-results-total').html("<p>Results: " + num_found + doc_units + "matched</p>");
+	    
+	    $('#search-explain').html(explain_html);
+	    
+	    var from = parseInt(store_search_args.start) + 1;
+	    //var to = from + num_results - 1;
+	    var to = from + store_search_args.rows - 1;
+	    
+	    if (to > num_found) {
+		// cap value
+		to = num_found;
+	    }
+	    var showing_matches = (facet_level == "page") ? "<p>Showing page-level matches: " : "<p>Showing volume matches:";
+	    
+	    showing_matches += '<span id="sm-from">' + from + '</span>';
+	    showing_matches += "-";
+	    showing_matches += '<span id="sm-to">' + to + '</span>';
+	    showing_matches += "</p>";
+	    
+	    $('#search-showing').html(showing_matches);
+	    
+	    $('#next-prev').show();
+	    
+	} else {
+	    $('#search-results-total').hide();
+	    $('#search-explain').html(explain_html);
+	    $('#search-showing').html("<p>No pages matched your query</p>");
+	    
+	    $('#next-prev').hide();
 	}
-	var showing_matches = (facet_level == "page") ? "<p>Showing page-level matches: " : "<p>Showing volume matches:";
 	
-	showing_matches += '<span id="sm-from">' + from + '</span>';
-	showing_matches += "-";
-	showing_matches += '<span id="sm-to">' + to + '</span>';
-	showing_matches += "</p>";
-
-	$('#search-showing').html(showing_matches);
-	
-	$('#next-prev').show();
-
-    } else {
-	$('#search-results-total').hide();
-	$('#search-explain').html(explain_html);
-	$('#search-showing').html("<p>No pages matched your query</p>");
-	
-	$('#next-prev').hide();
+	show_hide_solr_q();
     }
-
-    show_hide_solr_q();
-
+    
     var $search_results = $('#search-results');
-    $search_results.html("");
+    if (!appendData) {
+	$search_results.html("");
+    }
 
     // Example form of URL
     //   https://babel.hathitrust.org/cgi/pt?id=hvd.hnnssu;view=1up;seq=11
+
+    $('#search-loading-more').hide();
     
     var ids = [];
     var htids = [];
@@ -602,7 +634,8 @@ function show_results(jsonData,appendData) {
     var prev_pages = [];
     
     var i = 0;
-    var line_num = 1;    
+    var line_num = curr_line_num;
+
     while ((i < num_docs) && (line_num < num_results)) {
 	var doc = docs[i];
 	var id_and_page = doc.id.split(".page-");
@@ -619,6 +652,7 @@ function show_results(jsonData,appendData) {
 	    // time to output previous item
 	    var html_item = generate_item(line_num, prev_id, prev_pages);
 	    $search_results.append(html_item);
+	    show_hide_more_seqs(line_num);
 	    line_num++;
 	    prev_pages = [page];
 	} else {
@@ -635,27 +669,40 @@ function show_results(jsonData,appendData) {
     var num_pages = i;
     
     var html_item = generate_item(line_num, prev_id, prev_pages);
-    //    console.log("*** html item = " + html_item);
-    //    if (html_item != "") {
     $search_results.append(html_item);
-    //	line_num++;
-    //    }
-    //console.log("*** line_num = " + line_num);
-    
-    //else {
-    //	line_num--;
-    //  }
-    //    if ((i == num_docs) && (line_num != num_results)) {
-    //	line_num--;
-    //    }
-    
-    document.location.href = "#search-results-anchor";
+    show_hide_more_seqs(line_num);
+    line_num++;
+    curr_line_num = line_num;
 
+    var progressbar = $( "#search-lm-progressbar" );
+    //progressbar.progressbar( "option", "value", false ); // indetermined progress
+    progressbarValue = progressbar.find( ".ui-progressbar-value" );
+    progressbarValue.css("background","#orange");
+    //progressbar.progressbar( "option", {
+    //    value: Math.floor( Math.random() * 100 )
+    //});
+    
+
+    if (!appendData) {
+	document.location.href = "#search-results-anchor";
+    }
+    
     var search_end = search_start + num_pages;
-    //if (search_end < num_found) {
+    
+    console.log("*** search_end < num_found: " + search_end + " < " + num_found);
+    if (search_end < num_found) {
 	// more results exist
-    if (line_num<num_results) {
-	//$search_results.append('<p>More results needed to fill up the page</p>');
+	console.log("*** line_num < num_results: " + line_num + " < " + num_results);
+	if (line_num < num_results) {
+	    // Some compacting of results has gone on
+	    $('#search-loading-more').show();
+
+	    if (rep_i < rep_limit) {
+		rep_i++;
+		store_search_args.start = search_end	    
+		ajax_solr_text_search(true); // appendData=true
+	    }
+	}
     }
 
     var next_prev = '<p style="width:100%;"><div id="search-prev" style="float: left;"><a>&lt; Previous</a></div><div id="search-next" style="float: right;"><a>Next &gt;</a></div></p>';
@@ -678,7 +725,6 @@ function show_results(jsonData,appendData) {
 
 
     // Need to hide prev link?
-    var search_start = parseInt(store_search_args.start);
     if (search_start == 0) {
 	$('#search-prev').hide();
     }
@@ -690,7 +736,6 @@ function show_results(jsonData,appendData) {
     }
 
     // Showing matches to ...
-    //$('#sm-to').html(search_start + line_num);
     $('#sm-to').html(search_start + num_pages);
     
     
@@ -1188,6 +1233,22 @@ function show_hide_solr_q() {
 			$('#show-hide-solr-q').html("Hide full query ...");
 		}
 	});
+}
+
+function show_hide_more_seqs(line_num) {
+    var sid_label = "#show-hide-more-seqs-"+line_num;
+    var sid_block = sid_label + "-block";
+    
+    $(sid_label).click(function (event) {
+	event.preventDefault();
+	if ($(sid_block+':visible').length) {
+	    $(sid_block).hide("slide", { direction: "up" }, 1000);
+	    $(sid_label).html("Show more pages ...");
+	} else {
+	    $(sid_block).show("slide", { direction: "up" }, 1000);
+	    $(sid_label).html("Hide pages ...");
+	}
+    });
 }
 
 

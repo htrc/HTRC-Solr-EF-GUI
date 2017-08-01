@@ -119,3 +119,29 @@ span.workset a:hover {
     color: #d56d11;
     text-decoration: none;
 }
+
+
+#search-lm-progressbar {
+    width: 97%;
+    height: 38px;
+    margin: 10px;
+    padding: 8px 40px 8px 20px;
+}
+
+#search-lm-progressbar .ui-progressbar-value {
+    background-color: #orange;
+}
+
+
+.ui-progressbar {
+    position: relative;
+}
+
+.progress-label {
+    position: absolute;
+    left: 45%;
+    top: 2px;
+    font-weight: bold;
+    /*color: white; */
+    text-shadow: 1px 1px 0 #fff; 
+}
