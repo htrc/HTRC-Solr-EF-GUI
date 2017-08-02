@@ -171,7 +171,7 @@
             <div class="col-md-12">
 
 	      <h2>Unigram Page-based Extracted Feature Search (Prototype)</h2>
-	      <form action="http://solr1.ischool.illinois.edu/solr/faceted-htrc-full-ef20/select" id="search-form">
+	      <form id="search-form">
 		<input type="hidden" id="indent" name="indent" value="on"/>
 		<input type="hidden" id="wt" name="wt" value="json"/>
 		<input type="hidden" id="start" name="start" value="0"/>
@@ -296,6 +296,8 @@
 
       <div class="main">
 	<div id="search-results-total">
+	  <span id="search-results-total-span"></span>
+	  <span id="srt-vol-count-span" style="display:none;"> in <span id="srt-vol-count">[computing ...]</span> volumes</span>
 	</div>
 	<div id="search-explain">
 	</div>
@@ -305,7 +307,8 @@
       	<div id="search-results">	    
 	</div>
       	<div id="search-loading-more" style="display:none;">
-	  <div id="search-lm-progressbar"><div class="progress-label">Loading more results ...</div></div>	    
+	  <span class="progress-label">Loading more results: </span>
+	  <div id="search-lm-progressbar" styleXX="display: inline-block;"></div>	    
 	</div>
 	
 	<div id="next-prev">

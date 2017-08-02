@@ -11,12 +11,17 @@ var langs_without_pos = [
 var rights_dic = {
     'pd': 'Public domain',
     'ic': 'In-copyright',
-    'op': 'Out-of-print (implies in-copyright)',
-    'orph': 'Copyright-orphaned (implies in-copyright)',
-    'und': 'Undetermined copyright status',
-    'ic-world': 'In-copyright and permitted as world viewable by the copyright holder',
+    'op': 'Out-of-print',
+    'op-desc': 'Out-of-print (implies in-copyright)',
+    'orph': 'Copyright-orphaned',
+    'orph-desc': 'Copyright-orphaned (implies in-copyright)',
+    'und': 'Undetermined',
+    'und-desc': 'Undetermined copyright status',
+    'ic-world': 'In-copyright (world viewable)',
+    'ic-world-desc': 'In-copyright and permitted as world viewable by the copyright holder',
     'nobody': 'Available to nobody; blocked for all users',
-    'pdus': 'Public domain only when viewed in the US',
+    'pdus': 'US Public domain',
+    'pdus-desc': 'Public domain only when viewed in the US',
     'cc-by-3.0': 'Creative Commons Attribution license, 3.0 Unported',
     'cc-by-nd-3.0': 'Commons Attribution-NoDerivatives license, 3.0 Unported',
     'cc-by-nc-nd-3.0': 'Commons Attribution-NonCommercial-NoDerivatives license, 3.0 Unported',
@@ -34,7 +39,8 @@ var rights_dic = {
     'cc-by-nc-sa-4.0': 'Commons Attribution-NonCommercial-ShareAlike 4.0 International license',
     'cc-by-sa-4.0': 'Commons Attribution-ShareAlike 4.0 International license',
     'pd-pvt': 'Public domain but access limited due to privacy concerns',
-    'supp': 'Suppressed from view; see note for details'
+    'supp': 'Suppressed from view'
+    //'supp': 'Suppressed from view; see note for details'
 };
 
 var format_dic = {
