@@ -706,7 +706,7 @@ function show_results(jsonData,appendData) {
 	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
 
 	    if (facet_level == "page") {
-		if (num_docs < 250000) {
+		if (num_found < 500000) {
 		    $('#srt-vol-count-span').show();
 		    ajax_solr_stream_volume_count(store_search_args.q);
 		}
