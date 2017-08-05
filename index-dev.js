@@ -1,7 +1,9 @@
 
+var solr_prefix_url = "http://solr1.ischool.illinois.edu/solr/";
 var solr_collection = "faceted-htrc-full-ef20";
-var solr_search_action = "http://solr1.ischool.illinois.edu/solr/"+solr_collection+"/select";
-var solr_stream_action = "http://solr1.ischool.illinois.edu/solr/"+solr_collection+"/stream";
+
+var solr_search_action = solr_prefix_url+solr_collection+"/select";
+var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
 
 var num_results_per_page = 20;
@@ -19,6 +21,8 @@ var facet_level = null;
 var explain_search = { 'group_by_vol': null,
 		       'volume_level_terms': null, 'volume_level_desc': null,
 		       'page_level_terms': null, 'page_level_desc': null };
+
+var store_results_area_dom = null;
 
 $(document).ready(function(){
     $('#search-form').attr("action",solr_search_action);
@@ -49,6 +53,9 @@ $(document).ready(function(){
     $( "#search-lm-progressbar" ).progressbar({
 	value: 0
     });
+
+    //store_results_area_dom = $('#search-results-area').clone();
+    
 });
 
 
@@ -189,7 +196,7 @@ function escape_query(query)
     return escaped_query;
 }
 
-function ajax_solr_text_search(appendData)
+function ajax_solr_text_search(newResultPage)
 {
     var url_args = [];
 
@@ -226,12 +233,12 @@ function ajax_solr_text_search(appendData)
 	// async: false, // ****
 	data: data_str,
 	dataType: 'json',
-	success: function(jsonData) { show_results(jsonData,appendData); },
+	success: function(jsonData) { show_results(jsonData,newResultPage); },
 	error: ajax_error
     });
 }
 
-function ajax_solr_stream_volume_count(arg_q)
+function get_solr_stream_data_str(arg_q,doRollup)
 {
     //rollup(
     //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
@@ -239,7 +246,6 @@ function ajax_solr_stream_volume_count(arg_q)
     //	over="volumeid_s",
     //	count(*)
     //)
-
 
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
@@ -257,14 +263,13 @@ function ajax_solr_stream_volume_count(arg_q)
     };
 
 
-
     var search_stream_args = [];
 
     for (ka in vol_count_args) {
 	search_stream_args.push(ka + '="' + vol_count_args[ka] + '"');
     }
 
-    /*
+    
     for (kf in facet) {
 	var facet_val = facet[kf];
 	if (facet_level == "page") {
@@ -283,7 +288,7 @@ function ajax_solr_stream_volume_count(arg_q)
 
 	search_stream_args.push('fq=' + ks0 + ':("' + ks1 + '")');
     }
-    */
+    
     
     var search_stream_args_str = search_stream_args.join(",");
 
@@ -291,11 +296,30 @@ function ajax_solr_stream_volume_count(arg_q)
 
     var rollup_stream='rollup('+search_stream+',over="volumeid_s", count(*))'
 
-    var data_str = "expr="+rollup_stream;
-  
-    //var search_stream_url = solr_stream_action;
+    var data_str;
+    if (doRollup) {
+	data_str = "expr=" + rollup_stream ;
+    }
+    else {
+	data_str = "expr=" + search_stream;
+    }
+    
+    return data_str;
+}
 
-    //store_search_action + "?" + data_str;
+    
+function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
+{    
+    //rollup(
+    //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
+    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id", start="0",rows="200"),
+    //	over="volumeid_s",
+    //	count(*)
+    //)
+
+    // ****
+    callback = callback || show_volume_count;
+    var data_str = get_solr_stream_data_str(arg_q,doRollup);
     
     $.ajax({
 	type: 'GET',
@@ -307,6 +331,17 @@ function ajax_solr_stream_volume_count(arg_q)
     });
 
     
+}
+
+function stream_export(jsonData) {
+    var response = jsonData["result-set"];
+    //var docs = response.docs;
+    //var num_docs = docs.length;
+    console.log("*** response = " + JSON.stringify(jsonData));
+    
+    document.open();
+    document.write(JSON.stringify(response));
+    document.close();
 }
 
 function show_volume_count(jsonData) {
@@ -321,6 +356,7 @@ function show_volume_count(jsonData) {
     $('#srt-vol-count').html(num_docs);
 
     // ****
+    /*
     var total = 0;
     var i;
 
@@ -333,19 +369,26 @@ function show_volume_count(jsonData) {
 	//total += count;
 	//$('#srt-vol-count').html(total);
     }
-    console.log("*** page total check = " + total);
+//    console.log("*** page total check = " + total);
+*/
     
 }
 
 
-function show_new_results(delta) {
+function show_updated_results()
+{
     $('.search-in-progress').css("cursor", "wait");
+    
+    ajax_solr_text_search(true); // newResultPage=true
+}
+
+function show_new_results(delta) {
     
     var start = parseInt(store_search_args.start)
     
     store_search_args.start = start + parseInt(delta);
-    
-    ajax_solr_text_search(false);
+
+    show_updated_results();
 }
 
 function generate_item(line_num, id, id_pages)
@@ -645,17 +688,17 @@ function show_results_facet_html(facet_fields)
 var store_start;
 var store_line_num;
 
-function show_results(jsonData,appendData) {
+function show_results(jsonData,newResultPage)
+{
     var response = jsonData.response;
     var num_found = response.numFound;
     var docs = response.docs;
     var num_docs = docs.length;
 
-    $('.search-in-progress').css("cursor", "auto");
 
     var search_start = parseInt(store_search_args.start);
 
-    if (!appendData) {
+    if (newResultPage) {
 	// freshly minted page
 	store_start = search_start;
 	store_line_num = 1;
@@ -696,7 +739,7 @@ function show_results(jsonData,appendData) {
 	query_level_mix = page_level_desc;
     }
 
-    if (!appendData) {
+    if (newResultPage) {
 	// Freshly minted page!
 	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
 	
@@ -708,16 +751,34 @@ function show_results(jsonData,appendData) {
 	    if (facet_level == "page") {
 		if (num_found < 500000) {
 		    $('#srt-vol-count-span').show();
-		    ajax_solr_stream_volume_count(store_search_args.q);
+
+		    var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
+		    var url = solr_stream_action + "?" + data_str;
+		    $("#srt-vol-export").attr("href",url);
+		    $("#srt-vol-export").show();
+		    
+		    var data_str = get_solr_stream_data_str(store_search_args.q,false) // doRollup=false
+		    var url = solr_stream_action + "?" + data_str;
+		    $("#srt-page-export").attr("href",url);
+		    $("#srt-page-export").show();
+		    
+		    ajax_solr_stream_volume_count(store_search_args.q,true); // doRollup=true
 		}
 		else {
-		    $('#srt-vol-count').html("a prohibitively high number of");
+		    $('#srt-vol-count').html('<span style="color:red;">a prohibitively high (!!) number of</span>');
 		    $('#srt-vol-count-span').show();
 		}
 	    }
 	    else {
+		var data_str = get_solr_stream_data_str(store_search_args.q,false) // doRollup=true
+		var url = solr_stream_action + "?" + data_str;
+		$("#srt-vol-export").attr("href",url);
+		$("#srt-page-export").hide();
+
+		
 		$('#srt-vol-count').html("[computing ...]"); // restore back to default text, ready for next vol count computation
 		$('#srt-vol-count-span').hide();
+		
 	    }
 	    
 	    $('#search-explain').html(explain_html);
@@ -758,8 +819,13 @@ function show_results(jsonData,appendData) {
     }
     
     var $search_results = $('#search-results');
-    if (!appendData) {
+    if (newResultPage) {
 	$search_results.html("");
+    }
+
+    $('.search-in-progress').css("cursor", "auto");
+    if ($('#search-results-page').is(":hidden")) {
+	$('#search-results-page').show("slide", { direction: "up" }, 1000);
     }
 
     // Example form of URL
@@ -815,10 +881,10 @@ function show_results(jsonData,appendData) {
     }
 
     var progressbar = $( "#search-lm-progressbar" );
-    progressbarValue = progressbar.find( ".ui-progressbar-value" );
-    progressbarValue.css("background","#orange");
+    //progressbarValue = progressbar.find( ".ui-progressbar-value" );
+    //progressbarValue.css("background","orange");
 
-    if (!appendData) {
+    if (newResultPage) {
 	document.location.href = "#search-results-anchor";
     }
     
@@ -831,18 +897,18 @@ function show_results(jsonData,appendData) {
 	
 	if (line_num < num_results_per_page) {
 	    // Some compacting of results has gone on
-	    if (!appendData) {
+	    if (newResultPage) {
 		$('#search-loading-more').show();
 	    }
 	    
 	    progressbar.progressbar( "value", 100 * line_num / num_results_per_page);
 
 	    store_search_args.start = search_end	    
-	    ajax_solr_text_search(true); // appendData=true
+	    ajax_solr_text_search(false); // newResultPage=false
 	}
 	else {
-	    $('#search-loading-more').hide();
 	    progressbar.progressbar( "value", 0);
+	    $('#search-loading-more').hide();
 	}
     }
 
@@ -1120,10 +1186,16 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
 
 
 function submit_action(event) {
-	event.preventDefault();
+    event.preventDefault();
 
-	$('.search-in-progress').css("cursor", "wait");
+    if ($('#search-results-page').is(":visible")) {
+	$('#search-results-page').hide();
+    }
+    $('.search-in-progress').css("cursor", "wait");
 
+    filters = [];
+    facetlist_set();
+    
         show_facet = 0;
     
         //store_search_action = $('#search-form').attr("action");
@@ -1233,7 +1305,22 @@ function submit_action(event) {
 		store_search_args.sort = "id asc";
 	}
 
-    ajax_solr_text_search(false);    
+    if (store_results_area_dom == null) {
+	store_results_area_dom = $('#search-results-area').clone();
+    }
+//    else {
+//	$('#search-results-area').replaceWith(store_results_area_dom.clone());
+//    }
+    
+/*
+    // reset the results search area
+    $('#search-results-area').replaceWith(store_results_area_dom.clone());
+    // Seem to need to regenerate the JQuery-UI progress bar for some reason
+    $( "#search-lm-progressbar" ).progressbar({
+	value: 0
+    });
+*/
+    ajax_solr_text_search(true); // newResultPage=true
 }
 
 function generate_pos_langs() {
@@ -1467,20 +1554,19 @@ $(function () {
 				filters.push(obj + "--" + key);
 			}
 			$(this).parent().remove();
-			facetlist_set();
-			$('#search-submit').trigger("click");
+		        facetlist_set();
+		        store_search_args.start = store_start;
+		        show_updated_results();
 		}
-
-
-
 	});
+    
 	$(".filters").on("click", "a", function () {
 
 		filters.splice($(this).parent().index(), 1);
-		facetlist_set();
-		$('#search-submit').trigger("click");
+	        facetlist_set();
+	        store_search_args.start = store_start;
+	        show_updated_results();
 	});
-
 });
 
 function facetlist_set() {

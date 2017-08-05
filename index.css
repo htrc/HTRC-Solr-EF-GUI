@@ -14,12 +14,6 @@ input:disabled {
 
 input:disabled+label{color:#cccccc;}
 
-/*
-input[type=text]+label {
-    float: left;
-}
-*/
-
 .evenline {
     background-color: #eee;
     margin: 0 0 0 0;
@@ -36,10 +30,8 @@ input[type=text]+label {
 
 .con{    padding: 2rem;}
  .con .main {
-    min-height: 400px ;
-    min-height: 40rem ;
+    min-height: 1rem ; /* used to be 40rem */
     width: 80%;
-    /* min-width: 75%; */
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;
@@ -129,15 +121,11 @@ span.workset a:hover {
     border: 0;
 }
 
-/*
-#search-lm-progressbar .ui-progressbar-value {
-    background-color: orange;
-}
-*/
-
-
 .progress-label {
     font-weight: bold;
     padding: 5px;
 }
 
+a.export-item {
+    display: block;
+}

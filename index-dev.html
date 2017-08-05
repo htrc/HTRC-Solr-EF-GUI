@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+  <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     
-<title>HTRC Page-Level Extracted Feature Solr Search</title>
+    <title>HTRC Page-Level Extracted Feature Solr Search</title>
 
         <link rel="shortcut icon" href="https://analytics.hathitrust.org/assets/images/favicon.ico">
 
@@ -170,7 +171,7 @@
         <div class="row" style="padding-top : 25px; font-size : 17px; line-height : 27px;">
             <div class="col-md-12">
 
-	      <h2>Unigram Page-based Extracted Feature Search (Prototype)</h2>
+	      <h2>Faceted Unigram Page-based Extracted Feature Search (Prototype)</h2>
 	      <form id="search-form">
 		<input type="hidden" id="indent" name="indent" value="on"/>
 		<input type="hidden" id="wt" name="wt" value="json"/>
@@ -246,7 +247,10 @@
 		  <tr>
 		    <td></td>
 		    <td >
+		      <!--
 		      <input type="submit" class="search-in-progress" id="search-submit" style="float: right;"/>
+-->
+		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
 		    </td>
 		  </tr>
 		</table>
@@ -275,19 +279,27 @@
         </div>
 
 	<hr />
-	<div id="search-results-area" class="search-in-progress" style="position: relative;">
+	<div id="search-results-area" class="search-in-progress" style="position: relative; min-height: 50px;">
 	  <div id="search-results-anchor" style="position: absolute; top: -90px;">
 	  </div>
-<div class=" con page centered">
+
+    <div id="search-results-page" class="con page centered" style="display: none;">
       
       <div class="facets sidebar">
         <div id="selectedFacets" class="advancedSelectedFacets">
           <ul class="filters  list-unstyled">
  
-        </ul>
+          </ul>
+	</div>
+	<div id="srt-export" class="narrow" >
+          <h3 class="narrowsearch" style="display: none">Export Results</h3>
+	  <div>
+	    <a id="srt-vol-export"  class="export-item" style="display: none" target="_blank">Volume IDs</a>
+	    <a id="srt-page-export" class="export-item" style="display: none" target="_blank">Page IDs</a>
+	  </div>
         </div>
         <div class="narrow">
-          <h3 class="narrowsearch" style="display: none">Refined Results</h3>
+          <h3 class="narrowsearch" style="display: none">Refine Results</h3>
           <div id="facetlist">
          
           </div>
@@ -297,7 +309,9 @@
       <div class="main">
 	<div id="search-results-total">
 	  <span id="search-results-total-span"></span>
-	  <span id="srt-vol-count-span" style="display:none;"> in <span id="srt-vol-count">[computing ...]</span> volumes</span>
+	  <span id="srt-vol-count-span" style="display:none;">
+	    in <span id="srt-vol-count">[computing ...]</span> volumes
+	  </span>
 	</div>
 	<div id="search-explain">
 	</div>
