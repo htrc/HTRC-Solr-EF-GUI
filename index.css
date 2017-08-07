@@ -113,7 +113,15 @@ span.workset a:hover {
 }
 
 
-#search-lm-progressbar {
+#search-lm-progressbar-top {
+    width: 100%; 
+    height: 9px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#search-lm-progressbar-bot {
     width: 100%; 
     height: 18px;
     margin: 0;

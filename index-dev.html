@@ -308,21 +308,33 @@
 
       <div class="main">
 	<div id="search-results-total">
-	  <span id="search-results-total-span"></span>
-	  <span id="srt-vol-count-span" style="display:none;">
-	    in <span id="srt-vol-count">[computing ...]</span> volumes
-	  </span>
+	  <div style="float:left;">
+	    <span id="search-results-total-span"></span>
+	    <span id="srt-vol-count-span" style="display:none;">
+	      in <span id="srt-vol-count">[computing ...]</span> volumes
+	    </span>
+	  </div>
+	  
+	  <div style="float:right; width=144px;">
+	    <div class="search-loading-more" style="display:none;">
+	      <span class="progress-label">Loading more results: </span>
+	      <div id="search-lm-progressbar-top"></div>
+	    </div>
+	  </div>
+
+	  <div style="clear:both"></div>
+	  
 	</div>
 	<div id="search-explain">
 	</div>
 	<div id="search-showing">
 	</div>
 
-      	<div id="search-results">	    
+      	<div id="search-results">
 	</div>
-      	<div id="search-loading-more" style="display:none;">
+      	<div class="search-loading-more" style="display:none;">
 	  <span class="progress-label">Loading more results: </span>
-	  <div id="search-lm-progressbar" styleXX="display: inline-block;"></div>	    
+	  <div id="search-lm-progressbar-bot"></div>	    
 	</div>
 	
 	<div id="next-prev">
