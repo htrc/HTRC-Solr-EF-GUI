@@ -6,7 +6,7 @@ var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
 
-var num_results_per_page = 20;
+var num_results_per_page = 15;
 var store_result_page_starts = [];
 
 var filters = [];
@@ -51,6 +51,24 @@ $(document).ready(function(){
 
     $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
 
+
+    $('#srt-vol-export').click(function (event) {
+	event.preventDefault();
+	console.log("*** arg q = " + store_search_args.q);
+	if (facet_level == "page") {
+	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
+	}
+	else {
+	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+	}
+    });
+
+    $('#srt-page-export').click(function (event) {
+	event.preventDefault();	
+	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+    });
+
+    
 });
 
 
@@ -233,14 +251,10 @@ function ajax_solr_text_search(newResultPage)
     });
 }
 
-function get_solr_stream_data_str(arg_q,doRollup)
+function get_solr_stream_search_clause(arg_q)
 {
-    //rollup(
     //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
-    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200"),
-    //	over="volumeid_s",
-    //	count(*)
-    //)
+    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200")
 
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
@@ -252,9 +266,7 @@ function get_solr_stream_data_str(arg_q,doRollup)
 	fl: "volumeid_s,id",
 	indent: arg_indent,
 	wt: arg_wt
-	//start: arg_start,
-	//rows: num_rows
-	//facet: "on"
+	//facet: "on" // ****
     };
 
 
@@ -287,9 +299,31 @@ function get_solr_stream_data_str(arg_q,doRollup)
     
     var search_stream_args_str = search_stream_args.join(",");
 
-    var search_stream="search("+solr_collection+","+search_stream_args_str+")";
+    var search_stream_clause ="search("+solr_collection+","+search_stream_args_str+")";
+    
+    return search_stream_clause;
+}
 
-    var rollup_stream='rollup('+search_stream+',over="volumeid_s",count(*))'
+function get_solr_stream_search_data_str(arg_q)
+{
+    var clause = get_solr_stream_search_clause(arg_q);
+    return "expr=" + clause;
+}
+
+
+
+function get_solr_stream_data_str(arg_q,doRollup)
+{
+    //rollup(
+    //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
+    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200"),
+    //	over="volumeid_s",
+    //	count(*)
+    //)
+    
+    var search_stream = get_solr_stream_search_clause(arg_q);
+
+    var rollup_stream ='rollup('+search_stream+',over="volumeid_s",count(*))'
 
     var data_str;
     if (doRollup) {
@@ -305,15 +339,8 @@ function get_solr_stream_data_str(arg_q,doRollup)
     
 function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 {    
-    //rollup(
-    //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
-    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200"),
-    //	over="volumeid_s",
-    //	count(*)
-    //)
-
-    // ****
-    callback = callback || show_volume_count;
+    //callback = callback || show_volume_count; // ****
+    
     var data_str = get_solr_stream_data_str(arg_q,doRollup);
     
     $.ajax({
@@ -321,7 +348,7 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 	url: solr_stream_action,
 	data: data_str,
 	dataType: "json",
-	success: show_volume_count,
+	success: callback,
 	error: ajax_error
     });
 
@@ -330,12 +357,25 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 
 function stream_export(jsonData) {
     var response = jsonData["result-set"];
-    console.log("*** response = " + JSON.stringify(jsonData));
     
-    document.open();
-    document.write(JSON.stringify(response));
-    document.close();
+    var docs = response.docs;
+    var num_docs = docs.length;
+
+    num_docs--; // last entry provides response time data
+
+    var ids = [];
+    
+    var i;    
+    for (i=0; i<num_docs; i++) {
+	var doc = docs[i];
+	var id = doc['volumeid_s'] || doc['id'];
+	
+	ids.push(id);
+    }
+
+    download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
 }
+
 
 function show_volume_count(jsonData) {
     var response = jsonData["result-set"];
@@ -343,28 +383,10 @@ function show_volume_count(jsonData) {
     var num_docs = docs.length;
 
     num_docs--; // last entry provides response time data
-    //console.log("**** show_volume_count() response = " + response);
-    //console.log("*** show_vol len = " + num_docs);
 
     $('#srt-vol-count').html(num_docs);
 
-    // ****
-    /*
-    var total = 0;
-    var i;
-
-    for (i=0; i<num_docs; i++) {
-	var doc = docs[i];
-	var count = doc["count(*)"];
-	//console.log("**** doc = " + JSON.stringify(doc));
-	//console.log ("*** count = " + count);
-	
-	//total += count;
-	//$('#srt-vol-count').html(total);
-    }
-//    console.log("*** page total check = " + total);
-*/
-    
+    $('#srt-export').show();        
 }
 
 
@@ -781,11 +803,20 @@ function show_results(jsonData,newResultPage)
 	store_start = search_start;
 	store_line_num = 1;
 	store_id = null;
+
+	$('#srt-export').hide(); // hide until volume count is in
 	
 	var facet_fields = jsonData.facet_counts.facet_fields;
     
 	var facet_html = show_results_facet_html(facet_fields);
 	if (show_facet == 1) {
+	    if (facet_level == "page") {
+		$('#facet-units').html(" (page count)");
+	    }
+	    else {
+		$('#facet-units').html(" (volume count)");
+	    }
+	    
 	    $(".narrowsearch").show();
 	    $("#facetlist").html(facet_html);
 	} else if (show_facet == 0){
@@ -832,16 +863,16 @@ function show_results(jsonData,newResultPage)
 		    $('#srt-vol-count-span').show();
 
 		    var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
-		    var url = solr_stream_action + "?" + data_str;
-		    $("#srt-vol-export").attr("href",url);
+		    //var url = solr_stream_action + "?" + data_str;
+		    //$("#srt-vol-export").attr("href",url);
 		    $("#srt-vol-export").show();
 		    
-		    var data_str = get_solr_stream_data_str(store_search_args.q,false) // doRollup=false
-		    var url = solr_stream_action + "?" + data_str;
-		    $("#srt-page-export").attr("href",url);
+		    var data_str = get_solr_stream_search_data_str(store_search_args.q)
+		    //var url = solr_stream_action + "?" + data_str;
+		    //$("#srt-page-export").attr("href",url);
 		    $("#srt-page-export").show();
 		    
-		    ajax_solr_stream_volume_count(store_search_args.q,true); // doRollup=true
+		    ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 		}
 		else {
 		    $('#srt-vol-count').html('<span style="color:red;">a prohibitively high (!!) number of</span>');
@@ -849,13 +880,19 @@ function show_results(jsonData,newResultPage)
 		}
 	    }
 	    else {
-		var data_str = get_solr_stream_data_str(store_search_args.q,false) // doRollup=true
-		var url = solr_stream_action + "?" + data_str;
-		$("#srt-vol-export").attr("href",url);
+		// .click
+		//var data_str = get_solr_stream_search_data_str(store_search_args.q); // ****
+		//var url = solr_stream_action + "?" + data_str;
+		//$("#srt-vol-export").attr("href",url);
+		$("#srt-vol-export").show();
+
+		//$("#srt-page-export").attr("href","");
 		$("#srt-page-export").hide();
 
-		
-		$('#srt-vol-count').html("[computing ...]"); // restore back to default text, ready for next vol count computation
+		$("#srt-export").show();
+
+		// restore vol-count display back to default text, ready for next vol count computation
+		$('#srt-vol-count').html("[computing ...]"); 
 		$('#srt-vol-count-span').hide();
 		
 	    }
@@ -1065,7 +1102,10 @@ function show_results(jsonData,newResultPage)
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
     }
 	
-    var next_prev = '<p style="width:100%;"><div id="search-prev" style="float: left;"><a>&lt; Previous</a></div><div id="search-next" style="float: right;"><a>Next &gt;</a></div></p>';
+    var next_prev = '<p style="width:100%;">';
+    next_prev += '<div id="search-prev" style="float: left;"><a>&lt; Previous</a></div>';
+    next_prev += '<div id="search-next" style="float: right;"><a>Next &gt;</a></div>';
+    next_prev += '</p>';
     
     $('#next-prev').html(next_prev);
 

@@ -98,6 +98,10 @@ dd.showfacet, dd.hidefacet {
     text-transform: capitalize;
 }
 
+span#facet-units {
+    font-size: 80%;
+}
+    
 span.workset {
     color: #924a0b;
 }
@@ -137,3 +141,4 @@ span.workset a:hover {
 a.export-item {
     display: block;
 }
+
