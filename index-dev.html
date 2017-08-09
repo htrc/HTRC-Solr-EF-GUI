@@ -184,11 +184,17 @@
 		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
 			       placeholder="metaname:metavalue e.g., title_t:farming"
 			       style="width: 600px;"/>
-		      <span id="volume-help" style="cursor: help">&#x1f6c8; Help</span>
-				      
 		      <br />
-		      <input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on">&nbsp;Search all volume fields
+		      <nobr>
+			<input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on">
+			Search all volume fields
+		      </nobr>
 		    </td>
+
+		    </td>
+		    <td>
+		      <span id="volume-help" style="cursor: help">&#x1f6c8; Help</span>
+		    </td>		      
 		  </tr>
 		  <tr>
 		    <td></td>
@@ -237,8 +243,12 @@
 		    <td>Page-level text:</td>
 		    <td>
 		      <input type="text"   class="search-in-progress" id="q" name="q"
-			     style="width: 600px;"/><br />
-		      <input type="checkbox" id="group-results-by-vol" name="group-results-by-vol" value="on">&nbsp;<span>Group by Volume</span>
+			     style="width: 600px;"/>
+		      <br />
+		      <nobr>
+			<input type="checkbox" id="group-results-by-vol" name="group-results-by-vol" value="on">
+			<span>Group by Volume</span>
+		      </nobr>
 
 		    </td>
 		  </tr>
@@ -344,7 +354,16 @@
 	  <div id="search-lm-progressbar-bot"></div>	    
 	</div>
 	
-	<div id="next-prev">
+	<div id="next-prev" style="display:none;">
+	  <p style="width:100%;">
+	    <div id="search-prev" style="float: left;">
+	      <a><span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a>
+	    </div>
+	    <div id="search-next" style="float: right;">
+	      <a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span></a>
+	    </div>
+	  </p>
+
 	</div>
       </div>      
       
@@ -359,7 +378,10 @@
     <div class="container">
       <h4>Additional Resources</h4>
       <ul>
-	<li><a href="index.html">Return to main interface (fully-indexed 5.1 billion pages)</a></li>
+	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.1 billion pages)</a></li>
+	<!--
+	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
+	-->
 	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>

@@ -5,8 +5,11 @@ var solr_collection = "faceted-htrc-full-ef20";
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
-var num_found_page_limit = 700000;
-var num_found_vol_limit  = 50000;
+var num_found_page_limit_str = "700,000";
+var num_found_vol_limit_str  = "100,000";
+var num_found_page_limit = num_found_page_limit_str.replace(/,/g,"");
+var num_found_vol_limit  = num_found_vol_limit_str.replace(/,/g,"");
+
 var num_results_per_page = 15;
 
 var store_result_page_starts = [];
@@ -140,15 +143,39 @@ function add_titles_solr(jsonData) {
 	    var htid = doc_val.id;
 
 	    var title = doc_val.title_s;
+	    
+	    var details = [];
+	    if (doc_val.typeOfResource_s) {
+		details.push("Resource type: " + doc_val.typeOfResource_s);
+	    }
+	    if (doc_val.names_ss) {
+		details.push("Author(s): " + doc_val.names_ss.join(", "));
+	    }
+	    if (doc_val.pubDate_s) {
+		details.push("Publication date: " + doc_val.pubDate_s);
+	    }
+	    if (doc_val.genre_ss) {
+		details.push("Genre: " + doc_val.genre_ss.join(", "));
+	    }
+
+	    var details_str = details.join(";\n");	    
+	    var $tooltip_title = $('<span />').attr('title',details_str).html(title);
+		    
+	    //console.log("*** tooltip title = " + $tooltip_title[0].outerHTML);
+	    
 	    $("[name='" + htid + "']").each(function () {
-		$(this).html(title)
+		var $tooltip_title_clone = $tooltip_title.clone();
+		$tooltip_title_clone.tooltip();
+		$(this).html($tooltip_title_clone)
 	    });
 	    console.log(htid + ", title = " + title);
 
 	    var itemURL = doc_val.handleUrl_s;
 	    itemURL = itemURL.replace(/^https:/, "http:");
 
-	    var ws_span = '<span class="workset" style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
+	    var ws_span = '<span class="workset" style="display: none;"><br />';
+	    ws_span += '[Workset: <span name="' + itemURL + '"></span>]</span>';
+	    
 	    $("[name='" + htid + "']").each(function () {
 		$(this).append(ws_span)
 	    });
@@ -201,7 +228,7 @@ function add_worksets(json_data) {
 
 }
 
-function escape_query(query)
+function escape_solr_query(query)
 {
 
     var pattern = /([\!\*\+\-\=\<\>\&\|\(\)\[\]\{\}\^\~\?\:\\\/\"])/g;
@@ -268,7 +295,6 @@ function get_solr_stream_search_clause(arg_q)
 	fl: "volumeid_s,id",
 	indent: arg_indent,
 	wt: arg_wt
-	//facet: "on" // ****
     };
 
 
@@ -393,9 +419,8 @@ function show_volume_count(jsonData) {
     else {
 	$('#srt-export').hide();
 
-	$('#srt-vol-count').append(' <span style="color:red;">[Volume count exceeds limit of '
-				   + num_found_vol_limit + ' for exporting]</span>');
-	//$('#srt-vol-count-span').show(); // ****
+	$('#srt-vol-count').append(' <span style="color:#BB0000;">[Note: Volume count exceeds limit of '
+				   + num_found_vol_limit_str + ' for exporting]</span>');
     }
 
 
@@ -735,7 +760,7 @@ function show_results_explain_html(query_level_mix,store_search_url)
     explain_html += '<div style="float:left;">\n';
     explain_html += '  <button id="show-hide-solr-q">Show full query ...</button>\n';
 
-    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '"</div>\n';
+    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '</div>\n';
     explain_html += "</div>\n";
     explain_html += "</p>\n";
 
@@ -886,8 +911,8 @@ function show_results(jsonData,newResultPage)
 		}
 		else {
 		    $('#srt-vol-count-computing').hide();
-		    $('#srt-vol-count').html('<span style="color:red;">[Page count exceeds limit of '
-					     + num_found_page_limit + ' for exporting result set]</span>');
+		    $('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Page count exceeds limit of '
+					     + num_found_page_limit_str + ' for exporting result set]</span>');
 		    $('#srt-vol-count-span').show();
 		}
 	    }
@@ -904,8 +929,8 @@ function show_results(jsonData,newResultPage)
 		}
 		else {
 		    $('#srt-vol-count-computing').hide();
-		    $('#srt-vol-count').html('<span style="color:red;">[Volume count exceeds limit of '
-					     + num_found_vol_limit + ' for exporting]</span>');
+		    $('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Volume count exceeds limit of '
+					     + num_found_vol_limit_str + ' for exporting]</span>');
 		    $('#srt-vol-count-span').show();
 		}		
 	    }
@@ -1116,14 +1141,18 @@ function show_results(jsonData,newResultPage)
 	progressbar_bot.progressbar( "value",0);
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
     }
-	
+
+    /*
     var next_prev = '<p style="width:100%;">';
-    next_prev += '<div id="search-prev" style="float: left;"><a>&lt; Previous</a></div>';
-    next_prev += '<div id="search-next" style="float: right;"><a>Next &gt;</a></div>';
+    next_prev += '<div id="search-prev" style="float: left;">';
+    next_prev += '<a>&lt; <span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a></div>';
+    next_prev += '<div id="search-next" style="float: right;">';
+    next_prev += '<a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span> &gt;</a></div>';
     next_prev += '</p>';
     
     $('#next-prev').html(next_prev);
-
+    */
+    
     $('#search-prev').click(function (event) {
 	var start = store_search_args.start;
 	var prev_start = store_result_page_starts.pop();
@@ -1153,7 +1182,11 @@ function show_results(jsonData,newResultPage)
     // Showing matches to ...
     $('#sm-to').html(search_start + num_pages);
     
-    
+
+    // Now setup and invoke ajax call to add title metadta (etc) into result set page
+
+    // This previously used to be done with the HT API:
+    //
     // Example URL for catalog metadata (multiple items)
     //   http://catalog.hathitrust.org/api/volumes/brief/json/id:552;lccn:70628581|isbn:0030110408
     
@@ -1166,19 +1199,32 @@ function show_results(jsonData,newResultPage)
     //});
     
 
-    // => fill out place-holder title information
+    // => Retrieve from solr volume level metadata to fill out place-holder title information (etc)
 
     // Example URL for using the Solr-EF collection to retrieve volume id info
     //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
+
+    //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});
+
+    var ids_escaped = ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});
     
-    var ids_and_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
-        
+    var ids_or_str = ids_escaped.join(" OR ");
+    
+    //var ids_or_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
+
+
+    
+    var fl_args = [ "id", "title_s", "handleUrl_s",
+		    "genre_ss", "names_ss", "pubDate_s", "typeOfResource_s" ];
+    var fl_args_str = fl_args.join(",");
+    
     var url_args = {
-	q: ids_and_str,
+	q: ids_or_str,
 	indent: "off",
 	wt: "json",
 	start: 0,
 	rows: ids.length,
+	fl: fl_args_str
     };
 
     

@@ -145,3 +145,11 @@ a.export-item {
 #srt-vol-count-computing {
     cursor: wait;
 }
+
+.ui-tooltip {
+    min-width: 400px;
+    white-space: pre-line;
+    font: inherit;
+    background: #EEEEEE;
+    opacity: 1;
+}
