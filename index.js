@@ -1,25 +1,33 @@
 
+var solr_prefix_url = "http://solr1.ischool.illinois.edu/solr/";
+var solr_collection = "faceted-htrc-full-ef20";
 
-var langs_with_pos = ["en", "de", "pt", "da", "nl", "sv"];
+var solr_search_action = solr_prefix_url+solr_collection+"/select";
+var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
-var langs_without_pos = [
-	"af", "ar", "bg", "bn", "cs", "el", "es", "et", "fa", "fi", "fr", "he", "hi", "hr", "hu",
-	"id", "it", "ja", "kn", "ko", "lt", "lv", "mk", "ml", "mr", "ne", "no", "pa", "pl",
-	"ro", "ru", "sk", "sl", "so", "sq", "sv", "sw", "ta", "te", "th", "tl", "tr",
-	"uk", "ur", "vi", "zh-cn", "zh-tw"
-];
+var num_found_page_limit = 700000;
+var num_found_vol_limit  = 50000;
+var num_results_per_page = 15;
 
-var num_rows = 20;
+var store_result_page_starts = [];
+
 var filters = [];
-var facet = ['genre_ss', 'language_t', 'pubPlace_s', 'bibliographicFormat_s'];
-var facet_display_name = {'genre_ss':'Genre', 'language_t': 'Language', 'pubPlace_s': 'Place of Publication', 'bibliographicFormat_s': 'Original Format'};
+var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'names_ss', 'pubPlace_s', 'bibliographicFormat_s'];
+var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status',
+			  'names_ss': 'Author', 'pubPlace_s': 'Place of Publication',
+			  'bibliographicFormat_s': 'Original Format'};
 
 // Global variable show_facet to control if faceting is used.
 var show_facet = 0;
+var facet_level = null;
 
-var explain_search = { 'group_by_vol': null, 'query_level': null };
+var explain_search = { 'group_by_vol': null,
+		       'volume_level_terms': null, 'volume_level_desc': null,
+		       'page_level_terms': null, 'page_level_desc': null };
 
 $(document).ready(function(){
+    $('#search-form').attr("action",solr_search_action);
+    
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
@@ -43,6 +51,26 @@ $(document).ready(function(){
 	$("#volume-help-dialog").dialog( "open" );
     });
 
+    $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
+
+
+    $('#srt-vol-export').click(function (event) {
+	event.preventDefault();
+	console.log("*** arg q = " + store_search_args.q);
+	if (facet_level == "page") {
+	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
+	}
+	else {
+	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+	}
+    });
+
+    $('#srt-page-export').click(function (event) {
+	event.preventDefault();	
+	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+    });
+
+    
 });
 
 
@@ -55,7 +83,7 @@ function lang_pos_toggle(event) {
 	var related_id = split_id[0] + "-pos-choice";
 
 	var disable_state = !checked_state;
-	$('#' + related_id + " *").prop('disabled', disable_state);
+	$('#' + related_id + " *").prop('disabled',disable_state);
 }
 
 function ajax_error(jqXHR, textStatus, errorThrown) {
@@ -86,7 +114,7 @@ function add_titles(json_data) {
 				var itemURL = item_val.itemURL;
 				itemURL = itemURL.replace(/^https:/, "http:");
 
-				var ws_span = '<span style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
+				var ws_span = '<span class="workset" style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
 				$("[name='" + htid + "']").each(function () {
 					$(this).append(ws_span)
 				});
@@ -101,7 +129,7 @@ function add_titles(json_data) {
 }
 
 function add_titles_solr(jsonData) {
-	var itemURLs = [];
+    var itemURLs = [];
     //console.log("jsonData = " + jsonData);
     
         var response = jsonData.response;
@@ -120,7 +148,7 @@ function add_titles_solr(jsonData) {
 	    var itemURL = doc_val.handleUrl_s;
 	    itemURL = itemURL.replace(/^https:/, "http:");
 
-	    var ws_span = '<span style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
+	    var ws_span = '<span class="workset" style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
 	    $("[name='" + htid + "']").each(function () {
 		$(this).append(ws_span)
 	    });
@@ -135,7 +163,7 @@ function add_titles_solr(jsonData) {
 
 function add_worksets(json_data) {
 
-	//console.log("****" + JSON.stringify(json_data));
+    if (json_data.hasOwnProperty('@graph')) {
 	$.each(json_data["@graph"], function (ws_index, ws_val) {
 		var workset_id = ws_val["@id"];
 		var workset_title = ws_val["http://purl.org/dc/terms/title"][0]["@value"];
@@ -143,8 +171,12 @@ function add_worksets(json_data) {
 		// http://acbres224.ischool.illinois.edu:8890/sparql?query=describe <http://worksets.hathitrust.org/wsid/189324112>&format=text/x-html+ul
 		// http://acbres224.ischool.illinois.edu:8890/sparql?query=describe+%3Chttp%3A%2F%2Fworksets.hathitrust.org%2Fwsid%2F189324112%3E&format=text%2Fx-html%2Bul
 
-		var describe_url = "http://acbres224.ischool.illinois.edu:8890/sparql?query=describe+<" +
-			workset_id + ">&format=text%2Fx-html%2Bul";
+		//var describe_url = "http://acbres224.ischool.illinois.edu:8890/sparql?query=describe+<" +
+		//    workset_id + ">&format=text%2Fx-html%2Bul";
+
+	        // http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=http://worksets.hathitrust.org/wsid/147967316
+	        var describe_url = "http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+
 		var hyperlinked_workset_title = '<a target="_blank" href="' + describe_url + '">' + workset_title + '</a>';
 
 		var gathers = ws_val["http://www.europeana.eu/schemas/edm/gathers"]
@@ -162,89 +194,394 @@ function add_worksets(json_data) {
 			});
 		});
 	});
+    }
+    else {
+	console.log("Empty workset list returned");
+    }
 
 }
 
+function escape_query(query)
+{
+
+    var pattern = /([\!\*\+\-\=\<\>\&\|\(\)\[\]\{\}\^\~\?\:\\\/\"])/g;
+    
+    var escaped_query = query.replace(pattern, "\\$1");
+
+    return escaped_query;
+}
+
+function ajax_solr_text_search(newResultPage)
+{
+    var url_args = [];
+
+    for (k in store_search_args) {
+	url_args.push(k + '=' + store_search_args[k]);
+    }
+    
+    for (k in facet) {
+	var facet_val = facet[k];
+	if (facet_level == "page") {
+	    facet_val = "volume" + facet_val;
+	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
+	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
+	}
+	url_args.push('facet.field=' + facet_val);
+    }
+    
+    for (k in filters) {
+	var ks = filters[k].split("--");
+	var ks0 = ks[0];
+	var ks1 = ks[1];
+	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
+
+	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
+    }
+
+    var data_str = url_args.join("&");
+    
+    store_search_url = store_search_action + "?" + data_str;
+    
+    $.ajax({
+	type: "GET",
+	url: store_search_action,
+	// async: false, // ****
+	data: data_str,
+	dataType: "json",
+	success: function(jsonData) { show_results(jsonData,newResultPage); },
+	error: ajax_error
+    });
+}
+
+function get_solr_stream_search_clause(arg_q)
+{
+    //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
+    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200")
+
+    var arg_indent = $('#indent').attr('value');
+    var arg_wt = $('#wt').attr('value');
+
+    var vol_count_args = {
+	qt: "/export",
+	q: arg_q,
+	sort: "id asc",
+	fl: "volumeid_s,id",
+	indent: arg_indent,
+	wt: arg_wt
+	//facet: "on" // ****
+    };
+
+
+    var search_stream_args = [];
+
+    for (ka in vol_count_args) {
+	search_stream_args.push(ka + '="' + vol_count_args[ka] + '"');
+    }
+
+    
+    for (kf in facet) {
+	var facet_val = facet[kf];
+	if (facet_level == "page") {
+	    facet_val = "volume" + facet_val;
+	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
+	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
+	}
+	search_stream_args.push('facet.field=' + facet_val);
+    }
+    
+    for (kf in filters) {
+	var ks = filters[kf].split("--");
+	var ks0 = ks[0];
+	var ks1 = ks[1];
+	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
+
+	search_stream_args.push('fq=' + ks0 + ':("' + ks1 + '")');
+    }
+    
+    
+    var search_stream_args_str = search_stream_args.join(",");
+
+    var search_stream_clause ="search("+solr_collection+","+search_stream_args_str+")";
+    
+    return search_stream_clause;
+}
+
+function get_solr_stream_search_data_str(arg_q)
+{
+    var clause = get_solr_stream_search_clause(arg_q);
+    return "expr=" + clause;
+}
+
+
+
+function get_solr_stream_data_str(arg_q,doRollup)
+{
+    //rollup(
+    //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
+    //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200"),
+    //	over="volumeid_s",
+    //	count(*)
+    //)
+    
+    var search_stream = get_solr_stream_search_clause(arg_q);
+
+    var rollup_stream ='rollup('+search_stream+',over="volumeid_s",count(*))'
+
+    var data_str;
+    if (doRollup) {
+	data_str = "expr=" + rollup_stream ;
+    }
+    else {
+	data_str = "expr=" + search_stream;
+    }
+    
+    return data_str;
+}
+
+    
+function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
+{        
+    var data_str = get_solr_stream_data_str(arg_q,doRollup);
+    
+    $.ajax({
+	type: "GET",
+	url: solr_stream_action,
+	data: data_str,
+	dataType: "json",
+	success: callback,
+	error: ajax_error
+    });
+
+    
+}
+
+function stream_export(jsonData) {
+    var response = jsonData["result-set"];
+    
+    var docs = response.docs;
+    var num_docs = docs.length;
+
+    num_docs--; // last entry provides response time data
+
+    var ids = [];
+    
+    var i;    
+    for (i=0; i<num_docs; i++) {
+	var doc = docs[i];
+	var id = doc['volumeid_s'] || doc['id'];
+	
+	ids.push(id);
+    }
+
+    download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
+}
+
+
+function show_volume_count(jsonData) {
+    var response = jsonData["result-set"];
+    var docs = response.docs;
+    var num_docs = docs.length;
+
+    num_docs--; // last entry provides response time data
+
+    $('#srt-vol-count-computing').hide();
+    $('#srt-vol-count').html(" in " + num_docs + " volumes");
+    
+    if (num_docs < num_found_vol_limit) {
+	$('#srt-export').show();
+    }
+    else {
+	$('#srt-export').hide();
+
+	$('#srt-vol-count').append(' <span style="color:red;">[Volume count exceeds limit of '
+				   + num_found_vol_limit + ' for exporting]</span>');
+	//$('#srt-vol-count-span').show(); // ****
+    }
+
+
+}
+
+
+function show_updated_results()
+{
+    $('.search-in-progress').css("cursor","wait");
+    
+    ajax_solr_text_search(true); // newResultPage=true
+}
 
 function show_new_results(delta) {
-	$('.search-in-progress').css("cursor", "wait");
+    
+    var start = parseInt(store_search_args.start)
+    
+    store_search_args.start = start + parseInt(delta);
 
-	var start = parseInt(store_search_args.start)
-
-	store_search_args.start = start + parseInt(delta);
-	var url = "";
-	for (k in store_search_args) {
-		url += k + '=' + store_search_args[k] + "&";
-	}
-
-	for (k in facet) {
-		url += 'facet.field=' + facet[k] + "&";
-	}
-	for (k in filters) {
-		_k = filters[k].split("-");
-		url += 'fq=' + _k[0] + ':("' + _k[1] + '")&';
-	}
-
-
-	$.ajax({
-		type: 'GET',
-		url: store_search_action,
-		data: url,
-		dataType: 'json',
-		success: show_results,
-		error: ajax_error
-	});
+    show_updated_results();
 }
 
-function generate_item(line, id, id_pages) {
-	var css_class = (line % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
-
-	var html_item = "";
-
-	var id_pages_len = id_pages.length;
-
-	for (var pi = 0; pi < id_pages_len; pi++) {
-		var page = id_pages[pi];
-
-		var seqnum = (page == 0) ? 1 : page;
-		var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
-
-		if (id_pages_len > 1) {
-
-			if (pi == 0) {
-				html_item += '<p ' + css_class + '>';
-				html_item += '<span style="font-style: italic;" name="' +
-					id + '"><span style="cursor: progress;">Loading ...</span></span><br>';
-				if (page > 0) {
-					html_item += id + ': <a target="_blank" href="' + babel_url + '">seq ' + seqnum + '</a> ';
-				} else {
-					// skip linking to the 'phony' page 0
-					html_item += id;
-				}
-			} else {
-				html_item += ', <a target="_blank" href="' + babel_url + '">seq ' + seqnum + '</a> ';
-			}
-		} else {
-			html_item += '<p ' + css_class + '>';
-			html_item += ' <span style="font-style: italic;" name="' +
-				id + '"><span style="cursor: progress;">Loading ...</span></span><br>';
-
-			if (page > 0) {
-				html_item += '<a target="_blank" href="' + babel_url + '">' + id + ', seq ' + seqnum + '</a>';
-			} else {
-				html_item += '<a target="_blank" href="' + babel_url + '">' + id + ', all pages</a>';
-			}
-
-			html_item += '</p>';
-		}
-
+function generate_item(line_num, id, id_pages, merge_with_previous)
+{
+    var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
+    
+    var html_item = "";
+    var seq_item  = "";
+    
+    // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
+    
+    var id_pages_len = id_pages.length;
+    
+    var download_text = "&nbsp;Download Extracted Features";
+    if (id_pages_len==1) {
+        if (id_pages[0]>0)  {
+	    // single page item working at the page level => clarify download is the complete volume
+	    download_text += " (complete volume)";
 	}
+    }
+    else if (id_pages_len>1) {
+	// multiple pages in the item => clarify dowload is the complete volume
+	download_text += " (complete volume)";
+    }
+    var download_span = '<div title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="ui-icon ui-icon-circle-arrow-s"></span>'+download_text+ '</a></div>';
 
+    var prev_seq_count = 0;
+    
+    if (merge_with_previous) {
+	// precalculated vals to work out if seq merging needs to generate a 'show/hide' label
+	if (line_num > 1) {
+	    var seqs_outer_div_id = "#seqs-outer-div-"+(line_num-1);
+	    var prev_seqs = $(seqs_outer_div_id).find('> nobr > a.seq');
+	    prev_seq_count = prev_seqs.length;
+	}
+    }
+    
+    var show_more = false;
+
+    for (var pi = 0; pi < id_pages_len; pi++) {
+	var page = id_pages[pi];
+	
+	var seqnum = (page == 0) ? 1 : page;
+	var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
+	
 	if (id_pages_len > 1) {
-		html_item += "</p>";
+	    
+	    if (pi == 0) {
+		var seqs_outer_div_id = "seqs-outer-div-"+line_num;
+		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
+
+		html_item += '<span style="font-style: italic;" name="' + id + '">';
+		html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
+		
+		if (page > 0) {
+		    html_item += id + ': ';
+
+		    //var head_seqs_label = "head-seqs-"+line_num; // ****
+		    //seq_item += '<span id="'+head_seq_label'"></span>';
+		    seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+		}
+		else {
+		    // skip linking to the 'phony' page 0
+		    html_item += id;
+		    seq_item += "<nobr>";
+		}
+	    }
+	    else {
+		if (seq_item != "") {
+		    seq_item += ',</nobr>';
+		}
+		
+		if (!merge_with_previous && (pi == 3) && (id_pages_len > 3)) {
+		    
+		    var sid_label = "show-hide-more-seqs-"+line_num;
+		    var sid_block = sid_label + "-block";
+		    seq_item += ' <a><span id="'+sid_label+'">Show more pages ...</span></a><div id="'+sid_block+'" style="display: none;">';
+		    show_more = true;
+		}
+		seq_item += ' <nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+	    }
+
+	    if ((merge_with_previous) && ((prev_seq_count + pi + 1) == 3)) {
+		// merge what we have so far for 'seq_item' with previous item
+		
+		var prev_line_num = line_num-1;
+		
+		if (prev_seq_count + id_pages_len > 3) {
+		    // also need 'show more'
+		    var sid_label = "show-hide-more-seqs-"+prev_line_num;
+		    var sid_block = sid_label + "-block";
+		    seq_item += ',</nobr> <a><span id="'+sid_label+'">Show more pages ...</span></a>';
+		    seq_item += '<div id="'+sid_block+'" style="display: none;"></div>';
+		}
+		
+		var ps_label_id = "prepend-seqs-"+prev_line_num;		    
+		$('#'+ps_label_id).before(", " + seq_item);
+		show_hide_more_seqs(prev_line_num);
+		
+		// Now move ps_span inside sid_block div
+		var $ps_span = $('#'+ps_label_id).detach();
+		$('#'+sid_block).append($ps_span);
+		
+		seq_item = "";
+	    }
+
+	}
+	else {
+	    var seqs_outer_div_id = "seqs-outer-div-"+line_num;
+	    html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
+
+	    html_item += '<span style="font-style: italic;" name="' + id + '">';
+	    html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
+	    
+	    if (page > 0) {
+		html_item += id + ': ';
+		seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a>';
+	    } else {
+		// dealing with 'phony' page => show 'all pages'
+		html_item += id + ': ';
+		seq_item += '<nobr><a class="seqall" target="_blank" href="' + babel_url + '">all pages</a>';
+	    }
+
+	    if (merge_with_previous) {
+		html_item = seq_item;
+	    }
+	    else {
+		// leave a span marker where later seq-items that need to merged in can go
+		var ps_label = "prepend-seqs-"+line_num;
+		seq_item += '</nobr><span id="'+ps_label+'"></span>';
+
+		html_item += seq_item;
+		html_item += download_span;
+		html_item += '</div>';
+	    }
+	}
+	
+    }
+
+	
+    if (id_pages_len > 1) {
+
+	seq_item += '</nobr>';
+	
+	if (!merge_with_previous) {
+	    // leave a span marker where later seq-items that need to merged in can go
+	    var ps_label = "prepend-seqs-"+line_num;
+	    seq_item += '<span id="'+ps_label+'"></span>';
 	}
 
-	return html_item;
+	if (show_more) {
+	    seq_item += '</div>'; // closes off the div-block formed for the hidden seqs
+	}
+
+	if (merge_with_previous) {
+	    html_item = seq_item;
+	}
+	else {
+	    html_item += seq_item;
+	    
+	    html_item += download_span;
+	    html_item += "</div>";
+	}
+    }
+    
+    return html_item;
 }
 
 
@@ -319,7 +656,7 @@ function workset_enrich_results(itemURLs) {
 		type: "POST",
 		url: sparql_url,
 		data: sparql_data,
-		dataType: 'jsonp',
+		dataType: "jsonp",
 		jsonpCallback: "add_worksets"
 	});
 
@@ -327,232 +664,546 @@ function workset_enrich_results(itemURLs) {
 
 }
 
-function show_results(jsonData) {
-	var response = jsonData.response;
-	var num_found = response.numFound;
-	var docs = response.docs;
-	var num_docs = docs.length;
-
-	var facet_fields = jsonData.facet_counts.facet_fields;
-
-	//
-	var facet_html = "";
-	var _class = '';
-	for (k in facet_fields) {
-		facet_html += "<dl>";
-		facet_html += "<dt class=\"facetField\">" + facet_display_name[k] + "</dt> ";
-		item = facet_fields[k];
-		ii = 0;
-		for (var j = 0; j <= item.length / 2; j = j + 2) {
-
-			if (item[j + 1] > 0) {
-				if (filters.indexOf(k + "-" + item[j]) < 0) {
-					_class = "showfacet";
-					if (ii > 5) {
-						_class = "hidefacet";
-					}
-					displayed_item = item[j]
-					if (k == "bibliographicFormat_s") {
-						if (displayed_item in format_dic) {
-							displayed_item = format_dic[displayed_item];
-						}
-					}
-					if (k == "language_t") {
-						if (displayed_item in language_dic) {
-							displayed_item = language_dic[displayed_item];
-						}
-					}
-					if (k == "pubPlace_s") {
-						if (displayed_item in place_dic) {
-							displayed_item = place_dic[displayed_item];
-						}
-					}
-					facet_html += '<dd class="' + _class + ' ' + k + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + displayed_item + '</a><span dir="ltr"> (' + item[j + 1] + ') </span></dd>';
-					ii++;
-				}
-
-			}
-
-		}
-		if (ii > 5) {
-			facet_html += '<dd><a href="" class="' + k + ' morefacets"><span class="moreless">more...</span></a><a href="" class="' + k + ' lessfacets" style="display: none;"><span class="moreless">less...</span></a></dd>'
-		}
-		facet_html += "</dl>";
+function pretty_print_facet_value(kv,displayed_item)
+{
+    if (kv == "rightsAttributes_s") {
+	if (displayed_item in rights_dic) {
+	    displayed_item = rights_dic[displayed_item];
 	}
-	if (show_facet == 1) {
-		$(".narrowsearch").show();
-		$("#facetlist").html(facet_html);
-		show_facet = 0;
-	} else if (show_facet == 0){
-		$(".narrowsearch").hide();
-		facet_html = "";
-		$("#facetlist").html(facet_html);
+    }
+    if (kv == "bibliographicFormat_s") {
+	if (displayed_item in format_dic) {
+	    displayed_item = format_dic[displayed_item];
 	}
-
-	$('.search-in-progress').css("cursor", "auto");
-
-	var $search_results = $('#search-results');
-
-        var explain_html = "<p>Search explanation: " + explain_search.query_level;
-        if (explain_search.group_by_vol != null) {
-	    explain_html += " THEN " + explain_search.group_by_vol;
+    }
+    if (kv == "language_s") {
+	if (displayed_item in language_dic) {
+	    displayed_item = language_dic[displayed_item];
 	}
-        explain_html += "</p>";
+    }
+    if (kv == "pubPlace_s") {
+    // fix the place code ending with whitespace
+    displayed_item = displayed_item.trim();
+	if (displayed_item in place_dic) {
+	    displayed_item = place_dic[displayed_item];
+	}
+    }
+
+    // The following led to the confusing situation that seemingly the same facet value could
+    // turn up twice in the list (e.g. because of 'fiction' and 'fiction.')
+    //displayed_item = displayed_item.replace(/\.$/,""); // tidy up spurious full-stop at end of string
+
+    return displayed_item;
+}
+
+function show_results_explain_html(query_level_mix,store_search_url)
+{
     
-	if (num_docs > 0) {
-	    $search_results.html("<p>Results: " + num_found + doc_units + "matched</p>");
+    var explain_html = "<hr /><p>Search explanation: " + query_level_mix;
+    if (explain_search.group_by_vol != null) {
+	explain_html += "<br /> THEN " + explain_search.group_by_vol;
+    }
 
-	    $search_results.append(explain_html);
+    //var a2a_config = a2a_config || {};
+    //a2a_config.linkname = "HathiTrust Research Center (HTRC) Extracted Feature Search";
+    //var base_url = location.protocol + '//' + location.host + location.pathname;
+    // //a2a_config.linkurl = base_url + "?pub-name=" + published_id.replace(/ /g,"+");
+    //a2a_config.linkurl = store_search_url;
+
+    explain_html += '<br />\n';
+
+    var data_a2a = "";
+    data_a2a += 'data-a2a-url="'+store_search_url+'"';
+    data_a2a += ' data-a2a-title="HathiTrust Research Center (HTRC) Extracted Feature Search"';
+    
+    var a2a_html = "";
+    a2a_html += '<div style="float:right;">\n';
+    a2a_html += '  <div class="a2a_kit a2a_kit_size_32 a2a_default_style"' + data_a2a + '>\n';
+    a2a_html += '    <a class="a2a_button_email"></a>\n';
+    a2a_html += '    <a class="a2a_button_facebook"></a>\n';
+    a2a_html += '    <a class="a2a_button_google_plus"></a>\n';
+    //a2a_html += '  <a class="a2a_button_twitter"></a>\n';
+    a2a_html += '    <a class="a2a_dd" href="https://www.addtoany.com/share"></a>\n';
+    //a2a_html += '  <a class="a2a_dd" href="https://www.addtoany.com/share_save"></a>\n';
+    a2a_html += '  </div>\n';
+    a2a_html += '</div>\n';
+    a2a_html += '\n';
+    a2a_html += '<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>\n';
+
+    explain_html += a2a_html;
+
+    explain_html += '<div style="float:left;">\n';
+    explain_html += '  <button id="show-hide-solr-q">Show full query ...</button>\n';
+
+    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '"</div>\n';
+    explain_html += "</div>\n";
+    explain_html += "</p>\n";
+
+    explain_html += '<p style="clear:both"></p>\n';
+
+    return explain_html;
+}
+
+function show_results_facet_html(facet_fields)
+{
+    var facet_html = "";    
+    var _class = '';
+    
+    for (k in facet_fields) {
+	//console.log("**** show results: k = " + k);
+	facet_html += "<dl>";
+	var kv = k;
+	if (facet_level == "page") {
+	    kv = kv.replace(/^volume/,"");
+	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
+	    kv = kv.replace(/_htrcstring$/,"_s"); 
+	}
+	//console.log("**** kv = " + kv);
+	
+	facet_html += "<dt class=\"facetField\">" + facet_display_name[kv] + "</dt> ";
+	item = facet_fields[k];
+	ii = 0;
+	for (var j = 0; j <= item.length / 2; j = j + 2) {
 	    
-		var from = parseInt(store_search_args.start) + 1;
-		var to = from + num_rows - 1;
-		if (to > num_found) {
-			// cap value
-			to = num_found;
-		}
-		var showing_matches = "<p>Showing matches: ";
-		showing_matches += '<span id="sm-from">' + from + '</span>';
-		showing_matches += "-";
-		showing_matches += '<span id="sm-to">' + to + '</span>';
-		showing_matches += "</p>";
+	    if (item[j + 1] > 0) {
+		if (filters.indexOf(kv + "--" + item[j]) < 0) {
+		    _class = "showfacet";
+		    if (ii > 5) {
+			_class = "hidefacet";
+		    }
+		    var displayed_item = item[j];
+		    var pp_displayed_item = pretty_print_facet_value(kv,item[j]);
 
-		$search_results.append(showing_matches);
+		    //if (pp_displayed_item != displayed_item) {
+			//var raw_item = "Raw facet: '"+displayed_item+"'";
+			//pp_displayed_item = '<span alt="'+raw_item+'" title="'+raw_item+'">'+pp_displayed_item+'</span>';
+		    //}
+		    
+		    facet_html += '<dd class="' + _class + ' ' + kv + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + pp_displayed_item + '</a><span dir="ltr">&nbsp;(' + item[j + 1] + ') </span></dd>';
+		    ii++;
+		}
+		
+	    }
+	    
+	}
+	if (ii > 5) {
+	    facet_html += '<dd><a href="" class="' + kv + ' morefacets"><span class="moreless">more...</span></a><a href="" class="' + kv + ' lessfacets" style="display: none;"><span class="moreless">less...</span></a></dd>'
+	}
+	facet_html += "</dl>";
+    }
+
+    return facet_html;
+}
+
+
+var store_start;
+var store_line_num;
+var store_id;
+
+function show_results(jsonData,newResultPage)
+{
+    var response = jsonData.response;
+    var num_found = response.numFound;
+    var docs = response.docs;
+    var num_docs = docs.length;
+
+
+    var search_start = parseInt(store_search_args.start);
+
+    if (newResultPage) {
+	// freshly minted page
+	store_start = search_start;
+	store_line_num = 1;
+	store_id = null;
+
+	$('#srt-export').hide(); // hide until volume count is in
+	
+	var facet_fields = jsonData.facet_counts.facet_fields;
+    
+	var facet_html = show_results_facet_html(facet_fields);
+	if (show_facet == 1) {
+	    if (facet_level == "page") {
+		$('#facet-units').html(" (page count)");
+	    }
+	    else {
+		$('#facet-units').html(" (volume count)");
+	    }
+	    
+	    $(".narrowsearch").show();
+	    $("#facetlist").html(facet_html);
+	} else if (show_facet == 0){
+	    $(".narrowsearch").hide();
+	    facet_html = "";
+	    $("#facetlist").html(facet_html);
+	}
+    }
+   
+    var volume_level_desc = explain_search.volume_level_desc;
+    if (volume_level_desc != null) {
+	var volume_level_terms = explain_search.volume_level_terms;
+	volume_level_desc = volume_level_desc.replace("TERMS",volume_level_terms);
+    }
+
+    var page_level_desc = explain_search.page_level_desc;
+    if (page_level_desc != null) {
+	var page_level_terms = explain_search.page_level_terms;
+	page_level_desc = page_level_desc.replace("TERMS",page_level_terms);
+    }
+
+    var query_level_mix = volume_level_desc;
+    
+    if (query_level_mix != null) {
+	if (page_level_desc != null) {
+	    query_level_mix += " AND " + page_level_desc; 
+	}
+    }
+    else {
+	query_level_mix = page_level_desc;
+    }
+
+    if (newResultPage) {
+	// Freshly minted page!
+	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
+	
+	if (num_docs > 0) {
+
+	    $('#search-results-total').show();
+	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+
+	    if (facet_level == "page") {
+		if (num_found < num_found_page_limit) {
+		    $('#srt-vol-count-computing').show();
+		    $('#srt-vol-count').html("");
+		    $('#srt-vol-count-span').show();
+		    
+		    var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
+		    $("#srt-vol-export").show();
+		    
+		    var data_str = get_solr_stream_search_data_str(store_search_args.q)
+		    $("#srt-page-export").show();
+		    
+		    ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
+		}
+		else {
+		    $('#srt-vol-count-computing').hide();
+		    $('#srt-vol-count').html('<span style="color:red;">[Page count exceeds limit of '
+					     + num_found_page_limit + ' for exporting result set]</span>');
+		    $('#srt-vol-count-span').show();
+		}
+	    }
+	    else {
+		if (num_found < num_found_vol_limit) {
+		    $("#srt-vol-export").show();
+		    $("#srt-page-export").hide();
+		    $("#srt-export").show();
+
+		    // restore vol-count display back to default text, ready for next vol count computation
+		    $('#srt-vol-count-computing').show();
+		    $('#srt-vol-count').hide();
+		    $('#srt-vol-count-span').hide();
+		}
+		else {
+		    $('#srt-vol-count-computing').hide();
+		    $('#srt-vol-count').html('<span style="color:red;">[Volume count exceeds limit of '
+					     + num_found_vol_limit + ' for exporting]</span>');
+		    $('#srt-vol-count-span').show();
+		}		
+	    }
+	    
+	    $('#search-explain').html(explain_html);
+	    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
+
+	    var from = parseInt(store_search_args.start) + 1;
+	    var to = from + store_search_args.rows - 1;
+	    
+	    if (to > num_found) {
+		// cap value
+		to = num_found;
+	    }
+
+	    var showing_matches = "<hr /><p>";
+	    showing_matches += (facet_level == "page") ? "Showing page-level matches: " : "Showing volume matches:";
+	    
+	    showing_matches += '<span id="sm-from">' + from + '</span>';
+	    showing_matches += "-";
+	    showing_matches += '<span id="sm-to">' + to + '</span>';
+	    showing_matches += "</p>";
+	    
+	    $('#search-showing').html(showing_matches);
+	    
+	    $('#next-prev').show();
+	    
 	} else {
-		$search_results.html(explain_html + "<p>No pages matched your query</p>");
+	    // restore back to default text, ready for next vol count computation
+	    $('#srt-vol-count-computing').show();
+	    $('#srt-vol-count').hide();
+	    $('#srt-vol-count-span').hide();
+	    $('#search-results-total').hide();	    
+
+	    $('#search-explain').html(explain_html);
+	    $('#search-showing').html("<p>No pages matched your query</p>");
+	    
+	    $('#next-prev').hide();
 	}
-
-	// Example form of URL
-	//   https://babel.hathitrust.org/cgi/pt?id=hvd.hnnssu;view=1up;seq=11
-
-	var ids = [];
-        var htids = [];
+	
+	show_hide_solr_q();
+    }
     
-	var prev_id = null;
-	var prev_pages = [];
+    var $search_results = $('#search-results');
+    if (newResultPage) {
+	$search_results.html("");
+    }
 
-	var i = 0;
-	var line_num = 1;
-	while ((i < num_docs) && (line_num < num_rows)) {
-		var doc = docs[i];
-		var id_and_page = doc.id.split(".page-");
-		var id = id_and_page[0];
-		var seqnum;
-		if (id_and_page.length > 1) {
-			seqnum = parseInt(id_and_page[1]) + 1; // fix up ingest error
-		} else {
-			seqnum = 0;
-		}
-		var page = seqnum;
+    $('.search-in-progress').css("cursor","auto");
+    if ($('#search-results-page').is(":hidden")) {
+	$('#search-results-page').show("slide", { direction: "up" }, 1000);
+    }
 
-		if ((!group_by_vol_checked && prev_id != null) || ((prev_id != null) && (id != prev_id))) {
-			// time to output previous item
-			var html_item = generate_item(line_num, prev_id, prev_pages);
-			$search_results.append(html_item);
-			line_num++;
-			prev_pages = [page];
-		} else {
-			// accumulate pages
-			prev_pages.push(page)
-		}
+    // Example form of URL
+    //   https://babel.hathitrust.org/cgi/pt?id=hvd.hnnssu;view=1up;seq=11
 
-	        ids.push(id);
-		htids.push("htid:" + id);
+    var ids = [];
+    var htids = [];
+    
+    var prev_id = null;
+    var prev_pages = [];
+    var prev_i_boundary = 0;
+    
+    var i = 0;
+    var line_num = store_line_num;
 
-		prev_id = id;
-		i++;
+    while ((i < num_docs) && (line_num <= num_results_per_page)) {
+	var doc = docs[i];
+	var id_and_page = doc.id.split(".page-");
+	var id = id_and_page[0];
+	
+	var seqnum;
+	if (id_and_page.length > 1) {
+	    seqnum = parseInt(id_and_page[1]) + 1; // fix up ingest error
+	} else {
+	    seqnum = 0;
 	}
-	var num_pages = i;
+	var page = seqnum;
+	
+	if (group_by_vol_checked) {
+	    if ((prev_id != null) && (id != prev_id)) {
+		// noticed start of next gropued item
+		// => conditions right to output previous item
+		var merge_with_previous = (!newResultPage && ((prev_i_boundary == 0) && (prev_id == store_id)));
+		var html_item = generate_item(line_num, prev_id, prev_pages, merge_with_previous);
+		if (merge_with_previous) {
+		    // prepend;
+		    var prev_line_num = line_num-1;
+		    var ps_label_id = "prepend-seqs-"+prev_line_num;
+		    
+		    var sid_label = "show-hide-more-seqs-"+prev_line_num;
+		    var sid_block = sid_label + "-block";
 
-	var html_item = generate_item(line_num, prev_id, prev_pages);
-	//    console.log("*** html item = " + html_item);
-	//    if (html_item != "") {
-	$search_results.append(html_item);
-	//	line_num++;
-	//    }
-	//console.log("*** line_num = " + line_num);
+		    var prev_seqs = $('#'+sid_block).find('> nobr > a.seq');
+		    prev_seq_count = prev_seqs.length;
 
-	//else {
-	//	line_num--;
-	//  }
-	//    if ((i == num_docs) && (line_num != num_rows)) {
-	//	line_num--;
-	//    }
+		    if (prev_seq_count==0) {
+		    	$('#'+ps_label_id).before(html_item);
+		    }
+		    else {
+			$('#'+ps_label_id).before(", " + html_item);
+		    }
+		    prev_i_boundary = i;
+		}
+		else {
+		    $search_results.append(html_item);
+		    show_hide_more_seqs(line_num);
+		    prev_i_boundary = i;
+		    line_num++;
+		}
+		prev_pages = [page];
+	    }
+	    else {
+		// accumulate pages
+		prev_pages.push(page)
+	    }
+	}
+	else {
+	    
+	    if (i>0) {
+		// output previous item
+		var html_item = generate_item(line_num, prev_id, prev_pages, false);
+		$search_results.append(html_item);
+		show_hide_more_seqs(line_num);
+		prev_i_boundary = i;
+		line_num++;
+		prev_pages = [page];
+	    }
+	    else {
+		// accumulate pages
+		prev_pages.push(page)
+	    }
+	}
+	
+	ids.push(id);
+	htids.push("htid:" + id);
+	
+	prev_id = id;
+	if (group_by_vol_checked) {
+	    store_id = id;
+	}
+	i++;
+    }
+    var num_pages = i;
 
+    if (line_num <= num_results_per_page) {
+
+	if (group_by_vol_checked) {
+	    // check if merge operation
+	    var merge_with_previous = (!newResultPage && (prev_i_boundary == 0))
+	    var html_item = generate_item(line_num, prev_id, prev_pages, merge_with_previous);
+
+	    if (merge_with_previous) {		
+	    	var ps_label_id = "prepend-seqs-"+(line_num-1);
+		$('#'+ps_label_id).before(", " +html_item);
+	    }
+	    else {
+		// no merge
+		$search_results.append(html_item);
+		show_hide_more_seqs(line_num);
+		store_line_num = line_num +1; // next line position
+	    }	    
+	}
+	else {
+	    var html_item = generate_item(line_num, prev_id, prev_pages, false); // merge_with_previous=false
+	    $search_results.append(html_item);
+	    show_hide_more_seqs(line_num);
+	    store_line_num = line_num +1; // next line position
+	}
+    }
+
+    var progressbar_top = $( "#search-lm-progressbar-top" );
+    var progressbar_bot = $( "#search-lm-progressbar-bot" );
+
+    if (newResultPage) {
 	document.location.href = "#search-results-anchor";
+    }
+    
+    var search_end = search_start + num_pages;
+    
+    //console.log("*** search_end < num_found: " + search_end + " < " + num_found);
+    if (search_end < num_found) {
+	// more results exist
+	//console.log("*** line_num < num_results_per_page: " + line_num + " < " + num_results_per_page);
+	
+	if (line_num < num_results_per_page) {
+	    // Some compacting of results has gone on
+	    if (newResultPage) {
+		$('.search-loading-more').show("slide", { direction: "up" }, 1000);
+	    }
+	    
+	    progressbar_top.progressbar( "value",100 * line_num / num_results_per_page);
+	    progressbar_bot.progressbar( "value",100 * line_num / num_results_per_page);
 
-	var next_prev = '<p style="width:100%;"><div id="search-prev" style="float: left;"><a>&lt; Previous</a></div><div id="search-next" style="float: right;"><a>Next &gt;</a></div></p>';
-
-	$search_results.append(next_prev);
-	$('#search-prev').click(function (event) {
-		show_new_results(-1 * num_rows);
-	});
-	$('#search-next').click(function (event) {
-		show_new_results(num_rows);
-	});
-
-	var search_start = parseInt(store_search_args.start);
-	if (search_start == 0) {
-		$('#search-prev').hide();
+	    store_search_args.start = search_end	    
+	    ajax_solr_text_search(false); // newResultPage=false
 	}
-
-	var search_end = search_start + num_pages;
-	if (search_end >= num_found) {
-		$('#search-next').hide();
+	else {
+	    progressbar_top.progressbar( "value",0);
+	    progressbar_bot.progressbar( "value",0);
+	    $('.search-loading-more').hide("slide", { direction: "up" }, 1000);
 	}
+    }
+    else {
+	// reached end of results before hitting num_results_per_page
+	// => hide progressbars
+	progressbar_top.progressbar( "value",0);
+	progressbar_bot.progressbar( "value",0);
+	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
+    }
+	
+    var next_prev = '<p style="width:100%;">';
+    next_prev += '<div id="search-prev" style="float: left;"><a>&lt; Previous</a></div>';
+    next_prev += '<div id="search-next" style="float: right;"><a>Next &gt;</a></div>';
+    next_prev += '</p>';
+    
+    $('#next-prev').html(next_prev);
 
-	$('#sm-to').html(search_start + line_num);
+    $('#search-prev').click(function (event) {
+	var start = store_search_args.start;
+	var prev_start = store_result_page_starts.pop();
+	var diff = prev_start - start;
+	
+	show_new_results(diff);
+    });
+    
+    $('#search-next').click(function (event) {
+	store_result_page_starts.push(store_start);
+	show_new_results(num_pages); // used to be num_results_per_page
+    });
 
 
-	// Example URL for catalog metadata (multiple items)
-	//   http://catalog.hathitrust.org/api/volumes/brief/json/id:552;lccn:70628581|isbn:0030110408
+    // Need to hide prev link?
+    //if (search_start == 0) { // ****
+    if (store_start == 0) { 
+	$('#search-prev').hide();
+    }
 
-	//var htids_str = htids.join("|", htids);
-	//var cat_url = "http://catalog.hathitrust.org/api/volumes/brief/json/" + htids_str;
-	//$.ajax({
-	//	url: cat_url,
-	//	dataType: 'jsonp',
-	//	jsonpCallback: "add_titles"
-	//});
+    // Need to hide next link?
+    //var search_end = search_start + num_pages;
+    if (search_end >= num_found) {
+	$('#search-next').hide();
+    }
 
+    // Showing matches to ...
+    $('#sm-to').html(search_start + num_pages);
+    
+    
+    // Example URL for catalog metadata (multiple items)
+    //   http://catalog.hathitrust.org/api/volumes/brief/json/id:552;lccn:70628581|isbn:0030110408
+    
+    //var htids_str = htids.join("|", htids);
+    //var cat_url = "http://catalog.hathitrust.org/api/volumes/brief/json/" + htids_str;
+    //$.ajax({
+    //	url: cat_url,
+    //	dataType: 'jsonp',
+    //	jsonpCallback: "add_titles"
+    //});
+    
 
-        // http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
-    	
+    // => fill out place-holder title information
 
-        var solr_search_action = $('#search-form').attr("action");
+    // Example URL for using the Solr-EF collection to retrieve volume id info
+    //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
+    
     var ids_and_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
+        
+    var url_args = {
+	q: ids_and_str,
+	indent: "off",
+	wt: "json",
+	start: 0,
+	rows: ids.length,
+    };
 
-        //console.log(store_search_action + "?" + url);
-        //console.log("ids_and_str = " + ids_and_str);
     
-        var url_args = {
-	    q: ids_and_str,
-	    indent: "off",
-	    wt: "json",	    
-	    start: 0,
-	    rows: ids.length,
-	};
+    $.ajax({
+	type: "POST",
+	url: solr_search_action,
+	data: url_args,
+	dataType: "json",
+	success: add_titles_solr,
+	error: ajax_error
+    });
     
-	$.ajax({
-	    type: 'GET',
-	    url: solr_search_action,
-	    data: url_args,
-	    dataType: 'json',
-	    success: add_titles_solr,
-	    error: ajax_error
-	});
-
-
+    
     
 }
 
 var store_search_args = null;
 var store_search_action = null;
+var store_search_url = null;
 
 var group_by_vol_checked = 0;
 var doc_units = "";
 
 
-function expand_vfield(q_term, all_vfields) {
+function expand_vfield(q_term, all_vfields, query_level) {
 	var vfields = [];
 	var metadata_fields = ["accessProfile_t", "genre_t", "imprint_t", "isbn_t", "issn_t",
 		"issuance_t", "language_t", "lccn_t", "names_t", "oclc_t",
@@ -561,15 +1212,23 @@ function expand_vfield(q_term, all_vfields) {
 
 	if (all_vfields) {
 		for (var fi = 0; fi < metadata_fields.length; fi++) {
-			var vfield = metadata_fields[fi];
+		        var vfield = metadata_fields[fi];
+		        if (query_level == "page") {
+		            vfield = "volume"+ vfield + "xt";
+			}
 			vfields.push(vfield + ":" + q_term);
 		}
 	} else {
 		if (q_term.match(/:/)) {
 			vfields.push(q_term);
 		} else {
-			// make searching by title the default
-			vfields.push("title_t:" + q_term);
+		        // make searching by title the default
+		        var vfield = "title_t";
+		        if (query_level == "page") {
+		            vfield = "volume"+ vfield + "xt";
+			}
+
+			vfields.push(vfield + ":" + q_term);
 		}
 	}
 
@@ -579,47 +1238,74 @@ function expand_vfield(q_term, all_vfields) {
 	return vfields_str;
 }
 
-function expand_vquery_field_and_boolean(query, all_vfields) {
-	// boolean terms
-	//  => pos and lang field
-	if (query === "") {
-		return ""
+function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
+    // boolean terms
+    //  => pos and lang field
+    if (query === "") {
+	return ""
+    }
+    
+    var query_terms = query.split(/\s+/);
+    var query_terms_len = query_terms.length;
+    
+    var bool_query_term = [];
+    
+    var i = 0;
+    var prev_bool = "";
+    
+    var and_count = 0;
+    var or_count  = 0;
+    
+    for (var i = 0; i < query_terms_len; i++) {
+	var term = query_terms[i];
+	if (term.match(/^and$/i)) {
+	    prev_bool = term.toUpperCase();
+	    and_count++;
 	}
-
-	var query_terms = query.split(/\s+/);
-	var query_terms_len = query_terms.length;
-
-	var bool_query_term = [];
-
-	var i = 0;
-	var prev_bool = "";
-
-	for (var i = 0; i < query_terms_len; i++) {
-		var term = query_terms[i];
-		if (term.match(/^(and|or)$/i)) {
-			prev_bool = term.toUpperCase();
-		} else {
-			if (i > 0) {
-				if (prev_bool == "") {
-					prev_bool = "AND";
-				}
-			}
-
-			var expanded_term = expand_vfield(term, all_vfields); // **** only difference to POS version
-
-			term = "(" + expanded_term + ")";
-
-			if (prev_bool != "") {
-				bool_query_term.push(prev_bool);
-				prev_bool = "";
-			}
-			bool_query_term.push(term);
+	else if (term.match(/^or$/i)) {
+	    prev_bool = term.toUpperCase();
+	    or_count++;
+	}
+	else {
+	    if (i > 0) {
+		if (prev_bool == "") {
+		    prev_bool = "AND";
+		    and_count++;
 		}
+	    }
+	    
+	    var expanded_term = expand_vfield(term, all_vfields, query_level); // **** only difference to POS version
+	    
+	    term = "(" + expanded_term + ")";
+	    
+	    if (prev_bool != "") {
+		bool_query_term.push(prev_bool);
+		prev_bool = "";
+	    }
+	    bool_query_term.push(term);
 	}
+    }
+    
+    var op_count = and_count + or_count;
 
-	var bool_query = bool_query_term.join(" ");
-
-	return bool_query;
+    if (op_count == 1) {
+	if (and_count == 1) {
+            explain_search.volume_level_terms = "metadata-term AND metadata-term";
+	}
+	else {
+	    // or_count == 1
+	    explain_search.volume_level_terms = "metadata-term OR metadata-term";
+	}
+    }
+    else {
+	if (op_count>1) {
+	    explain_search.volume_level_terms = "metadata-term AND+OR metadata-term ...";
+	}
+    }
+    
+    var bool_query = bool_query_term.join(" ");
+    
+    return bool_query;
 }
 
 
@@ -639,7 +1325,7 @@ function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search
 				var lang_tag_id = lang + "-" + tag + "-htrctoken-cb";
 				var $lang_tag_cb = $('#' + lang_tag_id);
 				if (search_all_checked || ($lang_tag_cb.is(':checked'))) {
-					var lang_tag_field = lang + "_" + tag + "_htrctoken";
+					var lang_tag_field = lang + "_" + tag + "_htrctokentext";
 					fields.push(lang_tag_field + ":" + q_text);
 				}
 			}
@@ -653,7 +1339,7 @@ function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search
 
 		if (search_all_checked || ($lang_enabled_cb.is(':checked'))) {
 			console.log("Adding in non-POS field for: " + lang);
-			var lang_tag_field = lang + "_htrctoken";
+			var lang_tag_field = lang + "_htrctokentext";
 			fields.push(lang_tag_field + ":" + q_text);
 		}
 	}
@@ -708,131 +1394,124 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
 
 
 function submit_action(event) {
-	event.preventDefault();
+    event.preventDefault();
 
+    if ($('#search-results-page').is(":visible")) {
+	$('#search-results-page').hide();
+    }
+    $('.search-in-progress').css("cursor","wait");
 
-	$('.search-in-progress').css("cursor", "wait");
-
-	store_search_action = $('#search-form').attr("action");
+    filters = [];
+    facetlist_set();
+    
+        show_facet = 0;
+    
+        store_search_action = solr_search_action;
 
 	var arg_indent = $('#indent').attr('value');
 	var arg_wt = $('#wt').attr('value');
-	var arg_start = $('#start').attr('value');
-	var arg_rows = $('#rows').attr('value');
 
 	var q_text = $('#q').val().trim();
 	var vq_text = $('#vq').val().trim();
 
 
 	group_by_vol_checked = $('#group-results-by-vol:checked').length;
-
+    
 	var search_all_langs_checked = $('#search-all-langs:checked').length;
 	var search_all_vfields_checked = $('#search-all-vfields:checked').length;
 
 	if ((q_text === "") && (vq_text === "")) {
-		$('.search-in-progress').css("cursor", "auto");
+		$('.search-in-progress').css("cursor","auto");
 		alert("No query term(s) entered");
 		return;
 	}
 
-	arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked);
+        explain_search = { 'group_by_vol': null,
+			   'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
+			   'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
 
 	arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+
+        if (arg_q == "") {
+	    // Potentially only looking at volume level terms
+	    facet_level = "volume";
+	}
+        else {
+	    facet_level = "page";
+	}
+        arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
 
 	//console.log("*** arg_vq = " + arg_vq);
 	//console.log("*** arg_q = " + arg_q);
 
-        explain_search = { 'group_by_vol': null, 'query_level': null };
     
 	if (arg_q == "") {
 		if (arg_vq == "") {
-			// arg_vq was empty to start with, but attempt to expand non-empty arg_q
-			//   lead to an empty arg_q being returned
-			$('.search-in-progress').css("cursor", "auto");
-			alert("No languages selected");
-			return;
+		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
+		    //   lead to an empty arg_q being returned
+		    $('.search-in-progress').css("cursor","auto");
+		    alert("No languages selected");
+		    return;
 		} else {
-			arg_q = arg_vq;
-			doc_units = " volumes ";
-		        show_facet = 1;
-		    explain_search.query_level  = "[Volume metadata]";
+		    arg_q = arg_vq;
+		    doc_units = " volumes ";
+		    show_facet = 1;
+		    explain_search.volume_level_desc  = "[Volume: TERMS]";
 		    if (group_by_vol_checked) {
-		        explain_search.group_by_vol = "Search results sorted by volume ID";		            
+		        explain_search.group_by_vol = "Search results sorted by volume ID";
 		    }
 
 		}
 	} else {
 		if (arg_vq != "") {
-			// join the two with an AND
-			arg_q = "(" + arg_vq + ")" + " OR " + "(" + arg_q + ")";
-
-			// also implies
-		        group_by_vol_checked = true;
-		    explain_search.query_level  = "[Volume metadata] OR [page-level POS terms]";
-		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		    // join the two with an AND
+		    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
+		    
+		    explain_search.volume_level_desc = "[Volume: TERMS]";
+		    explain_search.page_level_desc   = "[Page-level: TERMS]";
 		}
 	        else {
-		    explain_search.query_level  = "[page-level POS terms]";
-		    if (group_by_vol_checked) {
-		        explain_search.group_by_vol = "Search results sorted by volume ID";		            
-		    }		    
+		    explain_search.page_level_desc  = "[Page-level: POS-terms]";
 		}
+	        if (group_by_vol_checked) {
+		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		}		    
+
 		doc_units = " pages ";
-		show_facet = 0;
+		show_facet = 1;  
 	}
 
 	if ($('#vq').attr("data-key") == undefined) {
-		$('#vq').attr("data-key", vq_text);
+		$('#vq').attr("data-key",vq_text);
 	}
 	if ($('#vq').attr("data-key") != vq_text) {
-		$('#vq').attr("data-key", vq_text);
+		$('#vq').attr("data-key",vq_text);
 		filters = [];
 		facetlist_set();
 	}
 	//console.log("*** NOW arg_q = " + arg_q);
 
 	// Example search on one of the htrc-full-ef fields is: 
-	//  q=en_NOUN_htrctoken:farming
+	//  q=en_NOUN_htrctokentext:farming
 
+    	var arg_start = $('#start').attr('value');
+
+        var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
+    
 	store_search_args = {
 		q: arg_q,
 		indent: arg_indent,
 		wt: arg_wt,
 		start: arg_start,
-		rows: arg_rows,
+		rows: num_rows,
 		facet: "on"
 	};
 
-    if (group_by_vol_checked) {
+        if (group_by_vol_checked) {
 		store_search_args.sort = "id asc";
 	}
 
-	var url = "";
-	for (k in store_search_args) {
-		url += k + '=' + store_search_args[k] + "&";
-	}
-
-	for (k in facet) {
-		url += 'facet.field=' + facet[k] + "&";
-	}
-	for (k in filters) {
-		_k = filters[k].split("-");
-		url += 'fq=' + _k[0] + ':("' + _k[1] + '")&';
-	}
-
-	//console.log("Solr URL:\n");
-
-	//console.log(store_search_action + "?" + url);
-
-	$.ajax({
-		type: 'GET',
-		url: store_search_action,
-		data: url,
-		dataType: 'json',
-		success: show_results,
-		error: ajax_error
-	});
-
+    ajax_solr_text_search(true); // newResultPage=true
 }
 
 function generate_pos_langs() {
@@ -933,31 +1612,58 @@ function generate_pos_langs() {
 		$('#' + l + '-enabled').click(lang_pos_toggle);
 
 		if (l == "en") {
-			$('#en-pos-choice *').prop('disabled', false);
+			$('#en-pos-choice *').prop('disabled',false);
 		} else {
-			$('#' + l + '-pos-choice *').prop('disabled', true);
+			$('#' + l + '-pos-choice *').prop('disabled',true);
 		}
 	}
 
-	show_hide_lang()
+    show_hide_lang();
 }
 
 function show_hide_lang() {
 	$("#show-hide-lang").click(function (event) {
 		event.preventDefault();
 		if ($('.show-hide-lang:visible').length) {
-			$('.show-hide-lang').hide("slide", {
-				direction: "up"
-			}, 1000);
+			$('.show-hide-lang').hide("slide", { direction: "up" }, 1000);
 			$('#show-hide-lang').html("Show other languages ...");
 		} else {
-			$('.show-hide-lang').show("slide", {
-				direction: "up"
-			}, 1000);
+			$('.show-hide-lang').show("slide", { direction: "up" }, 1000);
 			$('#show-hide-lang').html("Hide other languages ...");
 		}
 	});
 }
+
+
+function show_hide_solr_q() {
+	$("#show-hide-solr-q").click(function (event) {
+		event.preventDefault();
+		if ($('.show-hide-solr-q:visible').length) {
+			$('.show-hide-solr-q').hide("slide", { direction: "up" }, 1000);
+			$('#show-hide-solr-q').html("Show full query ...");
+		} else {
+			$('.show-hide-solr-q').show("slide", { direction: "up" }, 1000);
+			$('#show-hide-solr-q').html("Hide full query ...");
+		}
+	});
+}
+
+function show_hide_more_seqs(line_num) {
+    var sid_label = "#show-hide-more-seqs-"+line_num;
+    var sid_block = sid_label + "-block";
+    
+    $(sid_label).click(function (event) {
+	event.preventDefault();
+	if ($(sid_block+':visible').length) {
+	    $(sid_block).hide("slide", { direction: "up" }, 1000);
+	    $(sid_label).html("Show more pages ...");
+	} else {
+	    $(sid_block).show("slide", { direction: "up" }, 1000);
+	    $(sid_label).html("Hide pages ...");
+	}
+    });
+}
+
 
 function generate_other_langs() {
 	// setup other languages
@@ -1002,7 +1708,7 @@ $(function () {
 		$('#search-submit').click(submit_action);
 	}
 
-	$("#facetlist").on("click", "a", function () {
+	$("#facetlist").on("click","a",function () {
 		//indexOf  
 		$class = $(this).attr("class");
 		if ($(this).hasClass("morefacets")) {
@@ -1027,77 +1733,45 @@ $(function () {
 
 			var obj = $(this).attr("data-obj");
 			var key = $(this).attr("data-key");
-			if (filters.indexOf(obj + "-" + key) < 0) {
-				filters.push(obj + "-" + key);
+			if (filters.indexOf(obj + "--" + key) < 0) {
+				filters.push(obj + "--" + key);
 			}
 			$(this).parent().remove();
-			facetlist_set();
-			$('#search-submit').trigger("click");
+		        facetlist_set();
+		        store_search_args.start = store_start;
+		        show_updated_results();
 		}
-
-
-
 	});
-	$(".filters").on("click", "a", function () {
+    
+	$(".filters").on("click","a",function () {
 
 		filters.splice($(this).parent().index(), 1);
-		facetlist_set();
-		$('#search-submit').trigger("click");
+	        facetlist_set();
+	        store_search_args.start = store_start;
+	        show_updated_results();
 	});
-
 });
 
 function facetlist_set() {
-	var facetlist_html = '';
-	for (k in filters) {
-		_k = filters[k].split("-");
-		facetlist_html += '<li><a href="javascript:;" class="unselect"><img alt="Delete" src="assets/jquery-ui-lightness-1.12.1/images/cancel.png" class="removeFacetIcon"></a><span class="selectedfieldname">' + _k[0] + '</span>:  ' + _k[1] + '</li>';
+    var facetlist_html = '';
+    for (k in filters) {
+	var ks = filters[k].split("--");
+
+	var kv0 = ks[0];
+	var kv1 = ks[1];
+
+	if (facet_level == "page") {
+	    kv0 = kv0.replace(/^volume/,"");
+	    kv0 = kv0.replace(/_htrcstrings$/,"_ss"); 
+	    kv0 = kv0.replace(/_htrcstring$/,"_s"); 
 	}
+	var kv0_display = facet_display_name[kv0]
+
+	var facet_val  = pretty_print_facet_value(kv0,kv1);	
+	
+	facetlist_html += '<li><a href="javascript:;" class="unselect"><img alt="Delete" src="assets/jquery-ui-lightness-1.12.1/images/cancel.png" class="removeFacetIcon"></a>&nbsp;<span class="selectedfieldname">' + kv0_display + '</span>:  ' + facet_val + '</li>';
+    }
 
 	$(".filters").html(facetlist_html);
 }
-
-
-var format_dic = {'BK':'Books', 'CF':'Computer Files', 'MP': 'Maps',
-				'MU': 'Music', 'CR': 'Continuing Resources',
-				'VM': 'Visual Materials', 'MX': 'Mixed Materials'};
-
-language_dic = {'-gal': 'Oromo', 'bak': 'Bashkir', 'art': 'Artificial (Other)', 'arw': 'Arawak', 'kam': 'Kamba', 'bin': 'Edo', 'bam': 'Bambara', 'lez': 'Lezgian', 'kir': 'Kyrgyz', 'twi': 'Twi', 'iii': 'Sichuan Yi', 'cau': 'Caucasian (Other)', 'tsn': 'Tswana', 'bel': 'Belarusian', 'ypk': 'Yupik languages', 'goh': 'German, Old High (ca. 750-1050)', '-sao': 'Samoan', 'grn': 'Guarani', 'gba': 'Gbaya', 'aze': 'Azerbaijani', 'sag': 'Sango (Ubangi Creole)', 'gil': 'Gilbertese', 'dua': 'Duala', 'mdf': 'Moksha', 'chm': 'Mari', 'ben': 'Bengali', 'sco': 'Scots', 'bur': 'Burmese', 'tyv': 'Tuvinian', 'nyn': 'Nyankole', 'glv': 'Manx', 'per': 'Persian', 'umb': 'Umbundu', 'paa': 'Papuan (Other)', 'lad': 'Ladino', 'ssw': 'Swazi', 'mnc': 'Manchu', 'chg': 'Chagatai', 'her': 'Herero', 'nia': 'Nias', 'alt': 'Altai', 'gla': 'Scottish Gaelic', 'nep': 'Nepali', 'ada': 'Adangme', 'myv': 'Erzya', 'sal': 'Salishan languages', 'cpf': 'Creoles and Pidgins, French-based (Other)', 'oss': 'Ossetic', 'ita': 'Italian', 'fao': 'Faroese', 'ewe': 'Ewe', 'awa': 'Awadhi', 'hrv': 'Croatian', 'fre': 'French', 'kro': 'Kru (Other)', 'lun': 'Lunda', 'eng': 'English', 'lin': 'Lingala', 'ger': 'German', 'syc': 'Syriac', 'lim': 'Limburgish', 'bla': 'Siksika', 'tir': 'Tigrinya', '-eth': 'Ethiopic', 'srp': 'Serbian', 'chi': 'Chinese', 'nzi': 'Nzima', 'tso': 'Tsonga', 'khi': 'Khoisan (Other)', 'sog': 'Sogdian', 'afa': 'Afroasiatic (Other)', '-esk': 'Eskimo languages', 'gor': 'Gorontalo', '-esp': 'Esperanto', 'bal': 'Baluchi', 'nqo': "N'Ko", 'bul': 'Bulgarian', 'dgr': 'Dogrib', 'frr': 'North Frisian', 'tlh': 'Klingon (Artificial language)', '-scc': 'Serbian', 'frs': 'East Frisian', 'raj': 'Rajasthani', 'tel': 'Telugu', 'lui': 'LuiseÃ±o', 'lus': 'Lushai', 'sna': 'Shona', 'wen': 'Sorbian (Other)', 'swa': 'Swahili', 'ach': 'Acoli', 'pol': 'Polish', 'orm': 'Oromo', 'kua': 'Kuanyama', 'kin': 'Kinyarwanda', 'afr': 'Afrikaans', 'bai': 'Bamileke languages', 'bos': 'Bosnian', 'nah': 'Nahuatl', 'sem': 'Semitic (Other)', 'phn': 'Phoenician', 'kut': 'Kootenai', 'cre': 'Cree', 'bej': 'Beja', 'gaa': 'GÃ£', 'sid': 'Sidamo', 'pau': 'Palauan', 'fon': 'Fon', 'kal': 'KalÃ¢tdlisut', '-kus': 'Kusaie', '-mla': 'Malagasy', 'slo': 'Slovak', 'sit': 'Sino-Tibetan (Other)', 'mar': 'Marathi', 'suk': 'Sukuma', 'nic': 'Niger-Kordofanian (Other)', 'iku': 'Inuktitut', 'znd': 'Zande languages', 'tgk': 'Tajik', 'wak': 'Wakashan languages', 'bnt': 'Bantu (Other)', 'yid': 'Yiddish', 'lug': 'Ganda', 'mwr': 'Marwari', 'nau': 'Nauru', 'gez': 'Ethiopic', 'him': 'Western Pahari languages', 'ven': 'Venda', 'nob': 'Norwegian (BokmÃ¥l)', 'dum': 'Dutch, Middle (ca. 1050-1350)', 'cos': 'Corsican', 'kau': 'Kanuri', 'bik': 'Bikol', 'hai': 'Haida', 'mus': 'Creek', 'ave': 'Avestan', 'cel': 'Celtic (Other)', 'pal': 'Pahlavi', 'tli': 'Tlingit', 'crh': 'Crimean Tatar', 'mad': 'Madurese', 'uzb': 'Uzbek', 'efi': 'Efik', 'pro': 'ProvenÃ§al (to 1500)', 'dyu': 'Dyula', 'bua': 'Buriat', 'tai': 'Tai (Other)', 'pon': 'Pohnpeian', 'guj': 'Gujarati', 'arn': 'Mapuche', 'sga': 'Irish, Old (to 1100)', 'amh': 'Amharic', 'zul': 'Zulu', 'inh': 'Ingush', 'elx': 'Elamite', '-cam': 'Khmer', 'lao': 'Lao', 'kos': 'Kosraean', 'bat': 'Baltic (Other)', '-gae': 'Scottish Gaelix', 'egy': 'Egyptian', 'sme': 'Northern Sami', 'del': 'Delaware', 'syr': 'Syriac, Modern', 'kbd': 'Kabardian', 'shn': 'Shan', 'kas': 'Kashmiri', 'nor': 'Norwegian', 'nym': 'Nyamwezi', 'gay': 'Gayo', 'tmh': 'Tamashek', 'hat': 'Haitian French Creole', 'ind': 'Indonesian', 'mal': 'Malayalam', 'non': 'Old Norse', 'kaw': 'Kawi', 'ice': 'Icelandic', 'bih': 'Bihari (Other)', 'ath': 'Athapascan (Other)', 'ltz': 'Luxembourgish', 'war': 'Waray', 'som': 'Somali', 'sux': 'Sumerian', 'was': 'Washoe', 'chu': 'Church Slavic', 'zen': 'Zenaga', 'tha': 'Thai', 'wel': 'Welsh', 'chv': 'Chuvash', 'car': 'Carib', 'ain': 'Ainu', 'nya': 'Nyanja', 'arp': 'Arapaho', 'mul': 'Multiple languages', 'nog': 'Nogai', 'tur': 'Turkish', 'jav': 'Javanese', 'kaz': 'Kazakh', 'abk': 'Abkhaz', 'mlt': 'Maltese', 'kac': 'Kachin', 'got': 'Gothic', 'den': 'Slavey', 'jbo': 'Lojban (Artificial language)', 'sla': 'Slavic (Other)', 'chk': 'Chuukese', '-int': 'Interlingua (International Auxiliary Language Association)', 'ukr': 'Ukrainian', 'heb': 'Hebrew', 'vie': 'Vietnamese', 'tiv': 'Tiv', 'hmn': 'Hmong', 'gon': 'Gondi', 'sun': 'Sundanese', 'sma': 'Southern Sami', 'krl': 'Karelian', 'gem': 'Germanic (Other)', 'kok': 'Konkani', 'lub': 'Luba-Katanga', 'sah': 'Yakut', 'fur': 'Friulian', 'frm': 'French, Middle (ca. 1300-1600)', 'tam': 'Tamil', '-iri': 'Irish', 'dan': 'Danish', 'ira': 'Iranian (Other)', 'krc': 'Karachay-Balkar', 'hmo': 'Hiri Motu', 'lav': 'Latvian', 'xal': 'Oirat', '-max': 'Manx', 'scn': 'Sicilian Italian', 'dsb': 'Lower Sorbian', 'srn': 'Sranan', 'peo': 'Old Persian (ca. 600-400 B.C.)', 'nbl': 'Ndebele (South Africa)', 'srr': 'Serer', 'ang': 'English, Old (ca. 450-1100)', 'ewo': 'Ewondo', 'fiu': 'Finno-Ugrian (Other)', 'snk': 'Soninke', 'aus': 'Australian languages', 'haw': 'Hawaiian', 'hup': 'Hupa', 'mak': 'Makasar', 'bho': 'Bhojpuri', 'mag': 'Magahi', 'dar': 'Dargwa', 'tvl': 'Tuvaluan', 'fat': 'Fanti', 'kur': 'Kurdish', 'tah': 'Tahitian', 'nav': 'Navajo', 'zxx': 'No linguistic content', 'vot': 'Votic', 'cpp': 'Creoles and Pidgins, Portuguese-based (Other)', 'man': 'Mandingo', 'cus': 'Cushitic (Other)', 'fan': 'Fang', 'udm': 'Udmurt', 'mic': 'Micmac', 'cai': 'Central American Indian (Other)', 'btk': 'Batak', 'nub': 'Nubian languages', 'zza': 'Zaz', 'iba': 'Iban', 'fry': 'Frisian', 'ceb': 'Cebuano', 'kum': 'Kumyk', 'min': 'Minangkabau', 'kom': 'Komi', 'rus': 'Russian', 'wol': 'Wolof', '-ajm': 'AljamÃ­a', 'tum': 'Tumbuka', 'xho': 'Xhosa', 'bre': 'Breton', 'und': 'Undetermined', 'pli': 'Pali', 'rom': 'Romani', 'mis': 'Miscellaneous languages', 'kaa': 'Kara-Kalpak', 'baq': 'Basque', 'byn': 'Bilin', 'nai': 'North American Indian (Other)', 'eka': 'Ekajuk', 'sel': 'Selkup', 'asm': 'Assamese', 'lol': 'Mongo-Nkundu', 'cad': 'Caddo', 'chr': 'Cherokee', 'tgl': 'Tagalog', '-lan': 'Occitan (post 1500)', 'men': 'Mende', 'nyo': 'Nyoro', 'tup': 'Tupi languages', 'doi': 'Dogri', 'din': 'Dinka', 'pag': 'Pangasinan', 'bis': 'Bislama', 'kon': 'Kongo', 'aym': 'Aymara', 'hit': 'Hittite', 'yap': 'Yapese', 'bem': 'Bemba', 'run': 'Rundi', 'ipk': 'Inupiaq', 'lat': 'Latin', 'tet': 'Tetum', 'sas': 'Sasak', '-sso': 'Sotho', 'mao': 'Maori', 'tut': 'Altaic (Other)', '-swz': 'Swazi', 'mdr': 'Mandar', 'ara': 'Arabic', 'fij': 'Fijian', 'swe': 'Swedish', 'ilo': 'Iloko', 'rap': 'Rapanui', 'kru': 'Kurukh', 'aar': 'Afar', 'snd': 'Sindhi', 'afh': 'Afrihili (Artificial language)', 'inc': 'Indic (Other)', 'fil': 'Filipino', 'mlg': 'Malagasy', 'glg': 'Galician', 'smn': 'Inari Sami', 'rum': 'Romanian', '-scr': 'Croatian', 'lit': 'Lithuanian', 'nde': 'Ndebele (Zimbabwe)', 'zun': 'Zuni', 'mah': 'Marshallese', 'anp': 'Angika', 'tuk': 'Turkmen', 'kha': 'Khasi', 'tig': 'TigrÃ©', 'chp': 'Chipewyan', 'tib': 'Tibetan', 'ile': 'Interlingue', 'luo': 'Luo (Kenya and Tanzania)', 'dra': 'Dravidian (Other)', 'ota': 'Turkish, Ottoman', 'gle': 'Irish', 'nap': 'Neapolitan Italian', 'tem': 'Temne', 'sai': 'South American Indian (Other)', 'cpe': 'Creoles and Pidgins, English-based (Other)', 'yao': 'Yao (Africa)', 'ava': 'Avaric', 'mni': 'Manipuri', 'iro': 'Iroquoian (Other)', 'new': 'Newari', 'oci': 'Occitan (post-1500)', 'mga': 'Irish, Middle (ca. 1100-1550)', 'sam': 'Samaritan Aramaic', '-tru': 'Truk', 'rup': 'Aromanian', 'jpr': 'Judeo-Persian', 'wal': 'Wolayta', 'akk': 'Akkadian', 'hil': 'Hiligaynon', 'grb': 'Grebo', 'cop': 'Coptic', 'sin': 'Sinhalese', 'hau': 'Hausa', 'zha': 'Zhuang', 'hun': 'Hungarian', 'ibo': 'Igbo', '-snh': 'Sinhalese', 'uga': 'Ugaritic', '-sho': 'Shona', 'gre': 'Greek, Modern (1453-)', 'pan': 'Panjabi', 'lua': 'Luba-Lulua', 'ale': 'Aleut', 'fin': 'Finnish', 'nno': 'Norwegian (Nynorsk)', 'pap': 'Papiamento', 'sot': 'Sotho', 'tat': 'Tatar', 'rar': 'Rarotongan', 'son': 'Songhai', 'roh': 'Raeto-Romance', 'lam': 'Lamba (Zambia and Congo)', '-gag': 'Galician', 'ban': 'Balinese', 'cze': 'Czech', 'tkl': 'Tokelauan', 'osa': 'Osage', 'smi': 'Sami', 'ter': 'Terena', 'enm': 'English, Middle (1100-1500)', 'dzo': 'Dzongkha', 'hsb': 'Upper Sorbian', 'pra': 'Prakrit languages', 'arm': 'Armenian', '-tsw': 'Tswana', 'kho': 'Khotanese', 'wln': 'Walloon', 'grc': 'Greek, Ancient (to 1453)', 'ton': 'Tongan', 'may': 'Malay', '-tag': 'Tagalog', 'arg': 'Aragonese', 'ber': 'Berber (Other)', 'vol': 'VolapÃ¼k', '-mol': 'Moldavian', 'sgn': 'Sign languages', 'map': 'Austronesian (Other)', 'jrb': 'Judeo-Arabic', 'smj': 'Lule Sami', 'aka': 'Akan', '-gua': 'Guarani', 'mun': 'Munda (Other)', 'cor': 'Cornish', 'roa': 'Romance (Other)', 'alg': 'Algonquian (Other)', 'sat': 'Santali', 'yor': 'Yoruba', 'phi': 'Philippine (Other)', 'mos': 'MoorÃ©', 'gmh': 'German, Middle High (ca. 1050-1500)', 'hin': 'Hindi', 'epo': 'Esperanto', 'ina': 'Interlingua (International Auxiliary Language Association)', 'nso': 'Northern Sotho', 'srd': 'Sardinian', 'mno': 'Manobo languages', 'vai': 'Vai', '-fri': 'Frisian', 'mkh': 'Mon-Khmer (Other)', 'ijo': 'Ijo', 'sio': 'Siouan (Other)', 'cmc': 'Chamic languages', '-lap': 'Sami', 'mwl': 'Mirandese', 'sus': 'Susu', 'ori': 'Oriya', 'oto': 'Otomian languages', '-far': 'Faroese', 'uig': 'Uighur', 'est': 'Estonian', 'bug': 'Bugis', 'cho': 'Choctaw', 'crp': 'Creoles and Pidgins (Other)', 'apa': 'Apache languages', '-tar': 'Tatar', 'urd': 'Urdu', 'cha': 'Chamorro', 'dut': 'Dutch', 'moh': 'Mohawk', 'slv': 'Slovenian', 'lah': 'LahndÄ', 'smo': 'Samoan', 'csb': 'Kashubian', 'loz': 'Lozi', 'tog': 'Tonga (Nyasa)', 'bad': 'Banda languages', 'cat': 'Catalan', '-taj': 'Tajik', 'ido': 'Ido', 'bas': 'Basa', 'div': 'Divehi', 'kor': 'Korean', 'nwc': 'Newari, Old', 'arc': 'Aramaic', 'sad': 'Sandawe', 'ndo': 'Ndonga', 'zap': 'Zapotec', 'alb': 'Albanian', 'sms': 'Skolt Sami', 'nds': 'Low German', 'mas': 'Maasai', 'ssa': 'Nilo-Saharan (Other)', 'kmb': 'Kimbundu', 'ace': 'Achinese', 'chy': 'Cheyenne', 'ady': 'Adygei', 'ast': 'Bable', 'gwi': "Gwich'in", 'kik': 'Kikuyu', 'kab': 'Kabyle', 'gsw': 'Swiss German', 'por': 'Portuguese', 'pam': 'Pampanga', 'jpn': 'Japanese', 'mai': 'Maithili', 'que': 'Quechua', 'ine': 'Indo-European (Other)', 'oji': 'Ojibwa', 'mac': 'Macedonian', 'zbl': 'Blissymbolics', 'san': 'Sanskrit', 'chn': 'Chinook jargon', 'dak': 'Dakota', 'chb': 'Chibcha', 'khm': 'Khmer', 'mon': 'Mongolian', 'pus': 'Pushto', 'kan': 'Kannada', 'spa': 'Spanish', 'fro': 'French, Old (ca. 842-1300)', 'day': 'Dayak', 'che': 'Chechen', 'tpi': 'Tok Pisin', 'ful': 'Fula', 'niu': 'Niuean', 'myn': 'Mayan languages', 'kpe': 'Kpelle', 'kar': 'Karen languages', 'bra': 'Braj', 'geo': 'Georgian', 'tsi': 'Tsimshian'};
-
-place_dic = {'af': 'Afghanistan', 'ie': 'Ireland', 'ctu': 'Connecticut', '-tkr': 'Turkmen S.S.R.',
-'tk': 'Turkmenistan', 'wyu': 'Wyoming', 'sh': 'Spanish North Africa', '-gn': 'Gilbert and Ellice Islands',
-'aa': 'Albania', 'mm': 'Malta', 'nbu': 'Nebraska', '-cz': 'Canal Zone', 'dcu': 'District of Columbia', 'gr': 'Greece',
-'abc': 'Alberta', 'ts': 'United Arab Emirates', 'ci': 'Croatia', 'tma': 'Tasmania', '-mvr': 'Moldavian S.S.R.',
-'-ln': 'Central and Southern Line Islands', 'riu': 'Rhode Island', 'xc': 'Maldives', 'fr': 'France', 'nw': 'Northern Mariana Islands',
-'pw': 'Palau', 'np': 'Nepal', 'ws': 'Samoa', 'xoa': 'Northern Territory', 'ko': 'Korea (South)', 'ai': 'Armenia (Republic)',
-'snc': 'Saskatchewan', 'ck': 'Colombia', 'my': 'Malaysia', '-sk': 'Sikkim', 'cm': 'Cameroon', 'cq': 'Comoros', 'ii': 'India',
-'mdu': 'Maryland', 'lv': 'Latvia', 'nju': 'New Jersey', 'pk': 'Pakistan', 'nik': 'Northern Ireland', 'am': 'Anguilla',
-'-pt': 'Portuguese Timor', '-kgr': 'Kirghiz S.S.R.', 'sr': 'Surinam', 'scu': 'South Carolina', 'cu': 'Cuba', '-err': 'Estonia',
-'xb': 'Cocos (Keeling) Islands', 'xa': 'Christmas Island (Indian Ocean)', 'xp': 'Spratly Island', '-ge': 'Germany (East)',
-'iau': 'Iowa', 'nfc': 'Newfoundland and Labrador', 'pp': 'Papua New Guinea', 'gm': 'Gambia', 'deu': 'Delaware',
-'xe': 'Marshall Islands', 'vm': 'Vietnam', 'qea': 'Queensland', 'jo': 'Jordan', 'tnu': 'Tennessee', 'aj': 'Azerbaijan',
-'ksu': 'Kansas', '-vs': 'Vietnam, South', 'tc': 'Turks and Caicos Islands', 'sd': 'South Sudan', 'tu': 'Turkey', 'at': 'Australia',
-'ss': 'Western Sahara', 'bt': 'Bhutan', 'wj': 'West Bank of the Jordan River', '-ui': 'United Kingdom Misc. Islands',
-'cou': 'Colorado', 'xxu': 'United States', 'au': 'Austria', 'cx': 'Central African Republic', 'ce': 'Sri Lanka', 'bcc': 'British Columbia',
-'fa': 'Faroe Islands', 'ic': 'Iceland', 'bs': 'Botswana', 'rb': 'Serbia', 'mp': 'Mongolia', 'xl': 'Saint Pierre and Miquelon',
-'gw': 'Germany', 'nhu': 'New Hampshire', 'onc': 'Ontario', 'nr': 'Nigeria', 'vau': 'Virginia', 'gt': 'Guatemala', 'sl': 'Sierra Leone',
-'et': 'Ethiopia', '-kzr': 'Kazakh S.S.R.', 'tl': 'Tokelau', 'aku': 'Alaska', 'aca': 'Australian Capital Territory', 'stk': 'Scotland',
-'xf': 'Midway Islands', 'xga': 'Coral Sea Islands Territory', '-sv': 'Swan Islands', 'vtu': 'Vermont', 'pn': 'Panama', 'it': 'Italy',
-'jm': 'Jamaica', 'mr': 'Morocco', '-gsr': 'Georgian S.S.R.', 'oku': 'Oklahoma', 'gv': 'Guinea', 'wau': 'Washington (State)',
-'bo': 'Bolivia', '-nm': 'Northern Mariana Islands', 'tz': 'Tanzania', 'cl': 'Chile', 'dq': 'Dominica', 'bl': 'Brazil',
-'em': 'Timor-Leste', 'ku': 'Kuwait', 'lo': 'Lesotho', '-tt': 'Trust Territory of the Pacific Islands', 'meu': 'Maine',
-'io': 'Indonesia', '-unr': 'Ukraine', 'tv': 'Tuvalu', 'go': 'Gabon', 'gp': 'Guadeloupe', 'ho': 'Honduras', 'sc': 'Saint-BarthÃ©lemy',
-'-cp': 'Canton and Enderbury Islands', '-bwr': 'Byelorussian S.S.R.', 'rw': 'Rwanda', 'ot': 'Mayotte', '-ajr': 'Azerbaijan S.S.R.',
-'-xi': 'Saint Kitts-Nevis-Anguilla', 'cr': 'Costa Rica', 'su': 'Saudi Arabia', '-iu': 'Israel-Syria Demilitarized Zones',
-'sw': 'Sweden', 'sp': 'Spain', 'nu': 'Nauru', 'inu': 'Indiana', 'miu': 'Michigan', 'un': 'Ukraine', 'ta': 'Tajikistan',
-'an': 'Andorra', 'vc': 'Vatican City', 'mq': 'Martinique', '-ac': 'Ashmore and Cartier Islands', 'mbc': 'Manitoba',
-'xx': 'No place', 'gd': 'Grenada', 'fp': 'French Polynesia', 'mtu': 'Montana', 'enk': 'England',
-'-ai': 'Anguilla', 'alu': 'Alabama', 'sdu': 'South Dakota', '-rur': 'Russian S.F.S.R.', 'xd': 'Saint Kitts-Nevis',
-'pf': 'Paracel Islands', 'ja': 'Japan', 'mau': 'Massachusetts', 'dk': 'Denmark', 'xn': 'Macedonia', '-vn': 'Vietnam, North',
-'mu': 'Mauritania', 'hiu': 'Hawaii', '-na': 'Netherlands Antilles', 'azu': 'Arizona', '-ys': "Yemen (People's Democratic Republic)",
-'xh': 'Niue', 'es': 'El Salvador', 'nx': 'Norfolk Island', 'gb': 'Kiribati', 'ke': 'Kenya', 'py': 'Paraguay', 'xv': 'Slovenia',
-'lh': 'Liechtenstein', 'aru': 'Arkansas', 'txu': 'Texas', 'bg': 'Bangladesh', 'is': 'Israel', 'ft': 'Djibouti', '-lir': 'Lithuania', 'cj': 'Cayman Islands', 'ohu': 'Ohio', 'mk': 'Oman', 'gau': 'Georgia', 'za': 'Zambi', 'uy': 'Uruguay', 'sg': 'Senegal', '-uk': 'United Kingdom', 'wf': 'Wallis and Futuna', 'fs': 'Terres australes et antarctiques franÃ§aises', 'kz': 'Kazakhstan', 'ly': 'Libya', 'utu': 'Utah', 'cb': 'Cambodia', 'ug': 'Uganda', '-cn': 'Canada', 'vra': 'Victoria', '-hk': 'Hong Kong', 'nsc': 'Nova Scotia', 'bi': 'British Indian Ocean Territory', 'cy': 'Cyprus', 'sq': 'Swaziland', 'nn': 'Vanuatu', 'so': 'Somalia', 'pg': 'Guinea-Bissau', '-yu': 'Serbia and Montenegro', 'cd': 'Chad', 'ml': 'Mali', 'gs': 'Georgia (Republic)', 'gz': 'Gaza Strip', 'cw': 'Cook Islands', '-lvr': 'Latvia', 'qa': 'Qatar', 'ye': 'Yemen', 'xs': 'South Georgia and the South Sandwich Islands', 'nvu': 'Nevada', '-sb': 'Svalbard', 'ag': 'Argentina', 'st': 'Saint-Martin', 'lb': 'Liberia', 'mx': 'Mexico', 'ae': 'Algeria', 'uv': 'Burkina Faso', '-cs': 'Czechoslovakia', 'ls': 'Laos', '-ry': 'Ryukyu Islands, Southern', 'pl': 'Poland', 're': 'RÃ©union', 'lau': 'Louisiana', 'ph': 'Philippines', 'th': 'Thailand', 'fm': 'Micronesia (Federated States)', 'bp': 'Solomon Islands', 'si': 'Singapore', 'nq': 'Nicaragua', 'kv': 'Kosovo', 'kyu': 'Kentucky', 'ba': 'Bahrain', 'hm': 'Heard and McDonald Islands', 'cg': 'Congo (Democratic Republic)', 'mg': 'Madagascar', 'iy': 'Iraq-Saudi Arabia Neutral Zone', 'mv': 'Moldova', 'uik': 'United Kingdom Misc. Islands', 'po': 'Portugal', 'gu': 'Guam', 'xna': 'New South Wales', 'ir': 'Iran', 'wk': 'Wake Island', 'dr': 'Dominican Republic', 'eg': 'Equatorial Guinea', 'iv': "CÃ´te d'Ivoire", 'bu': 'Bulgaria', 'xxc': 'Canada', 'ykc': 'Yukon Territory', 'bm': 'Bermuda Islands', 'pe': 'Peru', 'nyu': 'New York (State)', 'aq': 'Antigua and Barbuda', 'dm': 'Benin', 'bv': 'Bouvet Island', '-uzr': 'Uzbek S.S.R.', 'sx': 'Namibia', '-air': 'Armenian S.S.R.', 'kn': 'Korea (North)', 'fj': 'Fiji', 'bw': 'Belarus', '-wb': 'West Berlin', 'fi': 'Finland', 'mc': 'Monaco', 'nz': 'New Zealand', 'ch': 'China (Republic : 1949- )', 'vi': 'Virgin Islands of the United States', 'ti': 'Tunisia', 'no': 'Norway', 'ng': 'Niger', 'sj': 'Sudan', 'lu': 'Luxembourg', 'gy': 'Guyana', 'xr': 'Czech Republic', 'fk': 'Falkland Islands', 'mou': 'Missouri', 'idu': 'Idaho', 'ao': 'Angola', 'nmu': 'New Mexico', 'le': 'Lebanon', 'ua': 'Egypt', 'xo': 'Slovakia', 'pr': 'Puerto Rico', 'wlk': 'Wales', 'li': 'Lithuania', 'sf': 'Sao Tome and Principe', 'xm': 'Saint Vincent and the Grenadines', 'br': 'Burma', 'be': 'Belgium', 'oru': 'Oregon', 'mw': 'Malawi', 'flu': 'Florida', '-mh': 'Macao', 'ht': 'Haiti', 'pau': 'Pennsylvania', 'cc': 'China', 'xra': 'South Australia', 'bn': 'Bosnia and Herzegovina', 'xxk': 'United Kingdom', 'ncu': 'North Carolina', 'rm': 'Romania', 'mf': 'Mauritius', 'tr': 'Trinidad and Tobago', 'up': 'United States Misc. Pacific Islands', '-jn': 'Jan Mayen', 'uc': 'United States Misc. Caribbean Islands', 'er': 'Estonia', 'mj': 'Montserrat', 'se': 'Seychelles', 'nkc': 'New Brunswick', '-ur': 'Soviet Union', 'fg': 'French Guiana', 'bb': 'Barbados', 'ec': 'Ecuador', 'iq': 'Iraq', 'ilu': 'Illinois', 'as': 'American Samoa', 'bx': 'Brunei', 'bd': 'Burundi', 'ea': 'Eritrea', 'quc': 'QuÃ©bec (Province)', 'ji': 'Johnston Atoll', 'nuc': 'Nunavut', 'cau': 'California', 'xj': 'Saint Helena', 'ndu': 'North Dakota', 'sz': 'Switzerland', 'wea': 'Western Australia', 'ca': 'Caribbean Netherlands', 'nl': 'New Caledonia', 'sa': 'South Africa', 'sy': 'Syria', 'ne': 'Netherlands', 'mo': 'Montenegro', 'ay': 'Antarctica', 'mz': 'Mozambique', 'gi': 'Gibraltar', 'pic': 'Prince Edward Island', 'sn': 'Sint Maarten', 'kg': 'Kyrgyzstan', 'rh': 'Zimbabwe', 'hu': 'Hungary', 'aw': 'Aruba', '-iw': 'Israel-Jordan Demilitarized Zones', 'vp': 'Various places', '-us': 'United States', 'uz': 'Uzbekistan', 'bf': 'Bahamas', 'co': 'CuraÃ§ao', 'sm': 'San Marino', 'msu': 'Mississippi', '-xxr': 'Soviet Union', 'ntc': 'Northwest Territories', 'tg': 'Togo', 'xk': 'Saint Lucia', 'vb': 'British Virgin Islands', 've': 'Venezuela', 'wvu': 'West Virginia', 'mnu': 'Minnesota', 'bh': 'Belize', 'wiu': 'Wisconsin', 'cv': 'Cabo Verde', 'gl': 'Greenland', 'to': 'Tonga', 'cf': 'Congo (Brazzaville)', '-tar': 'Tajik S.S.R.', 'gh': 'Ghana', 'pc': 'Pitcairn Island', 'ru': 'Russia (Federation)'};
-
-
-
 

@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+  <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     
-<title>HTRC Page-Level Extracted Feature Solr Search</title>
-<!--
+    <title>HTRC Page-Level Extracted Feature Solr Search</title>
+
         <link rel="shortcut icon" href="https://analytics.hathitrust.org/assets/images/favicon.ico">
--->
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+	<!--
+	<link rel="stylesheet" type="text/css" href="https://babel.hathitrust.org/common/unicorn/css/common.css" />
+	-->
+	
         <!-- Bootstrap -->
         <link href="assets/bootstrap.css" rel="stylesheet" media="screen">
         <link href="assets/main.css" rel="stylesheet" media="screen">
@@ -15,7 +20,6 @@
         <link href="assets/font-awesome.css" rel="stylesheet">
         <link href="assets/tomorrow.css" rel="stylesheet">
 	<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
-
 	
         <link href="index.css" rel="stylesheet">
 	
@@ -24,12 +28,14 @@
         <script src="assets/stupidtable.js"></script>
         <script src="assets/bootstrap.js"></script>
         <script src="assets/bowser.js"></script>
+	<script src="assets/download.min.js"></script>
 	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
         <script type="text/javascript" src="assets/htrcwarnings.js"></script>
         <script type="text/javascript" src="assets/uploadws.js"></script>
         <script type="text/javascript" src="assets/ga-download-tracking.js"></script>
 	
-	<script src="iso-639-1.js"></script> <!-- defined var 'isoLangs' -->
+	<script src="iso-639-1.js"></script> <!-- defines var 'isoLangs' -->
+	<script src="lookup-vars.js"></script>
 	<script src="index.js"></script>
   </head>
   <body>
@@ -166,18 +172,11 @@
         <div class="row" style="padding-top : 25px; font-size : 17px; line-height : 27px;">
             <div class="col-md-12">
 
-	      <h2>Unigram Page-based Extracted Feature Search (Prototype)</h2>
-	      <form action="http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select" id="search-form">
+	      <h2>Faceted Unigram Page-based Extracted Feature Search (Prototype)</h2>
+	      <form id="search-form">
 		<input type="hidden" id="indent" name="indent" value="on"/>
 		<input type="hidden" id="wt" name="wt" value="json"/>
 		<input type="hidden" id="start" name="start" value="0"/>
-		<input type="hidden" id="rows" name="rows" value="200"/>
-
-		<!--
-		<input type="text"   class="search-in-progress" id="q" name="q" style="width: 600px;"/>
-		<input type="submit" class="search-in-progress" id="search-submit" />		
-		<br>
-		-->
 		
 		<table class="query-table">
 		  <tr>
@@ -199,13 +198,6 @@
 			   title="Help: Query Volume Metadata"
 			   style="height: 500px;">
 			<div>
-			  <!--
-		      accessProfile_t, genre_t,
-		      imprint_t, isbn_t, issn_t, issuance_t,
-		      language_t, lccn_t, names_t, oclc_t,
-		      pubPlace_t, pubDate_t, rightsAttributes_t,
-		      title_t, typeOfResource_t
-			-->
 
 			  Indexed volume metadata fields:<br />
 			  
@@ -251,12 +243,15 @@
 		    </td>
 		  </tr>
 		  <!-- example facet query
-		       http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?facet.field=genre_ss&facet=on&indent=on&q=title_t:*&rows=0&wt=json&facet.field=issuance_s
+		       http://solr1.ischool.illinois.edu/solr/faceted-htrc-full-ef20/select?facet.field=genre_ss&facet=on&indent=on&q=title_t:*&rows=0&wt=json&facet.field=issuance_s
 -->
 		  <tr>
 		    <td></td>
 		    <td >
+		      <!--
 		      <input type="submit" class="search-in-progress" id="search-submit" style="float: right;"/>
+-->
+		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
 		    </td>
 		  </tr>
 		</table>
@@ -280,36 +275,78 @@
 		
 	      </form>
 
-
 	    </div>
         </div>
 
 	<hr />
-	<div id="search-results-area" style="position: relative;">
+	<div id="search-results-area" class="search-in-progress" style="position: relative; min-height: 50px;">
 	  <div id="search-results-anchor" style="position: absolute; top: -90px;">
 	  </div>
-<div class=" con page centered">
+
+    <div id="search-results-page" class="con page centered" style="display: none;">
       
       <div class="facets sidebar">
         <div id="selectedFacets" class="advancedSelectedFacets">
           <ul class="filters  list-unstyled">
  
-        </ul>
+          </ul>
+	</div>
+	<div id="srt-export" class="narrow" style="display: none">
+          <h3 class="narrowexport">Export Results</h3>
+	  <div>
+	    <a id="srt-vol-export"  class="export-item" style="display: none"
+	       download="htrc-volume-export.json" target="_blank">
+	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+	    </a>
+	    <a id="srt-page-export" class="export-item" style="display: none"
+	       download="htrc-page-export.json" target="_blank">
+	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+	    </a>
+	  </div>
         </div>
         <div class="narrow">
-          <h3 class="narrowsearch" style="display: none">Refined Results</h3>
+          <h3 class="narrowsearch" style="display: none">Refine Results<span id="facet-units"></span></h3>
           <div id="facetlist">
          
           </div>
         </div>
       </div>
+
       <div class="main">
-      	<div id="search-results"  >
-	    
+	<div id="search-results-total">
+	  <div style="float:left;">
+	    <span id="search-results-total-span"></span>
+	    <span id="srt-vol-count-span" style="display:none;">
+	      <span id="srt-vol-count-computing">[computing volume count ...]</span>
+	      <span id="srt-vol-count"></span> 
+	    </span>
 	  </div>
-      	
-      </div>
-      
+	  
+	  <div style="float:right; width=144px;">
+	    <div class="search-loading-more" style="display:none;">
+	      <span class="progress-label">Loading more results: </span>
+	      <div id="search-lm-progressbar-top"></div>
+	    </div>
+	  </div>
+
+	  <div style="clear:both"></div>
+	  
+	</div>
+	<div id="search-explain">
+	</div>
+	<div id="search-showing">
+	</div>
+
+      	<div id="search-results">
+	</div>
+      	<div class="search-loading-more" style="display:none;">
+	  <span class="progress-label">Loading more results: </span>
+	  <div id="search-lm-progressbar-bot"></div>	    
+	</div>
+	
+	<div id="next-prev">
+	</div>
+      </div>      
       
     </div>
 	  
@@ -322,7 +359,10 @@
     <div class="container">
       <h4>Additional Resources</h4>
       <ul>
-	<li><a href="index-dev.html">Check out the newer page-facet interface (in progress index, 3.6+ billion pages)</a></li>
+	<!--
+	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.1 billion pages)</a></li>
+	-->
+	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
