@@ -142,3 +142,6 @@ a.export-item {
     display: block;
 }
 
+#srt-vol-count-computing {
+    cursor: wait;
+}

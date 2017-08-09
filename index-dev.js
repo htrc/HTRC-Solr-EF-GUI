@@ -5,8 +5,10 @@ var solr_collection = "faceted-htrc-full-ef20";
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
-
+var num_found_page_limit = 700000;
+var num_found_vol_limit  = 50000;
 var num_results_per_page = 15;
+
 var store_result_page_starts = [];
 
 var filters = [];
@@ -338,9 +340,7 @@ function get_solr_stream_data_str(arg_q,doRollup)
 
     
 function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
-{    
-    //callback = callback || show_volume_count; // ****
-    
+{        
     var data_str = get_solr_stream_data_str(arg_q,doRollup);
     
     $.ajax({
@@ -384,9 +384,21 @@ function show_volume_count(jsonData) {
 
     num_docs--; // last entry provides response time data
 
-    $('#srt-vol-count').html(num_docs);
+    $('#srt-vol-count-computing').hide();
+    $('#srt-vol-count').html(" in " + num_docs + " volumes");
+    
+    if (num_docs < num_found_vol_limit) {
+	$('#srt-export').show();
+    }
+    else {
+	$('#srt-export').hide();
 
-    $('#srt-export').show();        
+	$('#srt-vol-count').append(' <span style="color:red;">[Volume count exceeds limit of '
+				   + num_found_vol_limit + ' for exporting]</span>');
+	//$('#srt-vol-count-span').show(); // ****
+    }
+
+
 }
 
 
@@ -859,42 +871,43 @@ function show_results(jsonData,newResultPage)
 	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
 
 	    if (facet_level == "page") {
-		if (num_found < 500000) {
+		if (num_found < num_found_page_limit) {
+		    $('#srt-vol-count-computing').show();
+		    $('#srt-vol-count').html("");
 		    $('#srt-vol-count-span').show();
-
+		    
 		    var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
-		    //var url = solr_stream_action + "?" + data_str;
-		    //$("#srt-vol-export").attr("href",url);
 		    $("#srt-vol-export").show();
 		    
 		    var data_str = get_solr_stream_search_data_str(store_search_args.q)
-		    //var url = solr_stream_action + "?" + data_str;
-		    //$("#srt-page-export").attr("href",url);
 		    $("#srt-page-export").show();
 		    
 		    ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 		}
 		else {
-		    $('#srt-vol-count').html('<span style="color:red;">a prohibitively high (!!) number of</span>');
+		    $('#srt-vol-count-computing').hide();
+		    $('#srt-vol-count').html('<span style="color:red;">[Page count exceeds limit of '
+					     + num_found_page_limit + ' for exporting result set]</span>');
 		    $('#srt-vol-count-span').show();
 		}
 	    }
 	    else {
-		// .click
-		//var data_str = get_solr_stream_search_data_str(store_search_args.q); // ****
-		//var url = solr_stream_action + "?" + data_str;
-		//$("#srt-vol-export").attr("href",url);
-		$("#srt-vol-export").show();
+		if (num_found < num_found_vol_limit) {
+		    $("#srt-vol-export").show();
+		    $("#srt-page-export").hide();
+		    $("#srt-export").show();
 
-		//$("#srt-page-export").attr("href","");
-		$("#srt-page-export").hide();
-
-		$("#srt-export").show();
-
-		// restore vol-count display back to default text, ready for next vol count computation
-		$('#srt-vol-count').html("[computing ...]"); 
-		$('#srt-vol-count-span').hide();
-		
+		    // restore vol-count display back to default text, ready for next vol count computation
+		    $('#srt-vol-count-computing').show();
+		    $('#srt-vol-count').hide();
+		    $('#srt-vol-count-span').hide();
+		}
+		else {
+		    $('#srt-vol-count-computing').hide();
+		    $('#srt-vol-count').html('<span style="color:red;">[Volume count exceeds limit of '
+					     + num_found_vol_limit + ' for exporting]</span>');
+		    $('#srt-vol-count-span').show();
+		}		
 	    }
 	    
 	    $('#search-explain').html(explain_html);
@@ -921,7 +934,9 @@ function show_results(jsonData,newResultPage)
 	    $('#next-prev').show();
 	    
 	} else {
-	    $('#srt-vol-count').html("[computing ...]"); // restore back to default text, ready for next vol count computation
+	    // restore back to default text, ready for next vol count computation
+	    $('#srt-vol-count-computing').show();
+	    $('#srt-vol-count').hide();
 	    $('#srt-vol-count-span').hide();
 	    $('#search-results-total').hide();	    
 
