@@ -7,6 +7,36 @@ var langs_without_pos = [
     "uk", "ur", "vi", "zh-cn", "zh-tw"
 ];
 
+var volume_metadata_fields = {
+    "accessProfile_t": null,
+    "bibliographicFormat_t": null,
+    "classification_dcc_t": null,
+    "classification_lcc_t": null,
+    "dateCreated_t": null,              
+    "genre_t": null,
+    "handleUrl_t": null,
+    "hathitrustRecordNumber_t": null,  
+    "htBibUrl_t": null,
+    "imprint_t": null,
+    "isbn_t": null,
+    "issn_t": null,
+    "issuance_t": null,
+    "language_t": null,
+    "lastUpdateDate_t": null,		      
+    "lccn_t": null,
+    "names_t": null,
+    "oclc_t": null,
+    "pubDate_t": null,
+    "pubPlace_t": null,
+    "rightsAttributes_t": null,
+    "schemaVersion_t": null,
+    "sourceInstitution_t": null,
+    "sourceInstitutionRecordNumber_t": null,
+    "title_t": null,
+    "typeOfResource_t": null,
+    "volumeIdentifier_t": null
+};
+
 
 var rights_dic = {
     'pd': 'Public domain',
@@ -63,6 +93,7 @@ var rights_dic = {
 
 var format_dic = {
     'BK': 'Books',
+    'SE': 'Serials',
     'CF': 'Computer Files',
     'MP': 'Maps',
     'MU': 'Music',

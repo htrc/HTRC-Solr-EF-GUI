@@ -159,6 +159,13 @@
         
 
     <div class="container container-panel" style="padding-top: 15px; padding-bottom: 15px;">
+
+      <div id="htrc-alert-dialog" title="Alert">
+	<p id="htrc-alert-body">
+	</p>
+      </div>
+
+      
         <div class="row">
             <div class="col-md-2 col-sm-2 hidden-xs">
                 <img class="img-responsive" src="assets/hathi_medium.png" alt=" ">
@@ -182,7 +189,7 @@
 		  <tr>
 		    <td>Volume Metadata:</td>
 		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
-			       placeholder="metaname:metavalue e.g., title_t:farming"
+			       placeholder="field:term e.g., title_t:shakespeare"
 			       style="width: 600px;"/>
 		      <br />
 		      <nobr>
@@ -191,7 +198,6 @@
 		      </nobr>
 		    </td>
 
-		    </td>
 		    <td>
 		      <span id="volume-help" style="cursor: help">&#x1f6c8; Help</span>
 		    </td>		      
@@ -203,44 +209,42 @@
 		      <div id="volume-help-dialog"
 			   title="Help: Query Volume Metadata"
 			   style="height: 500px;">
-			<div>
+			<div id="volume-help-body">
 
-			  Indexed volume metadata fields:<br />
+			  <p>
+			    To enter a title-based search, simply
+			    enter the plain text words into the Volume
+			    Metadata search box.  For phrased-based
+			    searching quote the words &quot;like
+			    this&quot;
+			  </p>
+
+			  <p>
+			    To search all metadata fields, tick
+			    the <i>Search all volume fields</i>
+			    below the search box.
+			  </p>
 			  
-			  accessProfile_t,
-			  bibliographicFormat_t,
-			  classification_dcc_t,
-			  classification_lcc_t,
-			  dateCreated_t,              
-			  genre_t,
-			  handleUrl_t,
-			  hathitrustRecordNumber_t,  
-			  htBibUrl_t,
-			  imprint_t,
-      			  isbn_t,
-			  issn_t,
-			  issuance_t,
-			  language_t,
-			  lastUpdateDate_t,		      
-      			  lccn_t,
-      			  names_t,
-			  oclc_t,
-			  pubDate_t,
-			  pubPlace_t,
-			  rightsAttributes_t,
-			  schemaVersion_t,
-			  sourceInstitution_t,
-			  sourceInstitutionRecordNumber_t,
-			  title_t,
-			  typeOfResource_t,
-			  volumeIdentifier_t
+			  <p>
+			    To search specific volume metadata fields
+			    use the field:term form, such
+			    as <i>names_t:Austen</i> or
+			    <i>names_t:&quot;Austen, Jane&quot;</i>
+			    for a phrase-based search.
+			  </p>
+			  <p>
+			    In alphabetical order, the indexed fields are:
+			  </p>
+			  <div id="volume-help-fields" style="padding-left: 10px;">
+			  </div>
+			  
 			</div>
-		      </div>
-		      
+		      </div>		      
 		    </td>
 		  </tr>
+		  
 		  <tr>
-		    <td>Page-level text:</td>
+		    <td>Page-level Text:</td>
 		    <td>
 		      <input type="text"   class="search-in-progress" id="q" name="q"
 			     style="width: 600px;"/>
@@ -249,8 +253,54 @@
 			<input type="checkbox" id="group-results-by-vol" name="group-results-by-vol" value="on">
 			<span>Group by Volume</span>
 		      </nobr>
-
 		    </td>
+		    <td>
+		      <span id="page-help" style="cursor: help">&#x1f6c8; Help</span>
+
+		      <div id="page-help-dialog"
+			   title="Help: Query Page Metadata"
+			   style="height: 500px;">
+			<div id="page-help-body">
+
+			  <p>
+			    To enter a Part-of-Speech (POS) search, simply
+			    enter the plain text words into the Page-level
+			    Text search box.  For phrased-based
+			    searching quote the words &quot;like
+			    this&quot;
+			  </p>
+			  
+			  <p>
+			    To gather all thre matching results from
+			    one volume together when searching, tick
+			    the <i>Group by volume</i> checkbox
+			    below the search box.
+			  </p>
+
+			  <p>
+			    To search specific languages and for particular
+			    parts of speech within that language (where available)
+			    use the checkboxes below the Page-level Text
+			    search box to have them include in the search.
+			  </p>
+			  <p>
+			    For languages with part-of-speech indexing
+			    a checkbox is provided to enable/disable
+			    that entire language in the search.  There
+			    is also a <i>Search all Languages</i> checkbox
+			    provided as a convenient way to override
+			    individual selections, and have the query
+			    terms entered apply to all languages
+			    and part-of-speech tags.
+			  </p>
+			  
+			</div>
+		      </div>		      
+
+		      
+		    </td>		      
+
+				    
 		  </tr>
 		  <!-- example facet query
 		       http://solr1.ischool.illinois.edu/solr/faceted-htrc-full-ef20/select?facet.field=genre_ss&facet=on&indent=on&q=title_t:*&rows=0&wt=json&facet.field=issuance_s
@@ -359,16 +409,16 @@
 	</div>
 	
 	<div id="next-prev" style="display:none;">
-	  <p style="width:100%;">
+	  <div style="width:100%;">
 	    <div id="search-prev" style="float: left;">
 	      <a><span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a>
 	    </div>
 	    <div id="search-next" style="float: right;">
 	      <a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span></a>
 	    </div>
-	  </p>
-
+	  </div>	  
 	</div>
+	
       </div>      
       
     </div>

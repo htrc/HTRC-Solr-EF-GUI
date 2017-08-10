@@ -31,7 +31,25 @@ var explain_search = { 'group_by_vol': null,
 		       'page_level_terms': null, 'page_level_desc': null };
 
 $(document).ready(function(){
+    
     $('#search-form').attr("action",solr_search_action);
+    
+    $( "#htrc-alert-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	buttons: {
+	    "OK": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
     
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
@@ -51,18 +69,49 @@ $(document).ready(function(){
 	}
     });
 
+    var vol_md_keys = [];
+    for (var key in volume_metadata_fields) {
+	vol_md_keys.push(key);
+    }
+    var vol_md_keys_str = vol_md_keys.sort().join(", ");
+    $('#volume-help-fields').html(vol_md_keys_str);
+    
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
     });
 
+    
+    $("#page-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#page-help").click(function () {
+	$("#page-help-dialog").dialog( "open" );
+    });
+
+    
     $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
 
 
     $('#srt-vol-export').click(function (event) {
 	event.preventDefault();
 	$('.export-item').css("cursor","wait");
-if (facet_level == "page") {
+	if (facet_level == "page") {
 	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
 	}
 	else {
@@ -108,6 +157,12 @@ if (facet_level == "page") {
 
 });
 
+function htrc_alert(message)
+{
+    $('#htrc-alert-body').html(message)
+    $("#htrc-alert-dialog").dialog( "open" );
+}
+
 
 function lang_pos_toggle(event) {
 	var $this = $(this);
@@ -122,7 +177,7 @@ function lang_pos_toggle(event) {
 }
 
 function ajax_error(jqXHR, textStatus, errorThrown) {
-    alert('ajax_error: An error occurred... Look at the console (F12 or Ctrl+Shift+I, Console tab) for more information!\n======\n' + JSON.stringify(jqXHR.responseText.error));
+    htrc_alert('ajax_error: An error occurred... Look at the console (F12 or Ctrl+Shift+I, Console tab) for more information!<br />====<br />' + JSON.stringify(jqXHR.responseText.error));
 
     console.log('textStatus:' + textStatus);
     console.log('errorThrown:' + errorThrown);
@@ -459,11 +514,11 @@ function stream_export_ef(jsonData)
     $('.export-item').css("cursor","auto");
 
     if (ids.length>export_ef_limit) {
-	var alert_mess = "Exporting Extracted Features is currently in development.\n";
+	var alert_mess = "Exporting Extracted Features is currently in development.<br />";
 	alert_mess += "Currently only the first "
 	    + export_ef_limit + " JSON files in the search list are exported";
 	
-	alert(alert_mess);
+	htrc_alert(alert_mess);
     }
 
     $('#srt-ef-export').attr('href',url);
@@ -1375,8 +1430,15 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
 	return ""
     }
     
-    var query_terms = query.split(/\s+/);
+    //var query_terms = query.split(/\s+/); // ****
+    // Based on:
+    //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+    var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    
+    console.log("*** query terms = " + query_terms);
+    
     var query_terms_len = query_terms.length;
+    console.log("*** query terms len = " + query_terms.length);
     
     var bool_query_term = [];
     
@@ -1486,7 +1548,11 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
 		return ""
 	}
 
-	var query_terms = query.split(/\s+/);
+        //var query_terms = query.split(/\s+/);
+        // Based on:
+        //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+        var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    
 	var query_terms_len = query_terms.length;
 
 	var bool_query_term = [];
@@ -1552,7 +1618,7 @@ function submit_action(event) {
 
 	if ((q_text === "") && (vq_text === "")) {
 		$('.search-in-progress').css("cursor","auto");
-		alert("No query term(s) entered");
+		htrc_alert("No query term(s) entered");
 		return;
 	}
 
@@ -1580,7 +1646,7 @@ function submit_action(event) {
 		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
 		    //   lead to an empty arg_q being returned
 		    $('.search-in-progress').css("cursor","auto");
-		    alert("No languages selected");
+		    htrc_alert("No languages selected");
 		    return;
 		} else {
 		    arg_q = arg_vq;
