@@ -104,9 +104,11 @@ $(document).ready(function(){
 	$("#page-help-dialog").dialog( "open" );
     });
 
+
+    $( "#search-progressbar-indeterminate" ).progressbar({ value: false });
     
     $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
-
+    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
 
     $('#srt-vol-export').click(function (event) {
 	event.preventDefault();
@@ -183,6 +185,36 @@ function ajax_error(jqXHR, textStatus, errorThrown) {
     console.log('errorThrown:' + errorThrown);
     console.log('Full jqXHR:' + JSON.stringify(jqXHR));
 
+}
+
+
+var iprogressbar_timeout_id = null;
+var iprogressbar_delay_threshold = 5000; // 5 secs
+
+function iprogressbar_delayed_display()
+{
+    iprogressbar_timeout_id = null;
+
+    var count_terms = (store_search_args.q.match(/:/g) || []).length;
+
+    if (count_terms>1) {
+	$('#search-indeterminate-label').html("for " + count_terms + " fields/terms");
+    }
+    else {
+	$('#search-indeterminate-label').html("");
+    }
+    
+    $('#search-indeterminate-div').show("slide", { direction: "up" }, 1000);
+}
+
+
+function iprogressbar_cancel()
+{
+    if (iprogressbar_timeout_id != null) {
+	window.clearTimeout(iprogressbar_timeout_id);
+	iprogressbar_timeout_id = null;
+    }
+    $('#search-indeterminate-div').hide("slide", { direction: "up" }, 1000);
 }
 
 
@@ -974,6 +1006,7 @@ function show_results(jsonData,newResultPage)
 
 	if (search_start == 0) {
 	    // The very beginning of the search results
+	    iprogressbar_cancel();
 	    
 	    $('#srt-export').hide(); // hide until volume count is in
 	
@@ -1081,7 +1114,7 @@ function show_results(jsonData,newResultPage)
 		$('#search-explain').html(explain_html);
 		show_hide_solr_q();
 		
-		$( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
+		//$( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
 	    	    
 		$('#next-prev').show();
 	    }
@@ -1707,6 +1740,9 @@ function submit_action(event) {
 		store_search_args.sort = "id asc";
 	}
 
+    iprogressbar_timeout_id = window.setTimeout(iprogressbar_delayed_display,
+						iprogressbar_delay_threshold);
+    
     ajax_solr_text_search(true); // newResultPage=true
 }
 

@@ -116,6 +116,16 @@ span.workset a:hover {
     text-decoration: none;
 }
 
+.progressbar-margin {
+    margin: 8px;
+}
+
+#search-progressbar-indeterminate {
+    width: 100%;    
+    height: 18px;
+    padding: 0;
+    border: 0;
+}
 
 #search-lm-progressbar-top {
     width: 100%; 
