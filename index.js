@@ -5,8 +5,13 @@ var solr_collection = "faceted-htrc-full-ef20";
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
-var num_found_page_limit = 700000;
-var num_found_vol_limit  = 50000;
+var ef_download_url = "http://solr1.ischool.illinois.edu:8080/get";
+
+var num_found_page_limit_str = "700,000";
+var num_found_vol_limit_str  = "100,000";
+var num_found_page_limit = num_found_page_limit_str.replace(/,/g,"");
+var num_found_vol_limit  = num_found_vol_limit_str.replace(/,/g,"");
+
 var num_results_per_page = 15;
 
 var store_result_page_starts = [];
@@ -26,7 +31,25 @@ var explain_search = { 'group_by_vol': null,
 		       'page_level_terms': null, 'page_level_desc': null };
 
 $(document).ready(function(){
+    
     $('#search-form').attr("action",solr_search_action);
+    
+    $( "#htrc-alert-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	buttons: {
+	    "OK": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
     
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
@@ -46,17 +69,50 @@ $(document).ready(function(){
 	}
     });
 
+    var vol_md_keys = [];
+    for (var key in volume_metadata_fields) {
+	vol_md_keys.push(key);
+    }
+    var vol_md_keys_str = vol_md_keys.sort().join(", ");
+    $('#volume-help-fields').html(vol_md_keys_str);
+    
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
     });
 
-    $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
+    
+    $("#page-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#page-help").click(function () {
+	$("#page-help-dialog").dialog( "open" );
+    });
 
+
+    $( "#search-progressbar-indeterminate" ).progressbar({ value: false });
+    
+    $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
+    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
 
     $('#srt-vol-export').click(function (event) {
 	event.preventDefault();
-	console.log("*** arg q = " + store_search_args.q);
+	$('.export-item').css("cursor","wait");
 	if (facet_level == "page") {
 	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
 	}
@@ -67,11 +123,47 @@ $(document).ready(function(){
 
     $('#srt-page-export').click(function (event) {
 	event.preventDefault();	
+	$('.export-item').css("cursor","wait");
 	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
     });
 
+
+    $('#srt-ef-export').click(function (event) {
+	//console.log("**** ef export link clicked: href = " + $('#srt-ef-export').attr('href'));
+	if (!$('#srt-ef-export').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+	    event.preventDefault();
+	    $('.export-item').css("cursor","wait");
+	    if (facet_level == "page") {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef); // doRollup=false
+	    }
+	}
+    });
+
     
+    $('#search-prev').click(function (event) {
+	var start = store_search_args.start;
+	var prev_start = store_result_page_starts.pop();
+	var diff = prev_start - start;
+	
+	show_new_results(diff);
+    });
+    
+    $('#search-next').click(function (event) {
+	store_result_page_starts.push(store_start);
+	show_new_results(store_num_pages); // used to be num_results_per_page
+    });
+
 });
+
+function htrc_alert(message)
+{
+    $('#htrc-alert-body').html(message)
+    $("#htrc-alert-dialog").dialog( "open" );
+}
 
 
 function lang_pos_toggle(event) {
@@ -87,11 +179,42 @@ function lang_pos_toggle(event) {
 }
 
 function ajax_error(jqXHR, textStatus, errorThrown) {
-	alert('An error occurred... Look at the console (F12 or Ctrl+Shift+I, Console tab) for more information!');
+    htrc_alert('ajax_error: An error occurred... Look at the console (F12 or Ctrl+Shift+I, Console tab) for more information!<br />====<br />' + JSON.stringify(jqXHR.responseText.error));
 
-	console.log('jqXHR:' + jqXHR);
-	console.log('textStatus:' + textStatus);
-	console.log('errorThrown:' + errorThrown);
+    console.log('textStatus:' + textStatus);
+    console.log('errorThrown:' + errorThrown);
+    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
+
+}
+
+
+var iprogressbar_timeout_id = null;
+var iprogressbar_delay_threshold = 5000; // 5 secs
+
+function iprogressbar_delayed_display()
+{
+    iprogressbar_timeout_id = null;
+
+    var count_terms = (store_search_args.q.match(/:/g) || []).length;
+
+    if (count_terms>1) {
+	$('#search-indeterminate-label').html("for " + count_terms + " fields/terms");
+    }
+    else {
+	$('#search-indeterminate-label').html("");
+    }
+    
+    $('#search-indeterminate-div').show("slide", { direction: "up" }, 1000);
+}
+
+
+function iprogressbar_cancel()
+{
+    if (iprogressbar_timeout_id != null) {
+	window.clearTimeout(iprogressbar_timeout_id);
+	iprogressbar_timeout_id = null;
+    }
+    $('#search-indeterminate-div').hide("slide", { direction: "up" }, 1000);
 }
 
 
@@ -140,15 +263,39 @@ function add_titles_solr(jsonData) {
 	    var htid = doc_val.id;
 
 	    var title = doc_val.title_s;
+	    
+	    var details = [];
+	    if (doc_val.typeOfResource_s) {
+		details.push("Resource type: " + doc_val.typeOfResource_s);
+	    }
+	    if (doc_val.names_ss) {
+		details.push("Author(s): " + doc_val.names_ss.join(", "));
+	    }
+	    if (doc_val.pubDate_s) {
+		details.push("Publication date: " + doc_val.pubDate_s);
+	    }
+	    if (doc_val.genre_ss) {
+		details.push("Genre: " + doc_val.genre_ss.join(", "));
+	    }
+
+	    var details_str = details.join(";\n");	    
+	    var $tooltip_title = $('<span />').attr('title',details_str).html(title);
+		    
+	    //console.log("*** tooltip title = " + $tooltip_title[0].outerHTML);
+	    
 	    $("[name='" + htid + "']").each(function () {
-		$(this).html(title)
+		var $tooltip_title_clone = $tooltip_title.clone();
+		$tooltip_title_clone.tooltip();
+		$(this).html($tooltip_title_clone)
 	    });
 	    console.log(htid + ", title = " + title);
 
 	    var itemURL = doc_val.handleUrl_s;
 	    itemURL = itemURL.replace(/^https:/, "http:");
 
-	    var ws_span = '<span class="workset" style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
+	    var ws_span = '<span class="workset" style="display: none;"><br />';
+	    ws_span += '[Workset: <span name="' + itemURL + '"></span>]</span>';
+	    
 	    $("[name='" + htid + "']").each(function () {
 		$(this).append(ws_span)
 	    });
@@ -201,7 +348,7 @@ function add_worksets(json_data) {
 
 }
 
-function escape_query(query)
+function escape_solr_query(query)
 {
 
     var pattern = /([\!\*\+\-\=\<\>\&\|\(\)\[\]\{\}\^\~\?\:\\\/\"])/g;
@@ -268,7 +415,6 @@ function get_solr_stream_search_clause(arg_q)
 	fl: "volumeid_s,id",
 	indent: arg_indent,
 	wt: arg_wt
-	//facet: "on" // ****
     };
 
 
@@ -355,7 +501,7 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
     
 }
 
-function stream_export(jsonData) {
+function stream_get_ids(jsonData) {
     var response = jsonData["result-set"];
     
     var docs = response.docs;
@@ -373,7 +519,42 @@ function stream_export(jsonData) {
 	ids.push(id);
     }
 
+    return ids;
+}
+
+function stream_export(jsonData)
+{
+    var ids = stream_get_ids(jsonData);
+    $('.export-item').css("cursor","auto");
+
     download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
+}
+
+function stream_export_ef(jsonData)
+{
+    var export_ef_limit = 5;
+    
+    var ids = stream_get_ids(jsonData);
+    var ids_head = ids.length>export_ef_limit ? ids.splice(0,export_ef_limit) : ids;
+    
+    
+    var ids_str = ids_head.join(",");
+
+    var url = ef_download_url + '?download-ids='+ids_str;
+    //console.log("*** download url = " + url); // ****
+
+    $('.export-item').css("cursor","auto");
+
+    if (ids.length>export_ef_limit) {
+	var alert_mess = "Exporting Extracted Features is currently in development.<br />";
+	alert_mess += "Currently only the first "
+	    + export_ef_limit + " JSON files in the search list are exported";
+	
+	htrc_alert(alert_mess);
+    }
+
+    $('#srt-ef-export').attr('href',url);
+    window.location.href = url;    
 }
 
 
@@ -386,16 +567,16 @@ function show_volume_count(jsonData) {
 
     $('#srt-vol-count-computing').hide();
     $('#srt-vol-count').html(" in " + num_docs + " volumes");
+    $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
-	$('#srt-export').show();
+	$('#srt-export').show("slide", { direction: "up" }, 1000);
     }
     else {
-	$('#srt-export').hide();
+	$('#srt-export').hide("slide", { direction: "up" }, 1000);
 
-	$('#srt-vol-count').append(' <span style="color:red;">[Volume count exceeds limit of '
-				   + num_found_vol_limit + ' for exporting]</span>');
-	//$('#srt-vol-count-span').show(); // ****
+	$('#srt-vol-count').append(' <span style="color:#BB0000;">[Note: Volume count exceeds limit of '
+				   + num_found_vol_limit_str + ' for exporting]</span>');
     }
 
 
@@ -440,7 +621,13 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	// multiple pages in the item => clarify dowload is the complete volume
 	download_text += " (complete volume)";
     }
-    var download_span = '<div title="'+id+'" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'"><span class="ui-icon ui-icon-circle-arrow-s"></span>'+download_text+ '</a></div>';
+    var download_span = '<div title="'+id+'" style="color: #924a0b;">';
+    //download_span +=      '<a download href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'">';
+    download_span +=      '<a download href="'+ef_download_url+'?download-id='+id+'">';
+    download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+    download_span +=         download_text;
+    download_span +=      '</a>';
+    download_span +=    '</div>';
 
     var prev_seq_count = 0;
     
@@ -735,7 +922,7 @@ function show_results_explain_html(query_level_mix,store_search_url)
     explain_html += '<div style="float:left;">\n';
     explain_html += '  <button id="show-hide-solr-q">Show full query ...</button>\n';
 
-    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '"</div>\n';
+    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + store_search_args.q + '</div>\n';
     explain_html += "</div>\n";
     explain_html += "</p>\n";
 
@@ -797,6 +984,7 @@ function show_results_facet_html(facet_fields)
 
 
 var store_start;
+var store_num_pages;
 var store_line_num;
 var store_id;
 
@@ -811,30 +999,35 @@ function show_results(jsonData,newResultPage)
     var search_start = parseInt(store_search_args.start);
 
     if (newResultPage) {
-	// freshly minted page
+	// at the top of a new result page to show
 	store_start = search_start;
 	store_line_num = 1;
 	store_id = null;
 
-	$('#srt-export').hide(); // hide until volume count is in
-	
-	var facet_fields = jsonData.facet_counts.facet_fields;
-    
-	var facet_html = show_results_facet_html(facet_fields);
-	if (show_facet == 1) {
-	    if (facet_level == "page") {
-		$('#facet-units').html(" (page count)");
-	    }
-	    else {
-		$('#facet-units').html(" (volume count)");
-	    }
+	if (search_start == 0) {
+	    // The very beginning of the search results
+	    iprogressbar_cancel();
 	    
-	    $(".narrowsearch").show();
-	    $("#facetlist").html(facet_html);
-	} else if (show_facet == 0){
-	    $(".narrowsearch").hide();
-	    facet_html = "";
-	    $("#facetlist").html(facet_html);
+	    $('#srt-export').hide(); // hide until volume count is in
+	
+	    var facet_fields = jsonData.facet_counts.facet_fields;
+    
+	    var facet_html = show_results_facet_html(facet_fields);
+	    if (show_facet == 1) {
+		if (facet_level == "page") {
+		    $('#facet-units').html(" (page count)");
+		}
+		else {
+		    $('#facet-units').html(" (volume count)");
+		}
+		
+		$(".narrowsearch").show();
+		$("#facetlist").html(facet_html);
+	    } else if (show_facet == 0){
+		$(".narrowsearch").hide();
+		facet_html = "";
+		$("#facetlist").html(facet_html);
+	    }
 	}
     }
    
@@ -862,57 +1055,69 @@ function show_results(jsonData,newResultPage)
     }
 
     if (newResultPage) {
-	// Freshly minted page!
+	    
 	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
 	
 	if (num_docs > 0) {
 
-	    $('#search-results-total').show();
-	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+	    if (search_start == 0) {
+		// The very beginning of the search results
 
-	    if (facet_level == "page") {
-		if (num_found < num_found_page_limit) {
-		    $('#srt-vol-count-computing').show();
-		    $('#srt-vol-count').html("");
-		    $('#srt-vol-count-span').show();
-		    
-		    var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
-		    $("#srt-vol-export").show();
-		    
-		    var data_str = get_solr_stream_search_data_str(store_search_args.q)
-		    $("#srt-page-export").show();
-		    
-		    ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
-		}
-		else {
-		    $('#srt-vol-count-computing').hide();
-		    $('#srt-vol-count').html('<span style="color:red;">[Page count exceeds limit of '
-					     + num_found_page_limit + ' for exporting result set]</span>');
-		    $('#srt-vol-count-span').show();
-		}
-	    }
-	    else {
-		if (num_found < num_found_vol_limit) {
-		    $("#srt-vol-export").show();
-		    $("#srt-page-export").hide();
-		    $("#srt-export").show();
-
-		    // restore vol-count display back to default text, ready for next vol count computation
-		    $('#srt-vol-count-computing').show();
-		    $('#srt-vol-count').hide();
-		    $('#srt-vol-count-span').hide();
-		}
-		else {
-		    $('#srt-vol-count-computing').hide();
-		    $('#srt-vol-count').html('<span style="color:red;">[Volume count exceeds limit of '
-					     + num_found_vol_limit + ' for exporting]</span>');
-		    $('#srt-vol-count-span').show();
+		$('#search-results-total').show();
+		$('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+		
+		if (facet_level == "page") {
+		    if (num_found < num_found_page_limit) {
+			$('#srt-vol-count-computing').show();
+			$('#srt-vol-count').html("");
+			$('#srt-vol-count-span').show();
+			
+			var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
+			$("#srt-vol-export").show();
+			
+			var data_str = get_solr_stream_search_data_str(store_search_args.q)
+			$("#srt-page-export").show();
+			
+			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
+			$("#srt-ef-export").show();
+		    }
+		    else {
+			$('#srt-vol-count-computing').hide();
+			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Page count exceeds limit of '
+						 + num_found_page_limit_str + ' for exporting result set]</span>');
+			$('#srt-vol-count').show();
+			$('#srt-vol-count-span').show();
+		    }
 		}		
-	    }
+		else {
+		    // volume level
+		    if (num_found < num_found_vol_limit) {
+			$("#srt-vol-export").show();
+			$("#srt-page-export").hide();
+			$("#srt-ef-export").show();
+			$("#srt-export").show("slide", { direction: "up" }, 1000);
+			
+			// restore vol-count display back to default text, ready for next vol count computation
+			$('#srt-vol-count-computing').show();
+			$('#srt-vol-count').hide();
+			$('#srt-vol-count-span').hide();
+		    }
+		    else {
+			$('#srt-vol-count-computing').hide();
+			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Volume count exceeds limit of '
+						 + num_found_vol_limit_str + ' for exporting]</span>');
+			$('#srt-vol-count').show();
+			$('#srt-vol-count-span').show();
+		    }		
+		}
 	    
-	    $('#search-explain').html(explain_html);
-	    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
-
+		$('#search-explain').html(explain_html);
+		show_hide_solr_q();
+		
+		//$( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
+	    	    
+		$('#next-prev').show();
+	    }
 	    var from = parseInt(store_search_args.start) + 1;
 	    var to = from + store_search_args.rows - 1;
 	    
@@ -920,7 +1125,7 @@ function show_results(jsonData,newResultPage)
 		// cap value
 		to = num_found;
 	    }
-
+	    
 	    var showing_matches = "<hr /><p>";
 	    showing_matches += (facet_level == "page") ? "Showing page-level matches: " : "Showing volume matches:";
 	    
@@ -931,22 +1136,22 @@ function show_results(jsonData,newResultPage)
 	    
 	    $('#search-showing').html(showing_matches);
 	    
-	    $('#next-prev').show();
-	    
-	} else {
+	}
+	else {
+	    // num_docs == 0
 	    // restore back to default text, ready for next vol count computation
 	    $('#srt-vol-count-computing').show();
 	    $('#srt-vol-count').hide();
 	    $('#srt-vol-count-span').hide();
 	    $('#search-results-total').hide();	    
-
+	    
 	    $('#search-explain').html(explain_html);
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
 	    $('#next-prev').hide();
 	}
-	
-	show_hide_solr_q();
+		
+
     }
     
     var $search_results = $('#search-results');
@@ -1050,7 +1255,8 @@ function show_results(jsonData,newResultPage)
 	i++;
     }
     var num_pages = i;
-
+    store_num_pages = num_pages;
+    
     if (line_num <= num_results_per_page) {
 
 	if (group_by_vol_checked) {
@@ -1116,44 +1322,43 @@ function show_results(jsonData,newResultPage)
 	progressbar_bot.progressbar( "value",0);
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
     }
-	
+
+    /*
     var next_prev = '<p style="width:100%;">';
-    next_prev += '<div id="search-prev" style="float: left;"><a>&lt; Previous</a></div>';
-    next_prev += '<div id="search-next" style="float: right;"><a>Next &gt;</a></div>';
+    next_prev += '<div id="search-prev" style="float: left;">';
+    next_prev += '<a>&lt; <span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a></div>';
+    next_prev += '<div id="search-next" style="float: right;">';
+    next_prev += '<a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span> &gt;</a></div>';
     next_prev += '</p>';
     
     $('#next-prev').html(next_prev);
-
-    $('#search-prev').click(function (event) {
-	var start = store_search_args.start;
-	var prev_start = store_result_page_starts.pop();
-	var diff = prev_start - start;
-	
-	show_new_results(diff);
-    });
+    */
     
-    $('#search-next').click(function (event) {
-	store_result_page_starts.push(store_start);
-	show_new_results(num_pages); // used to be num_results_per_page
-    });
-
 
     // Need to hide prev link?
-    //if (search_start == 0) { // ****
     if (store_start == 0) { 
 	$('#search-prev').hide();
     }
-
+    else {
+	$('#search-prev').show();
+    }
+    
     // Need to hide next link?
-    //var search_end = search_start + num_pages;
     if (search_end >= num_found) {
 	$('#search-next').hide();
     }
-
+    else {
+	$('#search-next').show();
+    }
+    
     // Showing matches to ...
     $('#sm-to').html(search_start + num_pages);
     
-    
+
+    // Now setup and invoke ajax call to add title metadta (etc) into result set page
+
+    // This previously used to be done with the HT API:
+    //
     // Example URL for catalog metadata (multiple items)
     //   http://catalog.hathitrust.org/api/volumes/brief/json/id:552;lccn:70628581|isbn:0030110408
     
@@ -1166,19 +1371,32 @@ function show_results(jsonData,newResultPage)
     //});
     
 
-    // => fill out place-holder title information
+    // => Retrieve from solr volume level metadata to fill out place-holder title information (etc)
 
     // Example URL for using the Solr-EF collection to retrieve volume id info
     //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
+
+    //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});
+
+    var ids_escaped = ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});
     
-    var ids_and_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
-        
+    var ids_or_str = ids_escaped.join(" OR ");
+    
+    //var ids_or_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
+
+
+    
+    var fl_args = [ "id", "title_s", "handleUrl_s",
+		    "genre_ss", "names_ss", "pubDate_s", "typeOfResource_s" ];
+    var fl_args_str = fl_args.join(",");
+    
     var url_args = {
-	q: ids_and_str,
+	q: ids_or_str,
 	indent: "off",
 	wt: "json",
 	start: 0,
 	rows: ids.length,
+	fl: fl_args_str
     };
 
     
@@ -1245,8 +1463,15 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
 	return ""
     }
     
-    var query_terms = query.split(/\s+/);
+    //var query_terms = query.split(/\s+/); // ****
+    // Based on:
+    //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+    var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    
+    console.log("*** query terms = " + query_terms);
+    
     var query_terms_len = query_terms.length;
+    console.log("*** query terms len = " + query_terms.length);
     
     var bool_query_term = [];
     
@@ -1356,7 +1581,11 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
 		return ""
 	}
 
-	var query_terms = query.split(/\s+/);
+        //var query_terms = query.split(/\s+/);
+        // Based on:
+        //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+        var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    
 	var query_terms_len = query_terms.length;
 
 	var bool_query_term = [];
@@ -1422,7 +1651,7 @@ function submit_action(event) {
 
 	if ((q_text === "") && (vq_text === "")) {
 		$('.search-in-progress').css("cursor","auto");
-		alert("No query term(s) entered");
+		htrc_alert("No query term(s) entered");
 		return;
 	}
 
@@ -1450,7 +1679,7 @@ function submit_action(event) {
 		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
 		    //   lead to an empty arg_q being returned
 		    $('.search-in-progress').css("cursor","auto");
-		    alert("No languages selected");
+		    htrc_alert("No languages selected");
 		    return;
 		} else {
 		    arg_q = arg_vq;
@@ -1511,6 +1740,9 @@ function submit_action(event) {
 		store_search_args.sort = "id asc";
 	}
 
+    iprogressbar_timeout_id = window.setTimeout(iprogressbar_delayed_display,
+						iprogressbar_delay_threshold);
+    
     ajax_solr_text_search(true); // newResultPage=true
 }
 
