@@ -1,136 +1,5 @@
 
 
-$(document).ready(function(){
-    
-    $('#search-form').attr("action",solr_search_action);
-    
-    $( "#htrc-alert-dialog" ).dialog({
-	modal: true,
-	autoOpen: false,
-	resizable: true,
-	buttons: {
-	    "OK": function() {
-		$( this ).dialog( "close" );
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-    
-    $("#volume-help-dialog").dialog({
-	autoOpen: false,
-	resizable: true,
-	width: 790,
-	modal: true,
-	buttons: {
-	    "OK": function () {
-		$(this).dialog("close");
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-
-    var vol_md_keys = [];
-    for (var key in volume_metadata_fields) {
-	vol_md_keys.push(key);
-    }
-    var vol_md_keys_str = vol_md_keys.sort().join(", ");
-    $('#volume-help-fields').html(vol_md_keys_str);
-    
-
-    $("#volume-help").click(function () {
-	$("#volume-help-dialog").dialog( "open" );
-    });
-
-    
-    $("#page-help-dialog").dialog({
-	autoOpen: false,
-	resizable: true,
-	width: 790,
-	modal: true,
-	buttons: {
-	    "OK": function () {
-		$(this).dialog("close");
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-    
-    $("#page-help").click(function () {
-	$("#page-help-dialog").dialog( "open" );
-    });
-
-
-    //$( "#search-progressbar-indeterminate" ).progressbar({ value: false }); // ****
-    
-    $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
-    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
-
-    $('#srt-vol-export').click(function (event) {
-	event.preventDefault();
-	$('.export-item').css("cursor","wait");
-	if (facet_level == "page") {
-	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
-	}
-	else {
-	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
-	}
-    });
-
-    $('#srt-page-export').click(function (event) {
-	event.preventDefault();	
-	$('.export-item').css("cursor","wait");
-	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
-    });
-
-
-    $('#srt-ef-export').click(function (event) {
-	//console.log("**** ef export link clicked: href = " + $('#srt-ef-export').attr('href'));
-	if (!$('#srt-ef-export').attr('href')) {
-	    // lazy evaluation, workout out what href should be, and then trigger click once more
-	    event.preventDefault();
-	    $('.export-item').css("cursor","wait");
-	    if (facet_level == "page") {
-		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
-	    }
-	    else {
-		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef); // doRollup=false
-	    }
-	}
-    });
-
-    
-    $('#search-prev').click(function (event) {
-	var start = store_search_args.start;
-	var prev_start = store_result_page_starts.pop();
-	var diff = prev_start - start;
-	
-	show_new_results(diff);
-    });
-    
-    $('#search-next').click(function (event) {
-	store_result_page_starts.push(store_start);
-	show_new_results(store_num_pages); // used to be num_results_per_page
-    });
-
-});
-
-
-
 
 function lang_pos_toggle(event) {
 	var $this = $(this);
@@ -301,60 +170,142 @@ function show_hide_lang() {
 	});
 }
 
-$(function () {
-	generate_pos_langs();
-	generate_other_langs();
 
-        show_hide_lang();
-
-	if ($('#search-submit').length > 0) {
-		$('#search-submit').click(submit_action);
+$(document).ready(function(){
+    
+    $('#search-form').attr("action",solr_search_action);
+    
+    $( "#htrc-alert-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	buttons: {
+	    "OK": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
 	}
-
-        //Facet related page setup
+    });
     
-	$("#facetlist").on("click","a",function () {
-		//indexOf  
-		$class = $(this).attr("class");
-		if ($(this).hasClass("morefacets")) {
-			obj = $class.split(" ")[0];
-			$(this).hide();
-			$("[class='" + obj + " lessfacets']").show();
-			$("[class='hidefacet " + obj + "']").css({
-				display: "block",
-				visibility: "visible"
-			});
-			return false;
-		} else if ($(this).hasClass("lessfacets")) {
-			obj = $class.split(" ")[0];
-			$(this).hide();
-			$("[class='" + obj + " morefacets']").show();
-			$("[class='hidefacet " + obj + "']").css({
-				display: "none",
-				visibility: "visible"
-			});
-			return false;
-		} else {
+    $("#volume-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
 
-			var obj = $(this).attr("data-obj");
-			var key = $(this).attr("data-key");
-			if (filters.indexOf(obj + "--" + key) < 0) {
-				filters.push(obj + "--" + key);
-			}
-			$(this).parent().remove();
-		        facetlist_set();
-		        store_search_args.start = store_start;
-		        show_updated_results();
-		}
-	});
+    var vol_md_keys = [];
+    for (var key in volume_metadata_fields) {
+	vol_md_keys.push(key);
+    }
+    var vol_md_keys_str = vol_md_keys.sort().join(", ");
+    $('#volume-help-fields').html(vol_md_keys_str);
     
-	$(".filters").on("click","a",function () {
 
-		filters.splice($(this).parent().index(), 1);
-	        facetlist_set();
-	        store_search_args.start = store_start;
-	        show_updated_results();
-	});
+    $("#volume-help").click(function () {
+	$("#volume-help-dialog").dialog( "open" );
+    });
+
+    
+    $("#page-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#page-help").click(function () {
+	$("#page-help-dialog").dialog( "open" );
+    });
+
+    
+    $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
+    $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
+
+    $('#export-by-vol').click(function (event) {
+	event.preventDefault();
+	$('.export-item').css("cursor","wait");
+	if (facet_level == FacetLevelEnum.Page) {
+	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
+	}
+	else {
+	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+	}
+    });
+
+    $('#export-by-page').click(function (event) {
+	event.preventDefault();	
+	$('.export-item').css("cursor","wait");
+	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
+    });
+
+
+    $('#export-ef-zip').click(function (event) {
+	//console.log("**** ef export link clicked: href = " + $('#export-ef-zip').attr('href'));
+	if (!$('#export-ef-zip').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+	    event.preventDefault();
+	    $('.export-item').css("cursor","wait");
+	    if (facet_level == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef); // doRollup=false
+	    }
+	}
+    });
+
+    
+    $('#search-prev').click(function (event) {
+	var start = store_search_args.start;
+	var prev_start = store_result_page_starts.pop();
+	var diff = prev_start - start;
+	
+	show_new_results(diff);
+    });
+    
+    $('#search-next').click(function (event) {
+	store_result_page_starts.push(store_start);
+	show_new_results(store_num_pages); // used to be num_results_per_page
+    });
+
+
+    generate_pos_langs();
+    generate_other_langs();
+
+    show_hide_lang();
+
+    if ($('#search-submit').length > 0) {
+	$('#search-submit').click(submit_action);
+    }
+
 });
 
 

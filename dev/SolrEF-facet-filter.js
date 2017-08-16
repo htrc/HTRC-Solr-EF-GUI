@@ -1,5 +1,11 @@
+
+var FacetLevelEnum = {
+    Page: 1,
+    Volume: 2
+};
+
 // Global variable show_facet to control if faceting is used.
-var show_facet = 0;
+var show_facet  = 0;
 var facet_level = null;
 
 var filters = [];
@@ -47,66 +53,125 @@ function pretty_print_facet_value(kv,displayed_item)
 function show_results_facet_html(facet_fields)
 {
     var facet_html = "";    
-    var _class = '';
     
     for (k in facet_fields) {
-	//console.log("**** show results: k = " + k);
-	facet_html += "<dl>";
+	//console.log("**** show_results_facet_html(): k = " + k);
+	var facet_dl = "<dl>";
 	var kv = k;
-	if (facet_level == "page") {
+	if (facet_level == FacetLevelEnum.Page) {
 	    kv = kv.replace(/^volume/,"");
 	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
 	    kv = kv.replace(/_htrcstring$/,"_s"); 
 	}
 	//console.log("**** kv = " + kv);
 	
-	facet_html += "<dt class=\"facetField\">" + facet_display_name[kv] + "</dt> ";
-	item = facet_fields[k];
-	ii = 0;
-	for (var j = 0; j <= item.length / 2; j = j + 2) {
-	    
-	    if (item[j + 1] > 0) {
-		if (filters.indexOf(kv + "--" + item[j]) < 0) {
-		    _class = "showfacet";
-		    if (ii > 5) {
-			_class = "hidefacet";
-		    }
-		    var displayed_item = item[j];
-		    var pp_displayed_item = pretty_print_facet_value(kv,item[j]);
+	facet_dl += "<dt class=\"facetField\">" + facet_display_name[kv] + "</dt> ";
+	var field_items = facet_fields[k];
+	var ii = 0;
+	
+	for (var j=0; j<=field_items.length; j=j+2) {
 
-		    //if (pp_displayed_item != displayed_item) {
-			//var raw_item = "Raw facet: '"+displayed_item+"'";
-			//pp_displayed_item = '<span alt="'+raw_item+'" title="'+raw_item+'">'+pp_displayed_item+'</span>';
-		    //}
-		    
-		    facet_html += '<dd class="' + _class + ' ' + kv + '"><a href="javascript:;" data-obj="' + k + '"  data-key="' + item[j] + '">' + pp_displayed_item + '</a><span dir="ltr">&nbsp;(' + item[j + 1] + ') </span></dd>';
-		    ii++;
+	    var item_term = field_items[j];
+	    var item_freq = field_items[j+1];
+
+	    if (item_freq == 0) {
+		break;
+	    }
+
+	    //console.log("**** looking in filter for: " + k + "--" + item_term);
+	
+	    if (filters.indexOf(k + "--" + item_term) < 0) {
+		var _class = "showfacet";
+		if (ii > 5) {
+		    _class = "hidefacet";
 		}
+		var displayed_item_term = item_term;
+		var pp_displayed_item_term = pretty_print_facet_value(kv,item_term);
 		
+		//if (pp_displayed_item_term != displayed_item_term) {
+		//var raw_item_term = "Raw facet: '"+displayed_item_term+"'";
+		//pp_displayed_item_term = '<span alt="'+raw_item_term+'" title="'+raw_item_term+'">'+pp_displayed_item+'</span>';
+		//}
+		
+		facet_dl += '<dd class="' + _class + ' ' + kv + '">';
+		facet_dl +=   '<span>'; // ****
+		facet_dl +=     '<input type="checkbox" class="facetbox '+kv+'" data-key="'+k+'"  data-term="'+item_term+'" />&nbsp;';
+		facet_dl +=     '<a href="javascript:;" data-key="' + k + '"  data-term="' + item_term + '">';
+		facet_dl +=       pp_displayed_item_term;
+		facet_dl +=     '</a> <span class="page-count" dir="ltr">(' + item_freq + ') </span>';
+		facet_dl +=   '</span>'; // ****
+		facet_dl += '</dd>';
+		ii++;	    		
 	    }
 	    
 	}
+	
 	if (ii > 5) {
-	    facet_html += '<dd><a href="" class="' + kv + ' morefacets"><span class="moreless">more...</span></a><a href="" class="' + kv + ' lessfacets" style="display: none;"><span class="moreless">less...</span></a></dd>'
+	    facet_dl += '<dd>';
+	    facet_dl +=   '<a href="" class="' + kv + ' morefacets">';
+	    facet_dl +=     '<span class="ui-icon ui-icon-caret-1-s"></span><span class="moreless">more...</span>';
+	    facet_dl +=   '</a>';
+	    facet_dl +=   '<a href="" class="' + kv + ' lessfacets" style="display: none;">';
+	    facet_dl +=     '<span class="ui-icon ui-icon-caret-1-n"></span><span class="moreless">less...</span>';
+	    facet_dl +=   '</a>';
+	    facet_dl += '</dd>';
 	}
-	facet_html += "</dl>";
+	
+	facet_dl += "</dl>";
+
+	if (ii > 0) {
+	    facet_html += facet_dl;
+	}
     }
 
     return facet_html;
 }
 
 
+function facet_html_add_checkbox_handlers()
+{
+    $('input.facetbox[type="checkbox"]').on("change",function () {
+	
+	// User has clicked on one of the currently applied filters
+	// => remove it from 'filters', then instigate an updated search
 
+	if($(this).is(":checked")) {
+	    // just been checked on
+	    console.log("**## checked on, this = " + this);
+	}
+	else {
+	    // now checked off
+	    console.log("**## checked off, this = " + this);
+	}
+	
+	
+	/*
+	filters.splice($(this).parent().index(), 1);
+	facetlist_set();
+	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
+	
+	store_search_args.start = store_start;
+	show_updated_results();
+*/
+    });
 
-function facetlist_set() {
-    var facetlist_html = '';
-    for (k in filters) {
-	var ks = filters[k].split("--");
+}
 
-	var kv0 = ks[0];
-	var kv1 = ks[1];
+function facetlist_set()
+{
+    // Display the filters that are currently in effect
+    
+    var facetlist_html = "";
 
-	if (facet_level == "page") {
+    var cancel_png = "assets/jquery-ui-lightness-1.12.1/images/cancel.png";
+    
+    for (f in filters) {
+	var f_split = filters[f].split("--");
+
+	var kv0 = f_split[0];
+	var kv1 = f_split[1];
+
+	if (facet_level == FacetLevelEnum.Page) {
 	    kv0 = kv0.replace(/^volume/,"");
 	    kv0 = kv0.replace(/_htrcstrings$/,"_ss"); 
 	    kv0 = kv0.replace(/_htrcstring$/,"_s"); 
@@ -115,9 +180,87 @@ function facetlist_set() {
 
 	var facet_val  = pretty_print_facet_value(kv0,kv1);	
 	
-	facetlist_html += '<li><a href="javascript:;" class="unselect"><img alt="Delete" src="assets/jquery-ui-lightness-1.12.1/images/cancel.png" class="removeFacetIcon"></a>&nbsp;<span class="selectedfieldname">' + kv0_display + '</span>:  ' + facet_val + '</li>';
+	facetlist_html += '<li>';
+	facetlist_html +=   '<a href="javascript:;" class="unselect">';
+	facetlist_html +=     '<img alt="Delete" src="'+cancel_png+'" class="removeFacetIcon">';
+	facetlist_html +=   '</a>';
+	facetlist_html +=   '&nbsp;<span class="selectedfieldname">' + kv0_display + '</span>';
+	facetlist_html +=   ':  ' + facet_val;
+	facetlist_html += '</li>';
     }
 
+    if (facetlist_html != "") {
+	$('#selectedFacets').show();
 	$(".filters").html(facetlist_html);
+    }
+    else {
+	$('#selectedFacets').hide();
+    }
 }
+
+
+$(function () {
+        //Facet related page setup
+    
+    $("#facetlist").on("click","a",function () {
+
+	$class = $(this).attr("class");
+	
+	if ($(this).hasClass("morefacets")) {
+	    obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " lessfacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "block",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else if ($(this).hasClass("lessfacets")) {
+	    obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " morefacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "none",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else {
+	    // User has clicked on a facet
+	    // => Add it to 'filters', then instigate an updated search
+	    
+	    var facet_key = $(this).attr("data-key");
+	    var term = $(this).attr("data-term");
+
+	    
+	    if (filters.indexOf(facet_key + "--" + term) < 0) {
+		filters.push(facet_key + "--" + term);
+		//console.log("**** adding into 'filter': " + facet_key + "--" + term);
+	    }
+
+	    // remove item from facet area
+	    $(this).parent().remove();
+	    facetlist_set();
+	    //console.log("*** facetlist on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
+	    store_search_args.start = store_start;
+	    show_updated_results();
+	}
+    });
+    
+    $(".filters").on("click","a",function () {
+	// User has clicked on one of the currently applied filters
+	// => remove it from 'filters', then instigate an updated search
+	
+	filters.splice($(this).parent().index(), 1);
+	facetlist_set();
+	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
+	
+	store_search_args.start = store_start;
+	show_updated_results();
+    });
+
+
+});
+
 

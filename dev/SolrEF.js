@@ -92,7 +92,7 @@ function add_titles_solr(jsonData) {
 
 
 
-function ajax_solr_text_search(newResultPage)
+function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
 
@@ -104,7 +104,7 @@ function ajax_solr_text_search(newResultPage)
     
     for (k in facet) {
 	var facet_val = facet[k];
-	if (facet_level == "page") {
+	if (facet_level == FacetLevelEnum.Page) {
 	    facet_val = "volume" + facet_val;
 	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
 	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
@@ -131,7 +131,7 @@ function ajax_solr_text_search(newResultPage)
 	// async: false, // ****
 	data: data_str,
 	dataType: "json",
-	success: function(jsonData) { show_results(jsonData,newResultPage); },
+	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
 	error: ajax_error
     });
 }
@@ -149,10 +149,12 @@ function show_volume_count(jsonData) {
     $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
-	$('#srt-export').show("slide", { direction: "up" }, 1000);
+	if (!$('#export-by').is(":visible")) {	
+	    $('#export-by').fadeIn(1500);
+	}
     }
     else {
-	$('#srt-export').hide("slide", { direction: "up" }, 1000);
+	$('#export-by').hide("slide", { direction: "up" }, 1000);
 
 	$('#srt-vol-count').append(' <span style="color:#BB0000;">[Note: Volume count exceeds limit of '
 				   + num_found_vol_limit_str + ' for exporting]</span>');
@@ -166,7 +168,7 @@ function show_updated_results()
 {
     $('.search-in-progress').css("cursor","wait");
     
-    ajax_solr_text_search(true); // newResultPage=true
+    ajax_solr_text_search(false,true); // newSearch=false, newResultPage=true
 }
 
 function show_new_results(delta) {
@@ -358,7 +360,7 @@ var store_id;
 
 var store_result_page_starts = [];
 
-function show_results(jsonData,newResultPage)
+function show_results(jsonData,newSearch,newResultPage)
 {
     var response = jsonData.response;
     var num_found = response.numFound;
@@ -374,30 +376,33 @@ function show_results(jsonData,newResultPage)
 	store_line_num = 1;
 	store_id = null;
 
-	if (search_start == 0) {
+	//if (search_start == 0) {
+	if (newSearch) {
 	    // The very beginning of the search results
 	    iprogressbar.cancel();
 	    
-	    $('#srt-export').hide(); // hide until volume count is in
+	    $('#export-by').hide(); // hide until volume count is in
+	}
+
+	var facet_fields = jsonData.facet_counts.facet_fields;
 	
-	    var facet_fields = jsonData.facet_counts.facet_fields;
-    
-	    var facet_html = show_results_facet_html(facet_fields);
-	    if (show_facet == 1) {
-		if (facet_level == "page") {
-		    $('#facet-units').html(" (page count)");
-		}
-		else {
-		    $('#facet-units').html(" (volume count)");
-		}
-		
-		$(".narrowsearch").show();
-		$("#facetlist").html(facet_html);
-	    } else if (show_facet == 0){
-		$(".narrowsearch").hide();
-		facet_html = "";
-		$("#facetlist").html(facet_html);
+	var facet_html = show_results_facet_html(facet_fields);
+	if (show_facet == 1) {
+	    if (facet_level == FacetLevelEnum.Page) {
+		$('#facet-units').html(" (page count)");
 	    }
+	    else {
+		$('#facet-units').html(" (volume count)");
+	    }
+	    
+	    $(".narrowsearch").show();
+	    $("#facetlist").html(facet_html);
+	    facet_html_add_checkbox_handlers();
+	    
+	} else if (show_facet == 0){
+	    $(".narrowsearch").hide();
+	    facet_html = "";
+	    $("#facetlist").html(facet_html);
 	}
     }
    
@@ -430,26 +435,27 @@ function show_results(jsonData,newResultPage)
 	
 	if (num_docs > 0) {
 
-	    if (search_start == 0) {
+	    //if (search_start == 0) {
+	    if (newSearch) {
 		// The very beginning of the search results
 
 		$('#search-results-total').show();
 		$('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
 		
-		if (facet_level == "page") {
+		if (facet_level == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
 			$('#srt-vol-count-computing').show();
 			$('#srt-vol-count').html("");
 			$('#srt-vol-count-span').show();
 			
-			var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true
-			$("#srt-vol-export").show();
+			//var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true // ****
+			$("#export-by-vol").show();
 			
-			var data_str = get_solr_stream_search_data_str(store_search_args.q)
-			$("#srt-page-export").show();
+			//var data_str = get_solr_stream_search_data_str(store_search_args.q) // ****
+			$("#export-by-page").show();
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
-			$("#srt-ef-export").show();
+			$("#export-ef-zip").show();
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
@@ -462,10 +468,10 @@ function show_results(jsonData,newResultPage)
 		else {
 		    // volume level
 		    if (num_found < num_found_vol_limit) {
-			$("#srt-vol-export").show();
-			$("#srt-page-export").hide();
+			$("#export-by-vol").show();
+			$("#export-by-page").hide();
 			$("#srt-ef-export").show();
-			$("#srt-export").show("slide", { direction: "up" }, 1000);
+			$("#export-by").fadeIn(1500);
 			
 			// restore vol-count display back to default text, ready for next vol count computation
 			$('#srt-vol-count-computing').show();
@@ -497,7 +503,9 @@ function show_results(jsonData,newResultPage)
 	    }
 	    
 	    var showing_matches = "<hr /><p>";
-	    showing_matches += (facet_level == "page") ? "Showing page-level matches: " : "Showing volume matches:";
+	    showing_matches += (facet_level == FacetLevelEnum.Page)
+		? "Showing page-level matches: "
+		: "Showing volume matches:";
 	    
 	    showing_matches += '<span id="sm-from">' + from + '</span>';
 	    showing_matches += "-";
@@ -677,7 +685,7 @@ function show_results(jsonData,newResultPage)
 	    progressbar_bot.progressbar( "value",100 * line_num / num_results_per_page);
 
 	    store_search_args.start = search_end	    
-	    ajax_solr_text_search(false); // newResultPage=false
+	    ajax_solr_text_search(false,false); // newSearch=false, newResultPage=false
 	}
 	else {
 	    progressbar_top.progressbar( "value",0);
@@ -802,7 +810,7 @@ function expand_vfield(q_term, all_vfields, query_level) {
 	if (all_vfields) {
 		for (var fi = 0; fi < metadata_fields.length; fi++) {
 		        var vfield = metadata_fields[fi];
-		        if (query_level == "page") {
+		        if (query_level == FacetLevelEnum.Page) {
 		            vfield = "volume"+ vfield + "xt";
 			}
 			vfields.push(vfield + ":" + q_term);
@@ -813,7 +821,7 @@ function expand_vfield(q_term, all_vfields, query_level) {
 		} else {
 		        // make searching by title the default
 		        var vfield = "title_t";
-		        if (query_level == "page") {
+		        if (query_level == FacetLevelEnum.Page) {
 		            vfield = "volume"+ vfield + "xt";
 			}
 
@@ -1034,10 +1042,10 @@ function submit_action(event) {
 
         if (arg_q == "") {
 	    // Potentially only looking at volume level terms
-	    facet_level = "volume";
+	    facet_level = FacetLevelEnum.Volume;
 	}
         else {
-	    facet_level = "page";
+	    facet_level = FacetLevelEnum.Page;
 	}
         arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
 
@@ -1113,7 +1121,7 @@ function submit_action(event) {
 
     iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
     
-    ajax_solr_text_search(true); // newResultPage=true
+    ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 }
 
 

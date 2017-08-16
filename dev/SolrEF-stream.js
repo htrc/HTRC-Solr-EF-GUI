@@ -27,7 +27,7 @@ function get_solr_stream_search_clause(arg_q)
     
     for (kf in facet) {
 	var facet_val = facet[kf];
-	if (facet_level == "page") {
+	if (facet_level == FacetLevelEnum.Page) {
 	    facet_val = "volume" + facet_val;
 	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
 	    facet_val = facet_val.replace(/_s$/,"_htrcstring");

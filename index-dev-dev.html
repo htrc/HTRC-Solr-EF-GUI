@@ -9,10 +9,6 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<!--
-	<link rel="stylesheet" type="text/css" href="https://babel.hathitrust.org/common/unicorn/css/common.css" />
-	-->
-	
         <!-- Bootstrap -->
         <link href="assets/bootstrap.css" rel="stylesheet" media="screen">
         <link href="assets/main.css" rel="stylesheet" media="screen">
@@ -21,7 +17,8 @@
         <link href="assets/tomorrow.css" rel="stylesheet">
 	<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
 	
-        <link href="index.css" rel="stylesheet">
+        <link href="dev/SolrEF.css" rel="stylesheet">
+        <link href="dev/SolrEF-progressbar.css" rel="stylesheet">
 	
         <script src="assets/jquery.js"></script>
         <script src="assets/highlight.js"></script>
@@ -354,39 +351,41 @@
 	  </div>
 
 	  <div id="search-indeterminate-div" class="search-indeterminate" style="display:none;">
-	    <span class="progressbar-margin progress-label" >Searching 20 Solr Cores
+	    <span class="progressbar-margin progressbar-label" >Searching 20 Solr Cores
 	      <span id="search-indeterminate-label"></span>
 	    </span>
-	    <div id="search-progressbar-indeterminate" class="progressbar-margin"></div>	    
+	    <div id="search-indeterminate-progressbar" class="progressbar-margin"></div>	    
 	  </div>
 
     <div id="search-results-page" class="con page centered" style="display: none;">
       
       <div class="facets sidebar">
         <div id="selectedFacets" class="advancedSelectedFacets">
+	  <h3>Applied Filters</h3>
           <ul class="filters  list-unstyled">
  
           </ul>
 	</div>
-	<div id="srt-export" class="narrow" style="display: none">
+	<div id="export-by" class="narrow" style="display: none">
           <h3 class="narrowexport">Export Results</h3>
 	  <div>
-	    <a id="srt-vol-export"  class="export-item" style="display: none"
+	    <a id="export-by-vol"  class="export-item" style="display: none"
 	       download="htrc-volume-export.json" target="_blank">
 	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
 	    </a>
-	    <a id="srt-page-export" class="export-item" style="display: none"
+	    <a id="export-by-page" class="export-item" style="display: none"
 	       download="htrc-page-export.json" target="_blank">
 	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
 	    </a>
-	    <a id="srt-ef-export" class="export-item" style="display: none"
+	    <a id="export-ef-zip" class="export-item" style="display: none"
 	       download>
 	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 	    </a>
 	  </div>
         </div>
         <div class="narrow">
-          <h3 class="narrowsearch" style="display: none">Refine Results<span id="facet-units"></span></h3>
+          <h3 class="narrowsearch" style="display: none">Refine Results
+	    <span id="facet-units" class="page-count"></span></h3>
           <div id="facetlist">
          
           </div>
@@ -405,7 +404,7 @@
 	  
 	  <div style="float:right; width=144px;">
 	    <div class="search-loading-more" style="display:none;">
-	      <span class="progress-label">Loading more results: </span>
+	      <span class="progressbar-label">Loading more results: </span>
 	      <div id="search-lm-progressbar-top"></div>
 	    </div>
 	  </div>
@@ -421,7 +420,7 @@
       	<div id="search-results">
 	</div>
       	<div class="search-loading-more" style="display:none;">
-	  <span class="progress-label">Loading more results: </span>
+	  <span class="progressbar-label">Loading more results: </span>
 	  <div id="search-lm-progressbar-bot"></div>	    
 	</div>
 	

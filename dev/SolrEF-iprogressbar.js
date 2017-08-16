@@ -44,7 +44,7 @@ IndeterminateProgressbar.prototype.trigger_delayed_display = function(delay)
 
 var iprogressbar = new IndeterminateProgressbar('search-indeterminate-div',
 						'search-indeterminate-label',
-						'search-progressbar-indeterminate');
+						'search-indeterminate-progressbar');
 
 
 $(document).ready(function(){
