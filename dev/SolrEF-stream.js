@@ -7,9 +7,11 @@ function get_solr_stream_search_clause(arg_q)
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
 
+    var escaped_arg_q = arg_q.replace(/,/g,"\\,");
+    
     var vol_count_args = {
 	qt: "/export",
-	q: arg_q,
+	q: escaped_arg_q,
 	sort: "id asc",
 	fl: "volumeid_s,id",
 	indent: arg_indent,
@@ -20,7 +22,7 @@ function get_solr_stream_search_clause(arg_q)
 
     var search_stream_args = [];
 
-    for (ka in vol_count_args) {
+    for (ka in vol_count_args) {	
 	search_stream_args.push(ka + '="' + vol_count_args[ka] + '"');
     }
 
@@ -39,11 +41,14 @@ function get_solr_stream_search_clause(arg_q)
 	var ks = filters[kf].split("--");
 	var ks0 = ks[0];
 	var ks1 = ks[1];
-	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
+	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,");
 
 	search_stream_args.push('fq=' + ks0 + ':("' + ks1 + '")');
     }
-    
+
+    //search_stream_args = search_stream_args.map(function(v) { return v.replace(/,/g,"\\,"); });
+    //search_stream_args.map(function(v) { return v.replace(/\//g,"\\/").replace(/:/g,"\\:"); });
+    //var search_stream_args = search_stream_args.map(escape_solr_query); // ****
     
     var search_stream_args_str = search_stream_args.join(",");
 
@@ -88,6 +93,8 @@ function get_solr_stream_data_str(arg_q,doRollup)
 function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 {        
     var data_str = get_solr_stream_data_str(arg_q,doRollup);
+
+    //console.log("***## data str = " + data_str);
     
     $.ajax({
 	type: "GET",
