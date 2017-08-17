@@ -101,7 +101,32 @@ dd.showfacet, dd.hidefacet {
 span#facet-units {
     font-size: 80%;
 }
-    
+
+
+.facet-apply-title {
+    padding-right: 5px;
+}
+
+
+.facet-apply-wrapper {
+    padding: 0;
+    position: relative;
+}
+
+.facet-apply {
+    display: none; /* default */
+    width: 15rem;
+    position: absolute;
+    font-weight: 100;
+    font-style: italic;
+    left: 0;
+    top: -1px;
+}
+
+.facet-apply a {
+    color: #32c786;
+}
+
 span.workset {
     color: #924a0b;
 }

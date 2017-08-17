@@ -1,4 +1,6 @@
-
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 // add_titles() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
@@ -52,20 +54,34 @@ function add_titles_solr(jsonData) {
 	var title = doc_val.title_s;
 	
 	var details = [];
-	if (doc_val.typeOfResource_s) {
-	    details.push("Resource type: " + doc_val.typeOfResource_s);
-	}
 	if (doc_val.names_ss) {
-	    details.push("Author(s): " + doc_val.names_ss.join(", "));
-	}
-	if (doc_val.pubDate_s) {
-	    details.push("Publication date: " + doc_val.pubDate_s);
+	    var names = doc_val.names_ss.map(strtrim).join(", ");
+	    if (!names.match(/^\s*$/)) {
+		details.push("Author(s): " + names);
+	    }
 	}
 	if (doc_val.genre_ss) {
-	    details.push("Genre: " + doc_val.genre_ss.join(", "));
+	    var genres = doc_val.genre_ss.map(strtrim).join(", ");
+	    if (!genres.match(/^\s*$/)) {
+		details.push("Genre: " + genres.capitalize() );
+	    }
 	}
-	
-	var details_str = details.join(";\n");	    
+	if (doc_val.pubDate_s && !doc_val.pubDate_s.match(/^\s*$/)) {
+	    details.push("Publication date: " + doc_val.pubDate_s);
+	}
+	if (doc_val.pubPlace_s && !doc_val.pubPlace_s.match(/^\s*$/)) {
+	    var pp_val = pretty_print_facet_value("pubPlace_s",doc_val.pubPlace_s)
+	    details.push("Publication place: " + pp_val);
+	}
+	if (doc_val.language_s && !doc_val.language_s.match(/^\s*$/)) {
+	    var pp_val = pretty_print_facet_value("language_s",doc_val.language_s)
+	    details.push("Language: " + pp_val);
+	}
+	if (doc_val.typeOfResource_s && !doc_val.typeOfResource_s.match(/^\s*$/)) {
+	    details.push("Resource type: " + doc_val.typeOfResource_s.capitalize() );
+	}
+
+	var details_str = details.map(strtrim).join(";\n");	    
 	var $tooltip_title = $('<span />').attr('title',details_str).html(title);
 	
 	$("[name='" + htid + "']").each(function () {
@@ -440,8 +456,12 @@ function show_results(jsonData,newSearch,newResultPage)
 		// The very beginning of the search results
 
 		$('#search-results-total').show();
-		$('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
-		
+	    }
+	    
+	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+
+	    if (search_start == 0) {
+
 		if (facet_level == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
 			$('#srt-vol-count-computing').show();
@@ -765,7 +785,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
     
     var fl_args = [ "id", "title_s", "handleUrl_s",
-		    "genre_ss", "names_ss", "pubDate_s", "typeOfResource_s" ];
+		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s" ];
     var fl_args_str = fl_args.join(",");
     
     var url_args = {
@@ -1010,48 +1030,49 @@ function submit_action(event) {
     $('.search-in-progress').css("cursor","wait");
 
     filters = [];
+    refined_filters = [];
+    refine_query = {};
     facetlist_set();
     
-        show_facet = 0;
+    show_facet = 0;
     
-        store_search_action = solr_search_action;
+    store_search_action = solr_search_action;
 
-	var arg_indent = $('#indent').attr('value');
-	var arg_wt = $('#wt').attr('value');
-
-	var q_text = $('#q').val().trim();
-	var vq_text = $('#vq').val().trim();
-
-
-	group_by_vol_checked = $('#group-results-by-vol:checked').length;
+    var arg_indent = $('#indent').attr('value');
+    var arg_wt = $('#wt').attr('value');
     
-	var search_all_langs_checked = $('#search-all-langs:checked').length;
-	var search_all_vfields_checked = $('#search-all-vfields:checked').length;
-
-	if ((q_text === "") && (vq_text === "")) {
-		$('.search-in-progress').css("cursor","auto");
-		htrc_alert("No query term(s) entered");
-		return;
-	}
-
-        explain_search = { 'group_by_vol': null,
-			   'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
-			   'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
-
-	arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
-
-        if (arg_q == "") {
-	    // Potentially only looking at volume level terms
-	    facet_level = FacetLevelEnum.Volume;
-	}
-        else {
-	    facet_level = FacetLevelEnum.Page;
-	}
-        arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
-
-	//console.log("*** arg_vq = " + arg_vq);
-	//console.log("*** arg_q = " + arg_q);
-
+    var q_text = $('#q').val().trim();
+    var vq_text = $('#vq').val().trim();
+        
+    group_by_vol_checked = $('#group-results-by-vol:checked').length;
+    
+    var search_all_langs_checked = $('#search-all-langs:checked').length;
+    var search_all_vfields_checked = $('#search-all-vfields:checked').length;
+    
+    if ((q_text === "") && (vq_text === "")) {
+	$('.search-in-progress').css("cursor","auto");
+	htrc_alert("No query term(s) entered");
+	return;
+    }
+    
+    explain_search = { 'group_by_vol': null,
+		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
+		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
+    
+    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+    
+    if (arg_q == "") {
+	// Potentially only looking at volume level terms
+	facet_level = FacetLevelEnum.Volume;
+    }
+    else {
+	facet_level = FacetLevelEnum.Page;
+    }
+    arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
+    
+    //console.log("*** arg_vq = " + arg_vq);
+    //console.log("*** arg_q = " + arg_q);
+    
     
 	if (arg_q == "") {
 		if (arg_vq == "") {
@@ -1094,7 +1115,7 @@ function submit_action(event) {
 	}
 	if ($('#vq').attr("data-key") != vq_text) {
 		$('#vq').attr("data-key",vq_text);
-		filters = [];
+		filters = []; // **** should refined_filters, refine_query and refine_query_count also be reset?
 		facetlist_set();
 	}
 	//console.log("*** NOW arg_q = " + arg_q);
