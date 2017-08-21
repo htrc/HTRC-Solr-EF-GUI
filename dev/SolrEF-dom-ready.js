@@ -252,7 +252,7 @@ $(document).ready(function(){
     $('#export-by-vol').click(function (event) {
 	event.preventDefault();
 	$('.export-item').css("cursor","wait");
-	if (facet_level == FacetLevelEnum.Page) {
+	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
 	}
 	else {
@@ -273,7 +273,7 @@ $(document).ready(function(){
 	    // lazy evaluation, workout out what href should be, and then trigger click once more
 	    event.preventDefault();
 	    $('.export-item').css("cursor","wait");
-	    if (facet_level == FacetLevelEnum.Page) {
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
 	    }
 	    else {

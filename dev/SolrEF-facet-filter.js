@@ -12,22 +12,54 @@ var RefineQueryEnum = {
 };
 */
 
-// Global variable show_facet to control if faceting is used.
-var show_facet  = 0;
-var facet_level = null;
 
-var filters = [];
-var refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
-var refine_query_count = {};
-var refined_filters = [];
+function FacetFilter()
+{
+    this.show_facet  = true; // on by default
+    this.facet_level = null;
 
-var facet = ['genre_ss', 'language_s', 'rightsAttributes_s', 'names_ss', 'pubPlace_s', 'bibliographicFormat_s'];
-var facet_display_name = {'genre_ss':'Genre', 'language_s': 'Language', 'rightsAttributes_s': 'Copyright Status',
-			  'names_ss': 'Author', 'pubPlace_s': 'Place of Publication',
-			  'bibliographicFormat_s': 'Original Format'};
+    this.filters = [];
+    this.refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
+    this.refine_query_count = {};
+    this.refined_filters = [];
+   
+}
 
+// Static member: The facet fields to display
+FacetFilter.FacetFieldsDisplay =
+    { 'genre_ss'             : 'Genre',
+      'language_s'           : 'Language',
+      'rightsAttributes_s'   : 'Copyright Status',
+      'names_ss'             : 'Author',
+      'pubPlace_s'           : 'Place of Publication',
+      'bibliographicFormat_s': 'Original Format' };
+    
 
-function pretty_print_facet_value(kv,displayed_item)
+FacetFilter.prototype.reset = function()
+{
+    // If looking for fuller reset, consider call constructor
+    this.filters = [];
+    this.refine_query = {}; 
+    this.refine_query_count = {};
+    this.refined_filters = [];
+}
+				      
+FacetFilter.prototype.setShowFacet = function(state)
+{
+    this.show_facet = state;
+}
+
+FacetFilter.prototype.setFacetLevel = function(level)
+{
+    this.facet_level = level;
+}
+
+FacetFilter.prototype.getFacetLevel = function()
+{
+    return this.facet_level;
+}
+
+FacetFilter.prototype.prettyPrintValue = function(kv,displayed_item)
 {
     if (kv == "rightsAttributes_s") {
 	if (displayed_item in rights_dic) {
@@ -62,23 +94,25 @@ function pretty_print_facet_value(kv,displayed_item)
 
 
 
-function show_results_facet_html(facet_fields)
+FacetFilter.prototype.showResultsHtml = function(facet_fields)
 {
     var facet_html = "";    
     
     for (var k in facet_fields) {
 	var facet_dl = "<dl>";
 	var kv = k;
-	if (facet_level == FacetLevelEnum.Page) {
+	if (this.facet_level == FacetLevelEnum.Page) {
 	    kv = kv.replace(/^volume/,"");
 	    kv = kv.replace(/_htrcstrings$/,"_ss"); 
 	    kv = kv.replace(/_htrcstring$/,"_s"); 
 	}
 
 	var apply_icon = '<span class="ui-icon ui-icon-circle-triangle-e"></span>';
-	    
+
+	var kv_display = FacetFilter.FacetFieldsDisplay[kv];
+	
 	facet_dl += '<dt class="facetField">';
-	facet_dl +=   '<span class="facet-apply-title">' + facet_display_name[kv] + ':</span>';
+	facet_dl +=   '<span class="facet-apply-title">' + kv_display + ':</span>';
 	facet_dl +=   '<span class="facet-apply-wrapper">&nbsp';
 	facet_dl +=     '<span id="refine-'+k+'" class="facet-apply"><a data-key="'+k+'">Refine Search '+apply_icon+'</a></span>'
 	facet_dl +=     '<span id="filter-'+k+'" class="facet-apply"><a data-key="'+k+'">Apply Filter '+apply_icon+'</a></span>'
@@ -97,14 +131,15 @@ function show_results_facet_html(facet_fields)
 		break;
 	    }
 	
-	    if ((filters.indexOf(k + "--" + item_term) < 0) && (refined_filters.indexOf(k + "--" + item_term) < 0)) {
+	    if ((this.filters.indexOf(k + "--" + item_term) < 0)
+		&& (this.refined_filters.indexOf(k + "--" + item_term) < 0)) {
 		// neither a facet that is currently being used as a filter, nor one used in a refined-search
 		var _class = "showfacet";
 		if (ii > 5) {
 		    _class = "hidefacet";
 		}
 		var displayed_item_term = item_term;
-		var pp_displayed_item_term = pretty_print_facet_value(kv,item_term);
+		var pp_displayed_item_term = this.prettyPrintValue(kv,item_term);
 		
 		//if (pp_displayed_item_term != displayed_item_term) {
 		//var raw_item_term = "Raw facet: '"+displayed_item_term+"'";
@@ -146,9 +181,11 @@ function show_results_facet_html(facet_fields)
 }
 
 
-function facet_html_add_checkbox_handlers()
+FacetFilter.prototype.addCheckboxHandlers = function()
 {
-    $('input.facetbox[type="checkbox"]').on("change",function () {
+    var that = this;
+    
+    $('input.facetbox[type="checkbox"]').on("change",function() {
 	
 	// User has clicked on one of the currently applied filters
 	// => remove it from 'filters', then instigate an updated search
@@ -161,24 +198,22 @@ function facet_html_add_checkbox_handlers()
 	
 	if (checkbox_inc) {
 	    // just been checked on
-	    if (!(facet_key in refine_query)) {
-		refine_query[facet_key] = {};
-		refine_query_count[facet_key] = 0;
+	    if (!(facet_key in that.refine_query)) {
+		that.refine_query[facet_key] = {};
+		that.refine_query_count[facet_key] = 0;
 	    }
-	    refine_query[facet_key][term] = 1;	    
-	    refine_query_count[facet_key]++;
+	    that.refine_query[facet_key][term] = 1;	    
+	    that.refine_query_count[facet_key]++;
 	    
 	    //console.log("**## Added [" + facet_key + "]." + term);
 	}
 	else {
-	    delete refine_query[facet_key][term];
-	    refine_query_count[facet_key]--;
+	    delete that.refine_query[facet_key][term];
+	    that.refine_query_count[facet_key]--;
 	    //console.log("**## Removed [" + facet_key + "]." + term);
 	}
 
-	//var fk_terms = Object.keys(refine_query[facet_key]);
-	//var fk_terms_count = fk_terms.length;
-	var fk_terms_count = refine_query_count[facet_key];
+	var fk_terms_count = that.refine_query_count[facet_key];
 	
 	if (checkbox_inc && (fk_terms_count == 1)) {
 	    // change back to filter
@@ -200,23 +235,23 @@ function facet_html_add_checkbox_handlers()
 	
     });
 
-    $('dt.facetField').on("click","a", function () {
+    $('dt.facetField').on("click","a", function() {
 	var parent_id = $(this).parent().attr("id");
 	var facet_key = $(this).attr("data-key");
 
 	if ("filter-"+facet_key == parent_id) {
 	    console.log("***filter: " + facet_key);
 
-	    var term = Object.keys(refine_query[facet_key])[0];
+	    var term = Object.keys(that.refine_query[facet_key])[0];
 	    	    
-	    if (filters.indexOf(facet_key + "--" + term) < 0) {
-		filters.push(facet_key + "--" + term);
+	    if (that.filters.indexOf(facet_key + "--" + term) < 0) {
+		that.filters.push(facet_key + "--" + term);
 	    }
 
 	    //// remove item from facet area
 	    //$(this).parent().remove();
 
-	    facetlist_set();
+	    facet_filter.facetlistSet();
 	    store_search_args.start = store_start;
 	    show_updated_results();
 	    
@@ -227,16 +262,16 @@ function facet_html_add_checkbox_handlers()
 
 	    var facet_or_terms = [];
 	    
-	    var terms = Object.keys(refine_query[facet_key]); // **** replace with keys in
+	    var terms = Object.keys(that.refine_query[facet_key]); // **** replace with keys in
 	    for (var i=0; i<terms.length; i++) {
 		var term = terms[i];
 		term = term.replace(/\//g,"\\/").replace(/:/g,"\\:");
 		
 		facet_or_terms.push(facet_key+':"'+term+'"');
 
-		if (refined_filters.indexOf(facet_key + "--" + term) < 0) {
+		if (that.refined_filters.indexOf(facet_key + "--" + term) < 0) {
 		    console.log("*** pushing on refined filter: " + facet_key + "--" + term);
-		    refined_filters.push(facet_key + "--" + term);
+		    that.refined_filters.push(facet_key + "--" + term);
 		}
 
 	    }
@@ -244,17 +279,17 @@ function facet_html_add_checkbox_handlers()
 	    var facet_terms_arg = "("+facet_or_terms.join(" OR ")+")";
 	    
 	    var filter_and_terms = [];
-	    for (var k in filters) {
-		var filter_split = filters[k].split("--");
+	    for (var k in that.filters) {
+		var filter_split = that.filters[k].split("--");
 		var filter_key = filter_split[0];
 		var filter_term = filter_split[1];
 		filter_term = filter_term.replace(/\//g,"\\/").replace(/:/g,"\\:");
 		
 		filter_and_terms.push(filter_key+':"'+filter_term+'"');
 
-		if (refined_filters.indexOf(filter_key + "--" + filter_term) < 0) {
+		if (that.refined_filters.indexOf(filter_key + "--" + filter_term) < 0) {
 		    console.log("*** pushing on refined filter for existing filter: " + filter_key + "--" + filter_term);
-		    refined_filters.push(filter_key + "--" + filter_term);
+		    that.refined_filters.push(filter_key + "--" + filter_term);
 		}
 
 	    }
@@ -270,11 +305,11 @@ function facet_html_add_checkbox_handlers()
 
 	    // Now that all the selectted refine_query terms and existing filters
 	    // have been merged into the main query arg, reset these values
-	    filters = [];
-	    refine_query = {};
-	    refine_query_count = {};
-	    
-	    facetlist_set();
+	    that.filters = [];
+	    that.refine_query = {};
+	    that.refine_query_count = {};
+
+	    facet_filter.facetlistSet();
 	    
 	    // Trigger a brand new search
 	    if ($('#search-results-page').is(":visible")) {
@@ -295,28 +330,53 @@ function facet_html_add_checkbox_handlers()
 	
 }
 
-function facetlist_set()
+FacetFilter.prototype.display = function(jsonFacetCounts)
+{
+    if (this.show_facet) {
+	if (this.facet_level == FacetLevelEnum.Page) {
+	    $('#facet-units').html(" (page count)");
+	}
+	else {
+	    $('#facet-units').html(" (volume count)");
+	}
+	
+	var facet_fields = jsonFacetCounts.facet_fields;
+	
+	var facet_html = this.showResultsHtml(facet_fields);
+	
+	$(".narrowsearch").show();
+	$("#facetlist").html(facet_html);
+	this.addCheckboxHandlers();
+	
+    }
+    else {
+	$(".narrowsearch").hide();
+	$("#facetlist").html("");
+    }
+}
+
+FacetFilter.prototype.facetlistSet = function()
 {
     // Display the filters that are currently in effect
     
     var facetlist_html = "";
-
+    
     var cancel_png = "assets/jquery-ui-lightness-1.12.1/images/cancel.png";
     
-    for (var f in filters) {
-	var f_split = filters[f].split("--");
+    for (var f in this.filters) {
+	var f_split = this.filters[f].split("--");
 
 	var kv0 = f_split[0];
 	var kv1 = f_split[1];
 
-	if (facet_level == FacetLevelEnum.Page) {
+	if (this.facet_level == FacetLevelEnum.Page) {
 	    kv0 = kv0.replace(/^volume/,"");
 	    kv0 = kv0.replace(/_htrcstrings$/,"_ss"); 
 	    kv0 = kv0.replace(/_htrcstring$/,"_s"); 
 	}
-	var kv0_display = facet_display_name[kv0]
+	var kv0_display = FacetFilter.FacetFieldsDisplay[kv0]
 
-	var facet_val  = pretty_print_facet_value(kv0,kv1);	
+	var facet_val  = this.prettyPrintValue(kv0,kv1);	
 	
 	facetlist_html += '<li>';
 	facetlist_html +=   '<a href="javascript:;" class="unselect">';
@@ -337,20 +397,20 @@ function facetlist_set()
 }
 
 
-function solr_search_append_fact_field_args(url_args)
+FacetFilter.prototype.solrSearchAppendArgs = function(url_args)
 {
-    for (var facet_key in facet) {
-	var facet_val = facet[facet_key];
-	if (facet_level == FacetLevelEnum.Page) {
-	    facet_val = "volume" + facet_val;
-	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
-	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
+    for (var facet_field in FacetFilter.FacetFieldsDisplay) {
+
+	if (this.facet_level == FacetLevelEnum.Page) {
+	    facet_field = "volume" + facet_field;
+	    facet_field = facet_field.replace(/_ss$/,"_htrcstrings");
+	    facet_field = facet_field.replace(/_s$/,"_htrcstring");
 	}
-	url_args.push('facet.field=' + facet_val);
+	url_args.push('facet.field=' + facet_field);
     }
     
-    for (var filter_key_pair in filters) {
-	var ks = filters[filter_key_pair].split("--");
+    for (var filter_key_pair in this.filters) {
+	var ks = this.filters[filter_key_pair].split("--");
 	var ks0 = ks[0];
 	var ks1 = ks[1];
 	//ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,");
@@ -362,10 +422,12 @@ function solr_search_append_fact_field_args(url_args)
     return url_args;
 }
 
-$(function () {
+var facet_filter = new FacetFilter();
+
+$(function() {
     //Facet related page setup
     
-    $("#facetlist").on("click","a",function () {
+    $("#facetlist").on("click","a",function() {
 
 	var $class = $(this).attr("class");
 	
@@ -397,26 +459,26 @@ $(function () {
 	    var term = $(this).attr("data-term");
 
 	    
-	    if (filters.indexOf(facet_key + "--" + term) < 0) {
+	    if (facet_filter.filters.indexOf(facet_key + "--" + term) < 0) {
 		console.log("*** pushing on filter: " + facet_key + "--" + term);
-		filters.push(facet_key + "--" + term);
+		facet_filter.filters.push(facet_key + "--" + term);
 	    }
 
 	    // remove item from facet area
 	    $(this).parent().remove();
-	    facetlist_set();
+	    facet_filter.facetlistSet();
 	    //console.log("*** facetlist on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
 	    store_search_args.start = store_start;
 	    show_updated_results();
 	}
     });
     
-    $(".filters").on("click","a",function () {
+    $(".filters").on("click","a",function() {
 	// User has clicked on one of the currently applied filters
 	// => remove it from 'filters', then instigate an updated search
 	
-	filters.splice($(this).parent().index(), 1);
-	facetlist_set();
+	facet_filter.filters.splice($(this).parent().index(), 1);
+	facet_filter.facetlistSet();
 	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
 	
 	store_search_args.start = store_start;
