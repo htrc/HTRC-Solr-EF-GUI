@@ -1,3 +1,4 @@
+"use strict";
 
 var FacetLevelEnum = {
     Page: 1,
@@ -65,7 +66,7 @@ function show_results_facet_html(facet_fields)
 {
     var facet_html = "";    
     
-    for (k in facet_fields) {
+    for (var k in facet_fields) {
 	var facet_dl = "<dl>";
 	var kv = k;
 	if (facet_level == FacetLevelEnum.Page) {
@@ -243,7 +244,7 @@ function facet_html_add_checkbox_handlers()
 	    var facet_terms_arg = "("+facet_or_terms.join(" OR ")+")";
 	    
 	    var filter_and_terms = [];
-	    for (k in filters) {
+	    for (var k in filters) {
 		var filter_split = filters[k].split("--");
 		var filter_key = filter_split[0];
 		var filter_term = filter_split[1];
@@ -302,7 +303,7 @@ function facetlist_set()
 
     var cancel_png = "assets/jquery-ui-lightness-1.12.1/images/cancel.png";
     
-    for (f in filters) {
+    for (var f in filters) {
 	var f_split = filters[f].split("--");
 
 	var kv0 = f_split[0];
@@ -336,12 +337,37 @@ function facetlist_set()
 }
 
 
+function solr_search_append_fact_field_args(url_args)
+{
+    for (var facet_key in facet) {
+	var facet_val = facet[facet_key];
+	if (facet_level == FacetLevelEnum.Page) {
+	    facet_val = "volume" + facet_val;
+	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
+	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
+	}
+	url_args.push('facet.field=' + facet_val);
+    }
+    
+    for (var filter_key_pair in filters) {
+	var ks = filters[filter_key_pair].split("--");
+	var ks0 = ks[0];
+	var ks1 = ks[1];
+	//ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,");
+	ks1 = escape_solr_query(ks1);
+
+	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
+    }
+
+    return url_args;
+}
+
 $(function () {
     //Facet related page setup
     
     $("#facetlist").on("click","a",function () {
 
-	$class = $(this).attr("class");
+	var $class = $(this).attr("class");
 	
 	if ($(this).hasClass("morefacets")) {
 	    obj = $class.split(" ")[0];

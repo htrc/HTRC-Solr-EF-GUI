@@ -1,9 +1,9 @@
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-}
+"use strict";
 
 // add_titles() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
+
+var store_search_xhr = null;
 
 function add_titles(json_data)
 {
@@ -112,14 +112,16 @@ function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
 
-    for (ka in store_search_args) {
+    for (var ka in store_search_args) {
 	url_args.push(ka + '=' + store_search_args[ka]);
     }
 
-    // DUPLICATE CODE??
+    url_args = solr_search_append_fact_field_args(url_args);
     
-    for (k in facet) {
-	var facet_val = facet[k];
+    // DUPLICATE CODE??
+    /*
+    for (var facet_key in facet) {
+	var facet_val = facet[facet_key];
 	if (facet_level == FacetLevelEnum.Page) {
 	    facet_val = "volume" + facet_val;
 	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
@@ -128,25 +130,30 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	url_args.push('facet.field=' + facet_val);
     }
     
-    for (k in filters) {
-	var ks = filters[k].split("--");
+    for (var filter_key_pair in filters) {
+	var ks = filters[filter_key_pair].split("--");
 	var ks0 = ks[0];
 	var ks1 = ks[1];
 	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
 
 	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
     }
-
+    */
+    
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
+
+    store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
 	type: "GET",
 	url: store_search_action,
-	// async: false, // ****
 	data: data_str,
 	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
 	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
 	error: ajax_error
     });
@@ -383,7 +390,9 @@ function show_results(jsonData,newSearch,newResultPage)
     var docs = response.docs;
     var num_docs = docs.length;
 
-
+    // ajax call has returnec successfully
+    store_search_xhr = null;
+    
     var search_start = parseInt(store_search_args.start);
 
     if (newResultPage) {
@@ -400,9 +409,6 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#export-by').hide(); // hide until volume count is in
 	}
 
-	var facet_fields = jsonData.facet_counts.facet_fields;
-	
-	var facet_html = show_results_facet_html(facet_fields);
 	if (show_facet == 1) {
 	    if (facet_level == FacetLevelEnum.Page) {
 		$('#facet-units').html(" (page count)");
@@ -410,15 +416,18 @@ function show_results(jsonData,newSearch,newResultPage)
 	    else {
 		$('#facet-units').html(" (volume count)");
 	    }
-	    
+
+	    var facet_fields = jsonData.facet_counts.facet_fields;
+	
+	    var facet_html = show_results_facet_html(facet_fields);
+
 	    $(".narrowsearch").show();
 	    $("#facetlist").html(facet_html);
 	    facet_html_add_checkbox_handlers();
 	    
 	} else if (show_facet == 0){
 	    $(".narrowsearch").hide();
-	    facet_html = "";
-	    $("#facetlist").html(facet_html);
+	    $("#facetlist").html("");
 	}
     }
    
@@ -547,8 +556,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
 	    $('#next-prev').hide();
-	}
-		
+	}		
 
     }
     
@@ -603,7 +611,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		    var sid_block = sid_label + "-block";
 
 		    var prev_seqs = $('#'+sid_block).find('> nobr > a.seq');
-		    prev_seq_count = prev_seqs.length;
+		    var prev_seq_count = prev_seqs.length;
 
 		    if (prev_seq_count==0) {
 		    	$('#'+ps_label_id).before(html_item);
@@ -1059,7 +1067,7 @@ function submit_action(event) {
 		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
 		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
     
-    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+    var arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
     
     if (arg_q == "") {
 	// Potentially only looking at volume level terms
@@ -1068,7 +1076,7 @@ function submit_action(event) {
     else {
 	facet_level = FacetLevelEnum.Page;
     }
-    arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
+    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
     
     //console.log("*** arg_vq = " + arg_vq);
     //console.log("*** arg_q = " + arg_q);

@@ -1,11 +1,21 @@
 // Indeterminante Progressbar
 
-function IndeterminateProgressbar(wrapper_id,label_id,progressbar_id) {
+function IndeterminateProgressbar(wrapper_id,label_id,progressbar_id,cancel_id) {
     this.wrapper_id     = wrapper_id;
     this.label_id       = label_id;
     this.progressbar_id = progressbar_id;
+    this.cancel_id      = cancel_id;
     
     this.timeout_id = null;
+}
+
+IndeterminateProgressbar.prototype.abort = function()
+{
+    this.cancel();
+    $('.search-in-progress').css("cursor","auto");
+    store_search_xhr.abort();
+    htrc_alert("Query canceled");
+    store_search_xhr = null;
 }
 
 IndeterminateProgressbar.prototype.display = function()
@@ -44,10 +54,15 @@ IndeterminateProgressbar.prototype.trigger_delayed_display = function(delay)
 
 var iprogressbar = new IndeterminateProgressbar('search-indeterminate-div',
 						'search-indeterminate-label',
-						'search-indeterminate-progressbar');
+						'search-indeterminate-progressbar',
+						'search-indeterminate-cancel' );
 
+$(document).ready(function() {
 
-$(document).ready(function(){
-    //$("#search-progressbar-indeterminate" ).progressbar({ value: false });
     $('#'+iprogressbar.progressbar_id).progressbar({ value: false });
+
+    $('#'+iprogressbar.cancel_id).click(function(event) {
+	event.preventDefault();
+	iprogressbar.abort();
+    });
 });

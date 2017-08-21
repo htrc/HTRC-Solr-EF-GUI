@@ -31,7 +31,7 @@ input:disabled+label{color:#cccccc;}
 .con{    padding: 2rem;}
  .con .main {
     min-height: 1rem ; /* used to be 40rem */
-    width: 80%;
+    width: 79%;
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;

@@ -1,3 +1,4 @@
+"use strict";
 
 function get_solr_stream_search_clause(arg_q)
 {
@@ -18,17 +19,20 @@ function get_solr_stream_search_clause(arg_q)
 	wt: arg_wt
     };
 
-    // DUPLICATE BLOCK?
 
     var search_stream_args = [];
 
-    for (ka in vol_count_args) {	
+    for (var ka in vol_count_args) {	
 	search_stream_args.push(ka + '="' + vol_count_args[ka] + '"');
     }
 
-    
-    for (kf in facet) {
-	var facet_val = facet[kf];
+
+    search_stream_args = solr_search_append_fact_field_args(search_stream_args);
+
+    // DUPLICATE BLOCK?
+/*
+    for (var facet_key in facet) {
+	var facet_val = facet[facet_key];
 	if (facet_level == FacetLevelEnum.Page) {
 	    facet_val = "volume" + facet_val;
 	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
@@ -37,15 +41,16 @@ function get_solr_stream_search_clause(arg_q)
 	search_stream_args.push('facet.field=' + facet_val);
     }
     
-    for (kf in filters) {
-	var ks = filters[kf].split("--");
+    for (var filter_key_pair in filters) {
+	var ks = filters[filter_key_pair].split("--");
 	var ks0 = ks[0];
 	var ks1 = ks[1];
 	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,");
 
 	search_stream_args.push('fq=' + ks0 + ':("' + ks1 + '")');
     }
-
+*/
+    
     //search_stream_args = search_stream_args.map(function(v) { return v.replace(/,/g,"\\,"); });
     //search_stream_args.map(function(v) { return v.replace(/\//g,"\\/").replace(/:/g,"\\:"); });
     //var search_stream_args = search_stream_args.map(escape_solr_query); // ****
@@ -118,10 +123,9 @@ function stream_get_ids(jsonData) {
 
     var ids = [];
     
-    var i;    
-    for (i=0; i<num_docs; i++) {
+    for (var i=0; i<num_docs; i++) {
 	var doc = docs[i];
-	var id = doc['volumeid_s'] || doc['id'];
+	var id = doc['id'] || doc['volumeid_s'] ;
 	
 	ids.push(id);
     }
