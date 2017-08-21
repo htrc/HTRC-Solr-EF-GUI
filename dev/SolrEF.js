@@ -71,7 +71,7 @@ function add_titles_solr(jsonData) {
 	}
 	if (doc_val.pubPlace_s && !doc_val.pubPlace_s.match(/^\s*$/)) {
 	    var pp_val = pretty_print_facet_value("pubPlace_s",doc_val.pubPlace_s)
-	    details.push("Publication place: " + pp_val);
+	    details.push("Place of Publication: " + pp_val);
 	}
 	if (doc_val.language_s && !doc_val.language_s.match(/^\s*$/)) {
 	    var pp_val = pretty_print_facet_value("language_s",doc_val.language_s)
