@@ -288,7 +288,7 @@ function add_titles_solr(jsonData) {
 		$tooltip_title_clone.tooltip();
 		$(this).html($tooltip_title_clone)
 	    });
-	    console.log(htid + ", title = " + title);
+//	    console.log(htid + ", title = " + title);
 
 	    var itemURL = doc_val.handleUrl_s;
 	    itemURL = itemURL.replace(/^https:/, "http:");
@@ -376,15 +376,24 @@ function ajax_solr_text_search(newResultPage)
 	url_args.push('facet.field=' + facet_val);
     }
     
+	var author="";
+	 
     for (k in filters) {
 	var ks = filters[k].split("--");
 	var ks0 = ks[0];
 	var ks1 = ks[1];
 	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
-
-	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
+	if(author==""){
+		author="\"" + ks1 + "\"";
+	}else{
+		author+=" OR \"" + ks1 + "\"";
+	}
+	
     }
-
+	console.log(author);
+	if(author!=""){
+    url_args.push('fq=' + ks0 + ':(' + author + ')');
+	}
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
