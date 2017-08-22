@@ -21,7 +21,7 @@ function FacetFilter()
     this.filters = [];
     this.refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
     this.refine_query_count = {};
-    this.refined_filters = [];
+    //this.refined_filters = []; // ****
    
 }
 
@@ -41,7 +41,7 @@ FacetFilter.prototype.reset = function()
     this.filters = [];
     this.refine_query = {}; 
     this.refine_query_count = {};
-    this.refined_filters = [];
+    //this.refined_filters = [];
 }
 				      
 FacetFilter.prototype.setShowFacet = function(state)
@@ -59,37 +59,84 @@ FacetFilter.prototype.getFacetLevel = function()
     return this.facet_level;
 }
 
-FacetFilter.prototype.prettyPrintValue = function(kv,displayed_item)
+FacetFilter.prototype.filterExists = function(field_in,term_in)
 {
-    if (kv == "rightsAttributes_s") {
-	if (displayed_item in rights_dic) {
-	    displayed_item = rights_dic[displayed_item];
+    for (var fi=0; fi<this.filters.length; fi++) {
+	var filter = this.filters[fi];
+	var filter_split = filter.split("--");
+	var field = filter_split[0];
+
+	if (field_in != field) {
+	    continue;
+	}
+	
+	var or_terms_str = filter_split[1];
+	var or_terms = or_terms_str.split(" OR ");
+
+	for (var ti=0; ti<or_terms.length; ti++) {
+	    var term = or_terms[ti];
+
+	    if (term_in == term) {
+		return true;
+	    }
 	}
     }
-    if (kv == "bibliographicFormat_s") {
-	if (displayed_item in format_dic) {
-	    displayed_item = format_dic[displayed_item];
+
+    // get to here, then found no match
+    return false;
+	
+    // return (this.filters.indexOf(field + "--" + term) == 0);
+}
+
+FacetFilter.prototype.filterAdd = function(field,term)
+{
+    this.filters.push(field + "--" + term);
+}
+
+
+FacetFilter.prototype.prettyPrintValue = function(field,terms_str)
+{
+    var or_terms = terms_str.split(" OR ");
+
+    var pp_or_terms = [];
+
+    for (var i=0; i<or_terms.length; i++) {
+	var term = or_terms[i];
+	
+	if (field == "rightsAttributes_s") {
+	    if (term in rights_dic) {
+		term = rights_dic[term];
+	    }
 	}
-    }
-    if (kv == "language_s") {
-	if (displayed_item in language_dic) {
-	    displayed_item = language_dic[displayed_item];
+	else if (field == "bibliographicFormat_s") {
+	    if (term in format_dic) {
+		term = format_dic[term];
+	    }
 	}
-    }
-    if (kv == "pubPlace_s") {
-	// fix the place code ending with whitespace
-	displayed_item = displayed_item.trim();
-	if (displayed_item in place_dic) {
-	    displayed_item = place_dic[displayed_item];
+	else if (field == "language_s") {
+	    if (term in language_dic) {
+		term = language_dic[term];
+	    }
 	}
+	else if (field == "pubPlace_s") {
+	    // fix the place code ending with whitespace
+	    term = term.trim();
+	    if (term in place_dic) {
+		term = place_dic[term];
+	    }
+	}
+
+	pp_or_terms.push(term);
     }
+
+    var pp_terms_str = pp_or_terms.join(" OR ");
     
     // The following led to the confusing situation that seemingly the same facet value could
     // turn up twice in the list (e.g. because of 'fiction' and 'fiction.')
     // => So for now, commented out
     //displayed_item = displayed_item.replace(/\.$/,""); // tidy up spurious full-stop at end of string
 
-    return displayed_item;
+    return pp_terms_str;
 }
 
 
@@ -114,8 +161,10 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 	facet_dl += '<dt class="facetField">';
 	facet_dl +=   '<span class="facet-apply-title">' + kv_display + ':</span>';
 	facet_dl +=   '<span class="facet-apply-wrapper">&nbsp';
-	facet_dl +=     '<span id="refine-'+k+'" class="facet-apply"><a data-key="'+k+'">Refine Search '+apply_icon+'</a></span>'
-	facet_dl +=     '<span id="filter-'+k+'" class="facet-apply"><a data-key="'+k+'">Apply Filter '+apply_icon+'</a></span>'
+	//facet_dl +=     '<span id="refine-'+k+'" class="facet-apply"><a data-key="'+k+'">Refine Search '+apply_icon+'</a></span>'
+	facet_dl +=     '<span id="filter-'+k+'" class="facet-apply">';
+	facet_dl +=        '<a data-key="'+k+'">Apply Filter '+apply_icon+'</a>';
+	facet_dl +=     '</span>'
 	facet_dl +=   '</span>';
 	facet_dl += '</dt> ';
 	
@@ -130,9 +179,10 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 	    if (item_freq == 0) {
 		break;
 	    }
-	
-	    if ((this.filters.indexOf(k + "--" + item_term) < 0)
-		&& (this.refined_filters.indexOf(k + "--" + item_term) < 0)) {
+
+	    if (!this.filterExists(k,item_term)) {
+	    //if ((this.filters.indexOf(k + "--" + item_term) < 0) {
+		    // && (this.refined_filters.indexOf(k + "--" + item_term) < 0)) { // ****
 		// neither a facet that is currently being used as a filter, nor one used in a refined-search
 		var _class = "showfacet";
 		if (ii > 5) {
@@ -194,7 +244,7 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	var term = $(this).attr("data-term");
 
 	var checkbox_inc = $(this).is(":checked");
-	var checkbox_dec = !checkbox_inc;
+	//var checkbox_dec = !checkbox_inc;
 	
 	if (checkbox_inc) {
 	    // just been checked on
@@ -216,9 +266,9 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	var fk_terms_count = that.refine_query_count[facet_key];
 	
 	if (checkbox_inc && (fk_terms_count == 1)) {
-	    // change back to filter
+	    // change to filter
 	    $('#filter-'+facet_key).show("slide", { direction: "left" }, 1000);
-	}
+	}/*
 	else if (checkbox_inc && (fk_terms_count == 2)) {
 	    // change to refine-search
 	    $('#filter-'+facet_key).hide("slide", { direction: "right" }, 1000);
@@ -228,7 +278,7 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	    // change back to filter
 	    $('#refine-'+facet_key).hide("slide", { direction: "left" }, 1000);
 	    $('#filter-'+facet_key).show("slide", { direction: "right" }, 1000);
-	}
+	}*/ // ****
 	else if (fk_terms_count == 0) {
 	    $('#filter-'+facet_key).hide("slide", { direction: "left" }, 1000);
 	}
@@ -240,22 +290,38 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	var facet_key = $(this).attr("data-key");
 
 	if ("filter-"+facet_key == parent_id) {
-	    console.log("***filter: " + facet_key);
+	    // console.log("***filter: " + facet_key);
 
-	    var term = Object.keys(that.refine_query[facet_key])[0];
-	    	    
-	    if (that.filters.indexOf(facet_key + "--" + term) < 0) {
-		that.filters.push(facet_key + "--" + term);
+	    var or_terms = [];
+	    
+	    for (var term in that.refine_query[facet_key]) {
+		
+	    	or_terms.push(term);
+		
+		//Work out the related <a> single-click facet element,
+		// and remove item from <dd> area
+		var $filter_elem = $('#facetlist a[data-key="'+facet_key+'"][data-term="'+term+'"]')	    
+		$filter_elem.parent().remove();
 	    }
 
-	    //// remove item from facet area
-	    //$(this).parent().remove();
+	    delete that.refine_query[facet_key];
+	    delete that.refine_query_count[facet_key];
+
+	    var or_terms_str = or_terms.join(" OR ");
+
+	    if (!that.filterExists(facet_key,or_terms_str)) {
+//	    if (that.filters.indexOf(facet_key + "--" + or_terms_str) < 0) { // ****
+		
+		//that.filters.push(facet_key + "--" + or_terms_str);
+		that.filterAdd(facet_key,or_terms_str);
+	    }
 
 	    facet_filter.facetlistSet();
 	    store_search_args.start = store_start;
 	    show_updated_results();
 	    
 	}
+	/* merge items into main query ...
 	else {
 	    // "refine-"+key
 	    console.log("***refine: " + facet_key);
@@ -321,8 +387,8 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
 	    
 	    ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
-
 	}
+	*/
 	
 	return false;
     });
@@ -359,37 +425,37 @@ FacetFilter.prototype.facetlistSet = function()
 {
     // Display the filters that are currently in effect
     
-    var facetlist_html = "";
+    var filterlist_html = "";
     
     var cancel_png = "assets/jquery-ui-lightness-1.12.1/images/cancel.png";
     
     for (var f in this.filters) {
 	var f_split = this.filters[f].split("--");
 
-	var kv0 = f_split[0];
-	var kv1 = f_split[1];
+	var filter_field = f_split[0];
+	var filter_term = f_split[1].replace(/\"/g,"");
 
 	if (this.facet_level == FacetLevelEnum.Page) {
-	    kv0 = kv0.replace(/^volume/,"");
-	    kv0 = kv0.replace(/_htrcstrings$/,"_ss"); 
-	    kv0 = kv0.replace(/_htrcstring$/,"_s"); 
+	    filter_field = filter_field.replace(/^volume/,"");
+	    filter_field = filter_field.replace(/_htrcstrings$/,"_ss"); 
+	    filter_field = filter_field.replace(/_htrcstring$/,"_s"); 
 	}
-	var kv0_display = FacetFilter.FacetFieldsDisplay[kv0]
+	var filter_field_display = FacetFilter.FacetFieldsDisplay[filter_field]
 
-	var facet_val  = this.prettyPrintValue(kv0,kv1);	
+	var filter_term_display  = this.prettyPrintValue(filter_field,filter_term);	
 	
-	facetlist_html += '<li>';
-	facetlist_html +=   '<a href="javascript:;" class="unselect">';
-	facetlist_html +=     '<img alt="Delete" src="'+cancel_png+'" class="removeFacetIcon">';
-	facetlist_html +=   '</a>';
-	facetlist_html +=   '&nbsp;<span class="selectedfieldname">' + kv0_display + '</span>';
-	facetlist_html +=   ':  ' + facet_val;
-	facetlist_html += '</li>';
+	filterlist_html += '<li>';
+	filterlist_html +=   '<a href="javascript:;" class="unselect">';
+	filterlist_html +=     '<img alt="Delete" src="'+cancel_png+'" class="removeFacetIcon">';
+	filterlist_html +=   '</a>';
+	filterlist_html +=   '&nbsp;<span class="selectedfieldname">' + filter_field_display + '</span>';
+	filterlist_html +=   ':  ' + filter_term_display;
+	filterlist_html += '</li>';
     }
 
-    if (facetlist_html != "") {
+    if (filterlist_html != "") {
 	$('#selectedFacets').show();
-	$(".filters").html(facetlist_html);
+	$(".filters").html(filterlist_html);
     }
     else {
 	$('#selectedFacets').hide();
@@ -411,12 +477,19 @@ FacetFilter.prototype.solrSearchAppendArgs = function(url_args)
     
     for (var filter_key_pair in this.filters) {
 	var ks = this.filters[filter_key_pair].split("--");
-	var ks0 = ks[0];
-	var ks1 = ks[1];
-	//ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,");
-	ks1 = escape_solr_query(ks1);
+	var filter_field = ks[0];
+	var filter_term = ks[1];
+	//filter_term = filter_term.replace(/\//g,"\\/").replace(/:/g,"\\:").replace(/,/g,"\\,"); // ****
+	filter_term = escape_solr_query(filter_term);
 
-	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
+	var or_terms = filter_term.split(" OR ");
+	var quoted_or_terms = or_terms.map(function(v) { return '"'+v+'"'; });
+	var quoted_or_terms_str = quoted_or_terms.join(" OR ");
+	
+	//url_args.push('fq=' + filter_field + ':("' + filter_term + '")');
+	//url_args.push('fq=' + filter_field + ':(' + filter_term + ')');
+
+	url_args.push('fq=' + filter_field + ':(' + quoted_or_terms_str + ')');
     }
 
     return url_args;
@@ -432,7 +505,7 @@ $(function() {
 	var $class = $(this).attr("class");
 	
 	if ($(this).hasClass("morefacets")) {
-	    obj = $class.split(" ")[0];
+	    var obj = $class.split(" ")[0];
 	    $(this).hide();
 	    $("[class='" + obj + " lessfacets']").show();
 	    $("[class='hidefacet " + obj + "']").css({
@@ -442,7 +515,7 @@ $(function() {
 	    return false;
 	}
 	else if ($(this).hasClass("lessfacets")) {
-	    obj = $class.split(" ")[0];
+	    var obj = $class.split(" ")[0];
 	    $(this).hide();
 	    $("[class='" + obj + " morefacets']").show();
 	    $("[class='hidefacet " + obj + "']").css({
@@ -457,11 +530,12 @@ $(function() {
 	    
 	    var facet_key = $(this).attr("data-key");
 	    var term = $(this).attr("data-term");
-
 	    
-	    if (facet_filter.filters.indexOf(facet_key + "--" + term) < 0) {
+	    if (!facet_filter.filterExists(facet_key,term)) {
+	    // if (facet_filter.filters.indexOf(facet_key + "--" + term) < 0) {
 		console.log("*** pushing on filter: " + facet_key + "--" + term);
-		facet_filter.filters.push(facet_key + "--" + term);
+		//facet_filter.filters.push(facet_key + "--" + term);
+		facet_filter.filterAdd(facet_key,term);
 	    }
 
 	    // remove item from facet area
