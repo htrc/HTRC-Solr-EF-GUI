@@ -12,9 +12,33 @@ function strtrim(s)
 function htrc_alert(message)
 {
     $('#htrc-alert-body').html(message)
+
+    $("#htrc-alert-dialog").dialog({
+        buttons : {
+	    "OK" : function() {
+		$(this).dialog("close");
+	    }
+	}
+    });
+    
     $("#htrc-alert-dialog").dialog( "open" );
 }
 
+function htrc_confirm(message,confirm_callback,cancel_callback)
+{
+    $('#htrc-alert-body').html(message)
+    
+    $("#htrc-alert-dialog").dialog({
+	buttons : {
+	    "Confirm" : confirm_callback,
+	    "Cancel" : cancel_callback
+	}
+    });
+
+    $("#htrc-alert-dialog").dialog( "open" );
+}
+
+		      
 function escape_solr_query(query)
 {
 

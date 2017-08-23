@@ -179,6 +179,7 @@ $(document).ready(function(){
 	modal: true,
 	autoOpen: false,
 	resizable: true,
+	width: 400,
 	buttons: {
 	    "OK": function() {
 		$( this ).dialog( "close" );

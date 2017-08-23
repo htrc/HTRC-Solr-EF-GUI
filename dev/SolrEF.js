@@ -70,11 +70,11 @@ function add_titles_solr(jsonData) {
 	    details.push("Publication date: " + doc_val.pubDate_s);
 	}
 	if (doc_val.pubPlace_s && !doc_val.pubPlace_s.match(/^\s*$/)) {
-	    var pp_val = facet_filter.prettyPrintValue("pubPlace_s",doc_val.pubPlace_s)
+	    var pp_val = facet_filter.prettyPrintTerm("pubPlace_s",doc_val.pubPlace_s)
 	    details.push("Place of Publication: " + pp_val);
 	}
 	if (doc_val.language_s && !doc_val.language_s.match(/^\s*$/)) {
-	    var pp_val = facet_filter.prettyPrintValue("language_s",doc_val.language_s)
+	    var pp_val = facet_filter.prettyPrintTerm("language_s",doc_val.language_s)
 	    details.push("Language: " + pp_val);
 	}
 	if (doc_val.typeOfResource_s && !doc_val.typeOfResource_s.match(/^\s*$/)) {
@@ -996,7 +996,7 @@ function submit_action(event) {
     }
     $('.search-in-progress').css("cursor","wait");
 
-    facet_filter.reset(); // ****
+    facet_filter.resetFilters(); // ****
     facet_filter.facetlistSet();    
     
     store_search_action = solr_search_action;
@@ -1075,7 +1075,7 @@ function submit_action(event) {
     }
     if ($('#vq').attr("data-key") != vq_text) {
 	$('#vq').attr("data-key",vq_text);
-	facet_filter.reset(); // ****
+	facet_filter.resetFilters(); // ****
 	facet_filter.facetlistSet();
     }
     //console.log("*** NOW arg_q = " + arg_q);
