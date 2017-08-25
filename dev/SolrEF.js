@@ -1,11 +1,20 @@
 "use strict";
 
-// add_titles() designed to work with information return by HT Metadata API
-// => Deprecated, as this information can now be returned by Solr directly
+var QueryTabEnum = {
+    Page: 0,
+    Volume: 1,
+    Combined: 2,
+    Advanced: 3
+};
 
+var store_query_tab_selected = QueryTabEnum.Page;
+    
 var store_search_xhr = null;
 
-function add_titles(json_data)
+// add_titles_ht() designed to work with information return by HT Metadata API
+// => Deprecated, as this information can now be returned by Solr directly
+
+function add_titles_ht(json_data)
 {
     var itemURLs = [];
     
@@ -133,7 +142,11 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	    return store_search_xhr;
 	},
 	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
-	error: ajax_error
+	error: function(jqXHR, textStatus, errorThrown) {
+	    $('.search-in-progress').css("cursor","auto");
+	    iprogressbar.cancel();
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
     });
 }
 
@@ -832,7 +845,8 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
     //var query_terms = query.split(/\s+/); // ****
     // Based on:
     //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
-    var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    //var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    var query_terms = query.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g);
     
     //console.log("*** query terms = " + query_terms); // ****
     
@@ -950,7 +964,8 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
     //var query_terms = query.split(/\s+/);
     // Based on:
     //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
-    var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    //var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    var query_terms = query.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g);
     
     var query_terms_len = query_terms.length;
     
@@ -1003,7 +1018,13 @@ function submit_action(event) {
 
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
+
+    explain_search = { 'group_by_vol': null,
+		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
+		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
     
+    var arg_q = null;
+
     var q_text = $('#q').val().trim();
     var vq_text = $('#vq').val().trim();
         
@@ -1011,65 +1032,98 @@ function submit_action(event) {
     
     var search_all_langs_checked = $('#search-all-langs:checked').length;
     var search_all_vfields_checked = $('#search-all-vfields:checked').length;
-    
-    if ((q_text === "") && (vq_text === "")) {
-	$('.search-in-progress').css("cursor","auto");
-	htrc_alert("No query term(s) entered");
-	return;
-    }
-    
-    explain_search = { 'group_by_vol': null,
-		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
-		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
-    
-    var arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
-    
-    if (arg_q == "") {
-	// Potentially only looking at volume level terms
-	facet_filter.setFacetLevel(FacetLevelEnum.Volume);
-    }
-    else {
-	facet_filter.setFacetLevel(FacetLevelEnum.Page);
-    }
 
-    var query_level = facet_filter.getFacetLevel();    
-    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
-    
-    if (arg_q == "") {
-	if (arg_vq == "") {
-	    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
-	    //   lead to an empty arg_q being returned
+    if (store_query_tab_selected == QueryTabEnum.Advanced) {
+	var advanced_q_text = $('#advanced-q').val().trim();
+	if (advanced_q_text === "") {
 	    $('.search-in-progress').css("cursor","auto");
-	    htrc_alert("No languages selected");
+	    htrc_alert("No query term(s) entered");
 	    return;
-	} else {
-	    arg_q = arg_vq;
-	    doc_units = " volumes ";
-	    explain_search.volume_level_desc  = "[Volume: TERMS]";
+	}
+	arg_q = advanced_q_text;
+
+
+	if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+	    doc_units = " pages ";
+
+	    if (arg_q.match(/volume[^_]+_txt:/)) {
+	    	explain_search.volume_level_desc  = "[Volume: Terms]";
+	    }
+	    if (arg_q.match(/htrctokentext:/)) {		
+		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+	    }
+	    
 	    if (group_by_vol_checked) {
 		explain_search.group_by_vol = "Search results sorted by volume ID";
 	    }
 	    
+	    if (arg_q.match(/[^_]+_t:/)) {
+		doc_units = " page/volume mix ";
+	    }
 	}
+	else {	
+	    doc_units = " volumes ";
+	    explain_search.volume_level_desc  = "[Volume: TERMS]";
+	}
+	
     }
     else {
-	if (arg_vq != "") {
-	    // join the two with an AND
-	    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
-	    
-	    explain_search.volume_level_desc = "[Volume: TERMS]";
-	    explain_search.page_level_desc   = "[Page-level: TERMS]";
+	if ((q_text === "") && (vq_text === "")) {
+	    $('.search-in-progress').css("cursor","auto");
+	    htrc_alert("No query term(s) entered");
+	    return;
+	}
+   
+    
+	arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+	
+	if (arg_q == "") {
+	    // Potentially only looking at volume level terms
+	    facet_filter.setFacetLevel(FacetLevelEnum.Volume);
 	}
 	else {
-	    explain_search.page_level_desc  = "[Page-level: POS-terms]";
+	    facet_filter.setFacetLevel(FacetLevelEnum.Page);
 	}
-	if (group_by_vol_checked) {
-	    explain_search.group_by_vol = "Search results sorted by volume ID";
-	}		    
+
+	var query_level = facet_filter.getFacetLevel();    
+	var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
 	
-	doc_units = " pages ";
+	if (arg_q == "") {
+	    if (arg_vq == "") {
+		// arg_vq was empty to start with, but attempt to expand non-empty arg_q
+		//   lead to an empty arg_q being returned
+		$('.search-in-progress').css("cursor","auto");
+		htrc_alert("No languages selected");
+		return;
+	    } else {
+		arg_q = arg_vq;
+		doc_units = " volumes ";
+		explain_search.volume_level_desc  = "[Volume: Terms]";
+		if (group_by_vol_checked) {
+		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		}
+	    }
+	}
+	else {
+	    if (arg_vq != "") {
+		// join the two with an AND
+		arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
+		
+		explain_search.volume_level_desc = "[Volume: Terms]";
+		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+	    }
+	    else {
+		explain_search.page_level_desc  = "[Page-level: POS-Terms]";
+	    }
+	    if (group_by_vol_checked) {
+		explain_search.group_by_vol = "Search results sorted by volume ID";
+	    }		    
+	    
+	    doc_units = " pages ";
+	}
     }
-    
+
+    /*
     if ($('#vq').attr("data-key") == undefined) {
 	$('#vq').attr("data-key",vq_text);
     }
@@ -1078,6 +1132,8 @@ function submit_action(event) {
 	facet_filter.resetFilters(); // ****
 	facet_filter.facetlistSet();
     }
+    */
+    
     //console.log("*** NOW arg_q = " + arg_q);
 
     // Example search on one of the htrc-full-ef fields is: 
@@ -1110,11 +1166,11 @@ function show_hide_solr_q() {
     $("#show-hide-solr-q").click(function (event) {
 	event.preventDefault();
 	if ($('.show-hide-solr-q:visible').length) {
-	    $('.show-hide-solr-q').hide("slide", { direction: "up" }, 1000);
+	    $('.show-hide-solr-q').hide("slide", { direction: "up" }, 500);
 	    $('#show-hide-solr-q').html("Show full query ...");
 	}
 	else {
-	    $('.show-hide-solr-q').show("slide", { direction: "up" }, 1000);
+	    $('.show-hide-solr-q').show("slide", { direction: "up" }, 500);
 	    $('#show-hide-solr-q').html("Hide full query ...");
 	}
     });

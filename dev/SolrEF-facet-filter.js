@@ -12,9 +12,7 @@ function FacetFilter()
 
     this.filters = [];
     this.refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
-    this.refine_query_count = {};
-    //this.refined_filters = []; // ****
-   
+    this.refine_query_count = {};   
 }
 
 // Static member: The facet fields to display
@@ -30,7 +28,6 @@ FacetFilter.prototype.resetRefineQuery = function()
 {
     this.refine_query = {}; 
     this.refine_query_count = {};
-    //this.refined_filters = [];
 }
 
 
@@ -190,16 +187,6 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 	var facet_dl = "<dl>";
 
 	var facet_field_neutral = this.getFieldNeutral(facet_field);
-	/*
-	var facet_field_neutral = facet_field;
-	if (this.facet_level == FacetLevelEnum.Page) {
-	    facet_field_neutral = facet_field_neutral.replace(/^volume/,"");
-	    facet_field_neutral = facet_field_neutral.replace(/_htrcstrings$/,"_ss"); 
-	    facet_field_neutral = facet_field_neutral.replace(/_htrcstring$/,"_s"); 
-	}
-	*/
-	// ****
-	//var facet_field_neutral_display = FacetFilter.FacetFieldsDisplay[facet_field_neutral];
 	var facet_field_neutral_display = this.prettyPrintField(facet_field);
 	
 	var apply_icon = '<span class="ui-icon ui-icon-circle-triangle-e"></span>';
@@ -411,7 +398,6 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	var facet_key = $(this).attr("data-key");
 
 	if ("filter-"+facet_key == parent_id) {
-	    // console.log("***filter: " + facet_key);
 
 	    var pending_filters = that.hasPendingFilters(facet_key);
 	    
@@ -574,7 +560,6 @@ FacetFilter.prototype.solrSearchAppendArgs = function(url_args)
 FacetFilter.prototype.applySingleFilter = function(clicked_elem,facet_key,term)
 {
     if (!this.filterExists(facet_key,term)) {
-	console.log("*** pushing on filter: " + facet_key + "--" + term);
 	this.filterAdd(facet_key,term);
     }
     
@@ -583,9 +568,7 @@ FacetFilter.prototype.applySingleFilter = function(clicked_elem,facet_key,term)
 
     // deselect all the checkboxes
     $('input.facetbox[type="checkbox"]').prop('checked', false);
-    // ****
-    //delete this.refine_query[facet_key];
-    //delete this.refine_query_count[facet_key];
+
     this.resetRefineQuery();    
     this.facetlistSet();
     //console.log("*** facetlist on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
@@ -595,6 +578,8 @@ FacetFilter.prototype.applySingleFilter = function(clicked_elem,facet_key,term)
 
 FacetFilter.prototype.applyMultiFilter = function(facet_key)
 {
+    $('#filter-'+facet_key).hide("slide", { direction: "left" }, 1000);
+
     var or_terms = [];
 	    
     for (var term in this.refine_query[facet_key]) {
@@ -607,10 +592,6 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 	$filter_elem.parent().remove();
     }
 
-    // ****
-    //delete this.refine_query[facet_key];
-    //delete this.refine_query_count[facet_key];
-    
     var or_terms_str = or_terms.join(" OR ");
     
     if (!this.filterExists(facet_key,or_terms_str)) {
