@@ -41,6 +41,10 @@ input:disabled+label{color:#cccccc;}
     font-size: 1.0em;
 }
 
+.ui-dialog {
+    z-index: 2000 !important ;
+}
+
 .con{    padding: 2rem;}
 .con .main {
     min-height: 1rem ; /* used to be 40rem */

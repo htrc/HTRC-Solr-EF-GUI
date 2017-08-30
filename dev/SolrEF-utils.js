@@ -38,7 +38,18 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
     $("#htrc-alert-dialog").dialog( "open" );
 }
 
-		      
+function htrc_login(buttons)
+{
+
+    var message='<iframe id="loginFrame" src="flogin.html" width="100%" height="500" frameBorder="0" style="padding: 0px;" >Browser not compatible.</iframe>';
+    $('#htrc-login-body').html(message);
+	
+    $("#htrc-login-dialog").dialog({ buttons : buttons });
+    
+    $("#htrc-login-dialog").dialog( "open" );
+}
+
+
 function escape_solr_query(query)
 {
 

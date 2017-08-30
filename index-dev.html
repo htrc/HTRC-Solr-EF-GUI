@@ -36,6 +36,7 @@
 
 	<script src="dev/SolrEF-settings.js"></script>
 	<script src="dev/SolrEF-utils.js"></script>
+	<script src="dev/SolrEF-authentication.js"></script>
 	<script src="dev/SolrEF-iprogressbar.js"></script>
 	<script src="dev/SolrEF-worksets.js"></script>
 	<script src="dev/SolrEF-stream.js"></script>
@@ -147,9 +148,15 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     Sign In<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="https://analytics.hathitrust.org/passwordresetmail">
+				  <!--
+				  <li><a onclick="login_faux()">Test</a></li>
+				  -->
+                                  <li><a onclick="solr_ef_login()">Sign In</a></li>
+<!--				  
+				  <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
+-->
+                                  <li class="divider"></li>
+                                  <li><a href="https://analytics.hathitrust.org/passwordresetmail">
                                         Forgot Password?</a></li>
                                 </ul>
                             </li>
@@ -180,6 +187,12 @@
 	<p id="htrc-alert-body">
 	</p>
       </div>
+
+      <div id="htrc-login-dialog" title="Login" style="padding: 0;">
+	<p id="htrc-login-body" style="margin: 0px;">
+	</p>
+      </div>
+
 
       
         <div class="row">

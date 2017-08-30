@@ -13,7 +13,8 @@ function add_worksets(json_data) {
 	    //    workset_id + ">&format=text%2Fx-html%2Bul";
 	    
 	    // http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=http://worksets.hathitrust.org/wsid/147967316
-	    var describe_url = "http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+	    //var describe_url = "http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+	    var describe_url = "https://solr1.ischool.illinois.edu/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
 	    
 	    var hyperlinked_workset_title = '<a target="_blank" href="' + describe_url + '">' + workset_title + '</a>';
 	    
@@ -98,7 +99,8 @@ function workset_enrich_results(itemURLs)
     // http://acbres224.ischool.illinois.edu:8890/sparql?default-graph-uri=&query
     // &format=application/x-json+ld&timeout=0&debug=on
     
-    var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
+    //var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
+    var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
     var sparql_data = {
 	"default-graph-uri": "",
 	"format": "application/x-json+ld",

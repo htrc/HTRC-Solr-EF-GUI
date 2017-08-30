@@ -264,6 +264,26 @@ $(document).ready(function(){
 	    $(this).dialog("close");
 	}
     });
+
+    $( "#htrc-login-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	width: 650,
+	height: 620,
+	buttons: {
+	    "Sign In": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
     
     $("#volume-help-dialog").dialog({
 	autoOpen: false,

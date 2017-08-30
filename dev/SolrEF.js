@@ -1194,3 +1194,17 @@ function show_hide_more_seqs(line_num) {
 }
 
 
+function login_faux()
+{
+    $.ajax({
+	type: "GET",
+	url: "https://analytics.hathitrust.org/login",
+	//data: data_str,
+	dataType: "jsonp",
+	success: function(jsonData) { alert(jsonData); },
+	error: function(jqXHR, textStatus, errorThrown) {
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+
+}
