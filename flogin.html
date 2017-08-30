@@ -1,0 +1,187 @@
+<html lang="en">
+  <head>
+    <base href="https://silvermaple.pti.indiana.edu/authenticationendpoint/" 
+    <meta charset="utf-8">
+    <title>Login with WSO2 Identity Server</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/localstyles.css" rel="stylesheet">
+            <!--[if lt IE 8]>
+        <link href="css/localstyles-ie7.css" rel="stylesheet">
+        <![endif]-->
+
+	    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+	            <!--[if lt IE 9]>
+        <script src="assets/js/html5.js"></script>
+        <![endif]-->
+		    <script src="assets/js/jquery-1.7.1.min.js"></script>
+		    <script src="js/scripts.js"></script>
+		    <style>
+		      div.different-login-container a.truncate {
+		      width: 148px;
+		      white-space: nowrap;
+		      overflow: hidden;
+		      text-overflow: ellipsis;
+		      }
+		    </style>
+
+  </head>
+
+  <body>
+    <style>
+      .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
+        width: 540px;
+      
+      }
+      body {
+        overflow:hidden;
+      }
+    </style>
+    
+    <div class="overlay" style="display:none"></div>
+    <div class="header-strip">&nbsp;</div>
+    <div class="header-back">
+      <div class="container">
+	<div class="row">
+	  <div class="span12">
+	    <a class="logo">&nbsp</a>
+	  </div>
+	</div>
+      </div>
+    </div>
+
+    <div class="header-text">
+
+    </div>
+    <div class="container">
+      <div class="row">
+	<div class="span12">
+	  <h1>Login to continue</h1>
+	</div>
+      </div>
+    </div>
+    <!-- container -->
+
+
+
+
+
+
+
+    <script type="text/javascript">
+      function doLogin() {
+      var loginForm = document.getElementById('loginForm');
+      loginForm.submit();
+      }
+    </script>
+
+
+
+
+    <div id="local_auth_div" class="container main-login-container" style="margin-top:10px;">
+
+
+
+
+      <form action="../commonauth" method="post" id="loginForm" class="form-horizontal" >
+
+
+
+	<div class="row">
+	  <div class="span6">
+
+	    <div id="loginTable1" class="identity-box">
+
+
+
+
+	      <!-- Username -->
+	      <div class="control-group">
+		<label class="control-label" for="username">User Name:</label>
+
+		<div class="controls">
+		  <input class="input-xlarge" type="text" id='username' name="username" size='30'/>
+		</div>
+	      </div>
+
+
+
+	      <!--Password-->
+	      <div class="control-group">
+		<label class="control-label" for="password">Password:</label>
+
+		<div class="controls">
+		  <input type="password" id='password' name="password"  class="input-xlarge" size='30'/>
+		  <input type="hidden" name="sessionDataKey" value='6b2fe96e-5415-496e-b9f7-2614d3541128'/>
+		  <label class="checkbox" style="margin-top:10px"><input type="checkbox" id="chkRemember" name="chkRemember">Remember me on this computer</label>
+		</div>
+	      </div>
+
+	      <div id="error-message" style="color:red">
+		Incorrect username and/or password entered.  Please try again.
+	      </div>
+	      <!--
+	      <div class="form-actions">
+		<input type="submit" value='Sign In' class="btn btn-primary">
+	      </div>
+	      -->
+	      
+	    </div>
+
+
+
+	  </div>
+	</div>
+
+
+
+
+    </div>
+
+
+    </form>
+</div>
+
+<script>
+  $(document).ready(function(){
+  $('.main-link').click(function(){
+  $('.main-link').next().hide();
+  $(this).next().toggle('fast');
+  var w = $(document).width();
+  var h = $(document).height();
+  $('.overlay').css("width",w+"px").css("height",h+"px").show();
+  });
+  $('.overlay').click(function(){$(this).hide();$('.main-link').next().hide();});
+
+  });
+  function myFunction(key, value, name)
+  {
+  var object = document.getElementById(name);
+  var domain = object.value;
+
+
+  if (domain != "")
+  {
+  document.location = "../commonauth?idp=" + key + "&authenticator=" + value + "&sessionDataKey=6b2fe96e-5415-496e-b9f7-2614d3541128&domain=" + domain;
+  } else {
+  document.location = "../commonauth?idp=" + key + "&authenticator=" + value + "&sessionDataKey=6b2fe96e-5415-496e-b9f7-2614d3541128";
+  }
+  }
+
+  function handleNoDomain(key, value)
+  {
+
+
+  document.location = "../commonauth?idp=" + key + "&authenticator=" + value + "&sessionDataKey=6b2fe96e-5415-496e-b9f7-2614d3541128";
+
+  }
+
+</script>
+
+</body>
+    </html>

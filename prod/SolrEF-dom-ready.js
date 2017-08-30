@@ -170,15 +170,88 @@ function show_hide_lang() {
 	});
 }
 
+function activate_tab_id(tab_id)
+{
+    if (tab_id == "tab-page") {
+	tab_id = QueryTabEnum.Page;
+    }
+    else if (tab_id == "tab-volume") {
+	tab_id = QueryTabEnum.Volume;
+    }
+    else if (tab_id == "tab-combined") {
+	tab_id = QueryTabEnum.Combined;
+    }
+    else if (tab_id == "tab-advanced") {
+	tab_id = QueryTabEnum.Advanced;
+    }
+
+    store_query_tab_selected = tab_id;
+    
+    if (tab_id == QueryTabEnum.Advanced) {
+	$('.volume-query-row').hide();
+	$('.page-query-row').hide();
+	$('.page-or-advanced-query-row').show();
+	$('.advanced-query-row').show();
+    }
+    else {
+	$('.advanced-query-row').hide();
+	
+	if ((tab_id == QueryTabEnum.Volume) || (tab_id == QueryTabEnum.Combined)) {
+	    if (tab_id == QueryTabEnum.Volume) {
+		$('#q').val("");
+	    }
+
+	    $('.volume-query-row').show();
+	}
+	else {
+	    // page	    
+	    $('.volume-query-row').hide();	    
+	}
+	
+	if ((tab_id == QueryTabEnum.Page) || (tab_id == QueryTabEnum.Combined)) {
+	    if (tab_id == QueryTabEnum.Page) {
+		$('#vq').val("");
+	    }
+	    
+	    $('.page-query-row').show();
+	    $('.page-or-advanced-query-row').show();
+	}
+	else {
+	    $('.page-query-row').hide();
+	    $('.page-or-advanced-query-row').hide();	    
+	}
+    }
+}
 
 $(document).ready(function(){
     
     $('#search-form').attr("action",solr_search_action);
+
+    //$('.volume-query-row').hide(); // ****
+    var tabs = $('#tabs-search').tabs({
+	activate: function( event, ui ) {	    
+	    var tab_id = ui.newTab.context.id;
+
+	    activate_tab_id(tab_id);	    
+	}
+    });
+
+    tabs.tabs({ active: store_query_tab_selected});
+    activate_tab_id(store_query_tab_selected);
+	
+    tabs.find( ".ui-tabs-nav" ).sortable({
+	axis: "x",
+	stop: function() {
+	    tabs.tabs( "refresh" );
+	}
+    });
+
     
     $( "#htrc-alert-dialog" ).dialog({
 	modal: true,
 	autoOpen: false,
 	resizable: true,
+	width: 400,
 	buttons: {
 	    "OK": function() {
 		$( this ).dialog( "close" );
@@ -191,6 +264,26 @@ $(document).ready(function(){
 	    $(this).dialog("close");
 	}
     });
+
+    $( "#htrc-login-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	width: 650,
+	height: 620,
+	buttons: {
+	    "Sign In": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
     
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
@@ -252,7 +345,7 @@ $(document).ready(function(){
     $('#export-by-vol').click(function (event) {
 	event.preventDefault();
 	$('.export-item').css("cursor","wait");
-	if (facet_level == FacetLevelEnum.Page) {
+	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export); // doRollup=true
 	}
 	else {
@@ -273,7 +366,7 @@ $(document).ready(function(){
 	    // lazy evaluation, workout out what href should be, and then trigger click once more
 	    event.preventDefault();
 	    $('.export-item').css("cursor","wait");
-	    if (facet_level == FacetLevelEnum.Page) {
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
 	    }
 	    else {

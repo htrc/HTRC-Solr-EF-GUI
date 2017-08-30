@@ -1,11 +1,20 @@
 "use strict";
 
-// add_titles() designed to work with information return by HT Metadata API
-// => Deprecated, as this information can now be returned by Solr directly
+var QueryTabEnum = {
+    Page: 0,
+    Volume: 1,
+    Combined: 2,
+    Advanced: 3
+};
 
+var store_query_tab_selected = QueryTabEnum.Page;
+    
 var store_search_xhr = null;
 
-function add_titles(json_data)
+// add_titles_ht() designed to work with information return by HT Metadata API
+// => Deprecated, as this information can now be returned by Solr directly
+
+function add_titles_ht(json_data)
 {
     var itemURLs = [];
     
@@ -70,11 +79,11 @@ function add_titles_solr(jsonData) {
 	    details.push("Publication date: " + doc_val.pubDate_s);
 	}
 	if (doc_val.pubPlace_s && !doc_val.pubPlace_s.match(/^\s*$/)) {
-	    var pp_val = pretty_print_facet_value("pubPlace_s",doc_val.pubPlace_s)
+	    var pp_val = facet_filter.prettyPrintTerm("pubPlace_s",doc_val.pubPlace_s)
 	    details.push("Place of Publication: " + pp_val);
 	}
 	if (doc_val.language_s && !doc_val.language_s.match(/^\s*$/)) {
-	    var pp_val = pretty_print_facet_value("language_s",doc_val.language_s)
+	    var pp_val = facet_filter.prettyPrintTerm("language_s",doc_val.language_s)
 	    details.push("Language: " + pp_val);
 	}
 	if (doc_val.typeOfResource_s && !doc_val.typeOfResource_s.match(/^\s*$/)) {
@@ -116,30 +125,8 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	url_args.push(ka + '=' + store_search_args[ka]);
     }
 
-    url_args = solr_search_append_fact_field_args(url_args);
-    
-    // DUPLICATE CODE??
-    /*
-    for (var facet_key in facet) {
-	var facet_val = facet[facet_key];
-	if (facet_level == FacetLevelEnum.Page) {
-	    facet_val = "volume" + facet_val;
-	    facet_val = facet_val.replace(/_ss$/,"_htrcstrings");
-	    facet_val = facet_val.replace(/_s$/,"_htrcstring");
-	}
-	url_args.push('facet.field=' + facet_val);
-    }
-    
-    for (var filter_key_pair in filters) {
-	var ks = filters[filter_key_pair].split("--");
-	var ks0 = ks[0];
-	var ks1 = ks[1];
-	ks1 = ks1.replace(/\//g,"\\/").replace(/:/g,"\\:");
-
-	url_args.push('fq=' + ks0 + ':("' + ks1 + '")');
-    }
-    */
-    
+    url_args = facet_filter.solrSearchAppendArgs(url_args);
+        
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
@@ -155,7 +142,11 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	    return store_search_xhr;
 	},
 	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
-	error: ajax_error
+	error: function(jqXHR, textStatus, errorThrown) {
+	    $('.search-in-progress').css("cursor","auto");
+	    iprogressbar.cancel();
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
     });
 }
 
@@ -408,27 +399,8 @@ function show_results(jsonData,newSearch,newResultPage)
 	    
 	    $('#export-by').hide(); // hide until volume count is in
 	}
-
-	if (show_facet == 1) {
-	    if (facet_level == FacetLevelEnum.Page) {
-		$('#facet-units').html(" (page count)");
-	    }
-	    else {
-		$('#facet-units').html(" (volume count)");
-	    }
-
-	    var facet_fields = jsonData.facet_counts.facet_fields;
 	
-	    var facet_html = show_results_facet_html(facet_fields);
-
-	    $(".narrowsearch").show();
-	    $("#facetlist").html(facet_html);
-	    facet_html_add_checkbox_handlers();
-	    
-	} else if (show_facet == 0){
-	    $(".narrowsearch").hide();
-	    $("#facetlist").html("");
-	}
+	facet_filter.display(jsonData.facet_counts)
     }
    
     var volume_level_desc = explain_search.volume_level_desc;
@@ -471,7 +443,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	    if (search_start == 0) {
 
-		if (facet_level == FacetLevelEnum.Page) {
+		if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
 			$('#srt-vol-count-computing').show();
 			$('#srt-vol-count').html("");
@@ -532,7 +504,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    }
 	    
 	    var showing_matches = "<hr /><p>";
-	    showing_matches += (facet_level == FacetLevelEnum.Page)
+	    showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
 	    
@@ -873,7 +845,8 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
     //var query_terms = query.split(/\s+/); // ****
     // Based on:
     //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
-    var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    //var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    var query_terms = query.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g);
     
     //console.log("*** query terms = " + query_terms); // ****
     
@@ -982,50 +955,51 @@ function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search
 }
 
 function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos, search_all_checked) {
-	// boolean terms
-	//  => pos and lang field
-	if (query === "") {
-		return ""
-	}
-
-        //var query_terms = query.split(/\s+/);
-        // Based on:
-        //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
-        var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    // boolean terms
+    //  => pos and lang field
+    if (query === "") {
+	return ""
+    }
     
-	var query_terms_len = query_terms.length;
-
-	var bool_query_term = [];
-
-	var i = 0;
-	var prev_bool = "";
-
-	for (var i = 0; i < query_terms_len; i++) {
-		var term = query_terms[i];
-		if (term.match(/^(and|or)$/i)) {
-			prev_bool = term.toUpperCase();
-		} else {
-			if (i > 0) {
-				if (prev_bool == "") {
-					prev_bool = "AND";
-				}
-			}
-
-			var expanded_term = expand_field_lang_pos(term, langs_with_pos, langs_without_pos, search_all_checked)
-
-			term = "(" + expanded_term + ")";
-
-			if (prev_bool != "") {
-				bool_query_term.push(prev_bool);
-				prev_bool = "";
-			}
-			bool_query_term.push(term);
+    //var query_terms = query.split(/\s+/);
+    // Based on:
+    //   https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+    //var query_terms = query.match(/\w+(?::(?:\w+|"[^"]+"))?|(?:"[^"]+")/g);
+    var query_terms = query.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g);
+    
+    var query_terms_len = query_terms.length;
+    
+    var bool_query_term = [];
+    
+    var i = 0;
+    var prev_bool = "";
+    
+    for (var i = 0; i < query_terms_len; i++) {
+	var term = query_terms[i];
+	if (term.match(/^(and|or)$/i)) {
+	    prev_bool = term.toUpperCase();
+	} else {
+	    if (i > 0) {
+		if (prev_bool == "") {
+		    prev_bool = "AND";
 		}
+	    }
+	    
+	    var expanded_term = expand_field_lang_pos(term, langs_with_pos, langs_without_pos, search_all_checked)
+	    
+	    term = "(" + expanded_term + ")";
+	    
+	    if (prev_bool != "") {
+		bool_query_term.push(prev_bool);
+		prev_bool = "";
+	    }
+	    bool_query_term.push(term);
 	}
-
-	var bool_query = bool_query_term.join(" ");
-
-	return bool_query;
+    }
+    
+    var bool_query = bool_query_term.join(" ");
+    
+    return bool_query;
 }
 
 
@@ -1037,18 +1011,20 @@ function submit_action(event) {
     }
     $('.search-in-progress').css("cursor","wait");
 
-    filters = [];
-    refined_filters = [];
-    refine_query = {};
-    facetlist_set();
-    
-    show_facet = 0;
+    facet_filter.resetFilters(); // ****
+    facet_filter.facetlistSet();    
     
     store_search_action = solr_search_action;
 
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
+
+    explain_search = { 'group_by_vol': null,
+		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
+		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
     
+    var arg_q = null;
+
     var q_text = $('#q').val().trim();
     var vq_text = $('#vq').val().trim();
         
@@ -1056,97 +1032,129 @@ function submit_action(event) {
     
     var search_all_langs_checked = $('#search-all-langs:checked').length;
     var search_all_vfields_checked = $('#search-all-vfields:checked').length;
-    
-    if ((q_text === "") && (vq_text === "")) {
-	$('.search-in-progress').css("cursor","auto");
-	htrc_alert("No query term(s) entered");
-	return;
-    }
-    
-    explain_search = { 'group_by_vol': null,
-		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
-		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
-    
-    var arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
-    
-    if (arg_q == "") {
-	// Potentially only looking at volume level terms
-	facet_level = FacetLevelEnum.Volume;
+
+    if (store_query_tab_selected == QueryTabEnum.Advanced) {
+	var advanced_q_text = $('#advanced-q').val().trim();
+	if (advanced_q_text === "") {
+	    $('.search-in-progress').css("cursor","auto");
+	    htrc_alert("No query term(s) entered");
+	    return;
+	}
+	arg_q = advanced_q_text;
+
+
+	if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+	    doc_units = " pages ";
+
+	    if (arg_q.match(/volume[^_]+_txt:/)) {
+	    	explain_search.volume_level_desc  = "[Volume: Terms]";
+	    }
+	    if (arg_q.match(/htrctokentext:/)) {		
+		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+	    }
+	    
+	    if (group_by_vol_checked) {
+		explain_search.group_by_vol = "Search results sorted by volume ID";
+	    }
+	    
+	    if (arg_q.match(/[^_]+_t:/)) {
+		doc_units = " page/volume mix ";
+	    }
+	}
+	else {	
+	    doc_units = " volumes ";
+	    explain_search.volume_level_desc  = "[Volume: TERMS]";
+	}
+	
     }
     else {
-	facet_level = FacetLevelEnum.Page;
-    }
-    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, facet_level);
+	if ((q_text === "") && (vq_text === "")) {
+	    $('.search-in-progress').css("cursor","auto");
+	    htrc_alert("No query term(s) entered");
+	    return;
+	}
+   
     
-    //console.log("*** arg_vq = " + arg_vq);
-    //console.log("*** arg_q = " + arg_q);
-    
-    
+	arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+	
 	if (arg_q == "") {
-		if (arg_vq == "") {
-		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
-		    //   lead to an empty arg_q being returned
-		    $('.search-in-progress').css("cursor","auto");
-		    htrc_alert("No languages selected");
-		    return;
-		} else {
-		    arg_q = arg_vq;
-		    doc_units = " volumes ";
-		    show_facet = 1;
-		    explain_search.volume_level_desc  = "[Volume: TERMS]";
-		    if (group_by_vol_checked) {
-		        explain_search.group_by_vol = "Search results sorted by volume ID";
-		    }
+	    // Potentially only looking at volume level terms
+	    facet_filter.setFacetLevel(FacetLevelEnum.Volume);
+	}
+	else {
+	    facet_filter.setFacetLevel(FacetLevelEnum.Page);
+	}
 
-		}
-	} else {
-		if (arg_vq != "") {
-		    // join the two with an AND
-		    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
-		    
-		    explain_search.volume_level_desc = "[Volume: TERMS]";
-		    explain_search.page_level_desc   = "[Page-level: TERMS]";
-		}
-	        else {
-		    explain_search.page_level_desc  = "[Page-level: POS-terms]";
-		}
-	        if (group_by_vol_checked) {
+	var query_level = facet_filter.getFacetLevel();    
+	var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
+	
+	if (arg_q == "") {
+	    if (arg_vq == "") {
+		// arg_vq was empty to start with, but attempt to expand non-empty arg_q
+		//   lead to an empty arg_q being returned
+		$('.search-in-progress').css("cursor","auto");
+		htrc_alert("No languages selected");
+		return;
+	    } else {
+		arg_q = arg_vq;
+		doc_units = " volumes ";
+		explain_search.volume_level_desc  = "[Volume: Terms]";
+		if (group_by_vol_checked) {
 		    explain_search.group_by_vol = "Search results sorted by volume ID";
-		}		    
-
-		doc_units = " pages ";
-		show_facet = 1;  
+		}
+	    }
 	}
-
-	if ($('#vq').attr("data-key") == undefined) {
-		$('#vq').attr("data-key",vq_text);
+	else {
+	    if (arg_vq != "") {
+		// join the two with an AND
+		arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
+		
+		explain_search.volume_level_desc = "[Volume: Terms]";
+		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+	    }
+	    else {
+		explain_search.page_level_desc  = "[Page-level: POS-Terms]";
+	    }
+	    if (group_by_vol_checked) {
+		explain_search.group_by_vol = "Search results sorted by volume ID";
+	    }		    
+	    
+	    doc_units = " pages ";
 	}
-	if ($('#vq').attr("data-key") != vq_text) {
-		$('#vq').attr("data-key",vq_text);
-		filters = []; // **** should refined_filters, refine_query and refine_query_count also be reset?
-		facetlist_set();
-	}
-	//console.log("*** NOW arg_q = " + arg_q);
+    }
 
-	// Example search on one of the htrc-full-ef fields is: 
-	//  q=en_NOUN_htrctokentext:farming
-
-    	var arg_start = $('#start').attr('value');
-
-        var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
+    /*
+    if ($('#vq').attr("data-key") == undefined) {
+	$('#vq').attr("data-key",vq_text);
+    }
+    if ($('#vq').attr("data-key") != vq_text) {
+	$('#vq').attr("data-key",vq_text);
+	facet_filter.resetFilters(); // ****
+	facet_filter.facetlistSet();
+    }
+    */
     
-	store_search_args = {
-		q: arg_q,
-		indent: arg_indent,
-		wt: arg_wt,
-		start: arg_start,
-		rows: num_rows,
-		facet: "on"
-	};
+    //console.log("*** NOW arg_q = " + arg_q);
 
-        if (group_by_vol_checked) {
-		store_search_args.sort = "id asc";
-	}
+    // Example search on one of the htrc-full-ef fields is: 
+    //  q=en_NOUN_htrctokentext:farming
+    
+    var arg_start = $('#start').attr('value');
+    
+    var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
+    
+    store_search_args = {
+	q: arg_q,
+	indent: arg_indent,
+	wt: arg_wt,
+	start: arg_start,
+	rows: num_rows,
+	facet: "on"
+    };
+    
+    if (group_by_vol_checked) {
+	store_search_args.sort = "id asc";
+    }
 
     iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
     
@@ -1155,16 +1163,17 @@ function submit_action(event) {
 
 
 function show_hide_solr_q() {
-	$("#show-hide-solr-q").click(function (event) {
-		event.preventDefault();
-		if ($('.show-hide-solr-q:visible').length) {
-			$('.show-hide-solr-q').hide("slide", { direction: "up" }, 1000);
-			$('#show-hide-solr-q').html("Show full query ...");
-		} else {
-			$('.show-hide-solr-q').show("slide", { direction: "up" }, 1000);
-			$('#show-hide-solr-q').html("Hide full query ...");
-		}
-	});
+    $("#show-hide-solr-q").click(function (event) {
+	event.preventDefault();
+	if ($('.show-hide-solr-q:visible').length) {
+	    $('.show-hide-solr-q').hide("slide", { direction: "up" }, 500);
+	    $('#show-hide-solr-q').html("Show full query ...");
+	}
+	else {
+	    $('.show-hide-solr-q').show("slide", { direction: "up" }, 500);
+	    $('#show-hide-solr-q').html("Hide full query ...");
+	}
+    });
 }
 
 function show_hide_more_seqs(line_num) {
@@ -1176,7 +1185,8 @@ function show_hide_more_seqs(line_num) {
 	if ($(sid_block+':visible').length) {
 	    $(sid_block).hide("slide", { direction: "up" }, 1000);
 	    $(sid_label).html("Show more pages ...");
-	} else {
+	}
+	else {
 	    $(sid_block).show("slide", { direction: "up" }, 1000);
 	    $(sid_label).html("Hide pages ...");
 	}
@@ -1184,3 +1194,17 @@ function show_hide_more_seqs(line_num) {
 }
 
 
+function login_faux()
+{
+    $.ajax({
+	type: "GET",
+	url: "https://analytics.hathitrust.org/login",
+	//data: data_str,
+	dataType: "jsonp",
+	success: function(jsonData) { alert(jsonData); },
+	error: function(jqXHR, textStatus, errorThrown) {
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+
+}

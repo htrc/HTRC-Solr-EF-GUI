@@ -1,3 +1,5 @@
+
+
 table.query-table tr td {
     padding-top: 4px;
     padding-bottom: 4px;
@@ -28,8 +30,23 @@ input:disabled+label{color:#cccccc;}
     padding-bottom: 5px;
 }
 
+/* ****
+.ui-widget.ui-widget-content {
+    border: 1px solid whitesmoke;
+}
+*/
+
+/* #pos-fieldsets */
+.ui-widget {
+    font-size: 1.0em;
+}
+
+.ui-dialog {
+    z-index: 2000 !important ;
+}
+
 .con{    padding: 2rem;}
- .con .main {
+.con .main {
     min-height: 1rem ; /* used to be 40rem */
     width: 79%;
     font-size: 14px ;
@@ -42,7 +59,8 @@ input:disabled+label{color:#cccccc;}
     padding-right: 2rem
 }
 .page {
-    background: #fffefb;
+    /*background: #fffefb;*/
+    background: #ffffff;
     border: 1px solid #d5d3d3;
     -webkit-box-shadow: rgba(0,0,0,0.1) 0 1px 10px;
     -moz-box-shadow: rgba(0,0,0,0.1) 0 1px 10px;
