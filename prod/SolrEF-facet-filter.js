@@ -370,7 +370,7 @@ $(function () {
 	var $class = $(this).attr("class");
 	
 	if ($(this).hasClass("morefacets")) {
-	    obj = $class.split(" ")[0];
+	    var obj = $class.split(" ")[0];
 	    $(this).hide();
 	    $("[class='" + obj + " lessfacets']").show();
 	    $("[class='hidefacet " + obj + "']").css({
@@ -380,7 +380,7 @@ $(function () {
 	    return false;
 	}
 	else if ($(this).hasClass("lessfacets")) {
-	    obj = $class.split(" ")[0];
+	    var obj = $class.split(" ")[0];
 	    $(this).hide();
 	    $("[class='" + obj + " morefacets']").show();
 	    $("[class='hidefacet " + obj + "']").css({
