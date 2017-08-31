@@ -14,7 +14,11 @@ function solr_ef_login()
 	    else {
 		$iframe_contents.find("#error-message").show();
 	    }
+	},
+	"Cancel"  : function() {
+	    $(this).dialog("close");
 	}
+
     });
     
 }
