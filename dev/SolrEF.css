@@ -14,6 +14,17 @@ input:disabled {
     background:#dddddd;
 }
 
+.no-user-select {
+    -webkit-user-select: none; /* Chrome/Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+ */
+    
+    -o-user-select: none;
+    user-select: none;
+
+    color: #aaa;
+}
+
 input:disabled+label{color:#cccccc;}
 
 .evenline {
@@ -28,6 +39,13 @@ input:disabled+label{color:#cccccc;}
     margin: 0 0 0 0;
     padding-top: 5px;
     padding-bottom: 5px;
+}
+
+.htrc-delete .ui-button .ui-icon {
+
+    /*background-image: url("images/ui-icons_ef8c08_256x240.png"); */
+    /*background-image: url("images/ui-icons_222222_256x240.png");*/
+    background-image: inherit;
 }
 
 /* ****

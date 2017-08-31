@@ -122,7 +122,14 @@ function ajax_solr_text_search(newSearch,newResultPage)
     var url_args = [];
 
     for (var ka in store_search_args) {
-	url_args.push(ka + '=' + store_search_args[ka]);
+	var ka_arg = store_search_args[ka];
+	
+	if (ka == "q") {
+	    if (store_search_not_ids.length>0) {
+		ka_arg += store_search_not_ids.join(" ");
+	    }
+	}
+	url_args.push(ka + '=' + ka_arg);
     }
 
     url_args = facet_filter.solrSearchAppendArgs(url_args);
@@ -194,6 +201,7 @@ function show_new_results(delta) {
     show_updated_results();
 }
 
+				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
     var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
@@ -224,6 +232,19 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=      '</a>';
     download_span +=    '</div>';
 
+    var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
+    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
+    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
+    var delete_div = '<div style="float: right;">';
+    delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
+    delete_div +=          'class="'+delete_div_classes+'" ';
+    delete_div +=          'title="Remove item from result set">';
+    delete_div +=         '<span class="ui-button-icon ui-icon ui-icon-closethick"></span>';
+    delete_div +=         '<span class="ui-button-icon-space"> </span>';
+    delete_div +=      '</button>';
+    delete_div +=    '</div>';
+
+    
     var prev_seq_count = 0;
     
     if (merge_with_previous) {
@@ -248,7 +269,8 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	    if (pi == 0) {
 		var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-
+		html_item += delete_div;
+		
 		html_item += '<span style="font-style: italic;" name="' + id + '">';
 		html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 		
@@ -308,7 +330,8 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	else {
 	    var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 	    html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-
+	    html_item += delete_div;
+	    
 	    html_item += '<span style="font-style: italic;" name="' + id + '">';
 	    html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 	    
@@ -415,20 +438,20 @@ function show_results(jsonData,newSearch,newResultPage)
 	page_level_desc = page_level_desc.replace("TERMS",page_level_terms);
     }
 
-    var query_level_mix = volume_level_desc;
+    store_query_level_mix = volume_level_desc;
     
-    if (query_level_mix != null) {
+    if (store_query_level_mix != null) {
 	if (page_level_desc != null) {
-	    query_level_mix += " AND " + page_level_desc; 
+	    store_query_level_mix += " AND " + page_level_desc; 
 	}
     }
     else {
-	query_level_mix = page_level_desc;
+	store_query_level_mix = page_level_desc;
     }
 
     if (newResultPage) {
 	    
-	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
+	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
 	
 	if (num_docs > 0) {
 
@@ -596,6 +619,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		else {
 		    $search_results.append(html_item);
 		    show_hide_more_seqs(line_num);
+		    result_set_delete_item(line_num);
 		    prev_i_boundary = i;
 		    line_num++;
 		}
@@ -613,6 +637,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		var html_item = generate_item(line_num, prev_id, prev_pages, false);
 		$search_results.append(html_item);
 		show_hide_more_seqs(line_num);
+		result_set_delete_item(line_num);
 		prev_i_boundary = i;
 		line_num++;
 		prev_pages = [page];
@@ -650,6 +675,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		// no merge
 		$search_results.append(html_item);
 		show_hide_more_seqs(line_num);
+		result_set_delete_item(line_num);
 		store_line_num = line_num +1; // next line position
 	    }	    
 	}
@@ -657,6 +683,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    var html_item = generate_item(line_num, prev_id, prev_pages, false); // merge_with_previous=false
 	    $search_results.append(html_item);
 	    show_hide_more_seqs(line_num);
+	    result_set_delete_item(line_num);
 	    store_line_num = line_num +1; // next line position
 	}
     }
@@ -794,6 +821,8 @@ function show_results(jsonData,newSearch,newResultPage)
 var store_search_args = null;
 var store_search_action = null;
 var store_search_url = null;
+var store_search_not_ids = null;
+var store_query_level_mix = null;
 
 var group_by_vol_checked = 0;
 var doc_units = "";
@@ -1151,6 +1180,8 @@ function submit_action(event) {
 	rows: num_rows,
 	facet: "on"
     };
+    store_search_not_ids = [];
+    store_query_level_mix = null;
     
     if (group_by_vol_checked) {
 	store_search_args.sort = "id asc";
@@ -1192,8 +1223,43 @@ function show_hide_more_seqs(line_num) {
 	}
     });
 }
+function result_set_delete_item(line_num) {
+    var di_id = "result-set-delete-"+line_num;
 
+    $('#'+di_id).click(function (event) {
+	
+	var $close_div = $(this).parent();
+	var $wrapper_line_div = $close_div.parent();
+	var id = $close_div.next().attr("name");
+	$wrapper_line_div.remove();
+	
+	console.log("close: " + id);
 
+	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+	    
+	    var $a_seqs = $wrapper_line_div.find('a[class="seq"]');
+	    $a_seqs.each(function() {
+		var seq_str = $(this).text();
+		var seq = seq_str.replace(/^seq\s+/,"");
+		// sprintf("%06d")
+		var page_str = "" + (seq-1);
+		var pad = "000000";
+		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
+		store_search_not_ids.push("-id:"+id+".page-"+seq_pad);		
+	    });
+	}
+	else {
+	    store_search_not_ids.push("-id:"+id);		
+	}
+
+	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
+	$('#search-explain').html(explain_html);
+	show_hide_solr_q(); 
+
+    });
+}
+
+	    
 function login_faux()
 {
     $.ajax({

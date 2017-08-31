@@ -263,11 +263,10 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 
 // **** Not currently used, would need updating
 
-FacetFilter.prototype.refine_query_usused = function()
+FacetFilter.prototype.refine_query_unused = function()
 {
     // merge items in refine_query and filter into into main Solr query q= ...
     
-
     // "refine-"+key
     console.log("***refine: " + facet_key);
     

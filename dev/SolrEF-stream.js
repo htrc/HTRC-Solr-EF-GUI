@@ -22,8 +22,16 @@ function get_solr_stream_search_clause(arg_q)
 
     var search_stream_args = [];
 
-    for (var ka in vol_count_args) {	
-	search_stream_args.push(ka + '="' + vol_count_args[ka] + '"');
+    for (var ka in vol_count_args) {
+	var ka_arg = vol_count_args[ka];
+
+	if (ka == "q") {
+	    if (store_search_not_ids.length>0) {
+		ka_arg += " AND ( " + store_search_not_ids.join(" ") + " )";
+	    }
+	}
+
+	search_stream_args.push(ka + '="' + ka_arg + '"');
     }
 
     search_stream_args = facet_filter.solrSearchAppendArgs(search_stream_args);
