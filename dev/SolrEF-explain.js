@@ -16,7 +16,7 @@ function add2any_html(store_search_url)
     data_a2a += ' data-a2a-title="HathiTrust Research Center (HTRC) Extracted Feature Search"';
     
     var a2a_html = "";
-    a2a_html += '<div style="float:right;">\n';
+    a2a_html += '<div class="no-user-select" style="float:right;">\n';
     a2a_html += '  <div class="a2a_kit a2a_kit_size_32 a2a_default_style"' + data_a2a + '>\n';
     a2a_html += '    <a class="a2a_button_email"></a>\n';
     a2a_html += '    <a class="a2a_button_facebook"></a>\n';
