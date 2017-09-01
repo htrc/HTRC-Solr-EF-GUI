@@ -195,22 +195,45 @@
 
       <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
 	<p id="htrc-publish-body">
-	  Publishing result set in Registry for username: <span id="publish-username"></span>
+	  Publishing result set in HathiTrust Research Center
+	  Registry:
 	</p>
-	<form>
-	  <div style="padding: 8px;">
-	    <div style="display: inline-block; width: 120px;">
-	      Workset Name:
+	<form class="publish-workset-form">
+	  <div>
+	    <div>
+	      Workset Title:
 	    </div>
-	    <input type="text" style="width: 500px;"/>
+	    <input type="text"/>
 	  </div>
-	  <div style="padding: 8px;">
-	    <div style="display: inline-block; width: 120px;">
-	      Description:
+
+	  <div>
+	    <div>
+	      Workset Creator:
 	    </div>
-	    <textarea style="width: 500px; min-height: 180px;"
-		      placeholder="Please enter some text that describes the focus of your workset"></textarea>
+	    <input id="publish-username" type="text" disabled="disabled" />
 	  </div>
+	  
+	  <div>
+	    <div>
+	      Abstract:
+	    </div>
+	    <textarea placeholder="Please enter an abstract of your workset"></textarea>
+	  </div>
+
+	  <div>
+	    <div>
+	      Criteria:
+	    </div>
+	    <textarea placeholder="What was the criteria established for including items in this workset?"></textarea>
+	  </div>
+
+	  <div>
+	    <div>
+	      Research Motivation:
+	    </div>
+	    <textarea placeholder="What was the research motivation for forming this workset?"></textarea>
+	  </div>
+
 	</form>
       </div>
 

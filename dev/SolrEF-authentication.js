@@ -68,7 +68,7 @@ function solr_ef_login_to_publish()
 		    $('#navbar-username').html(username);
 		    $('#navbar-login').hide();
 		    $('#navbar-logout').show();
-		    $('#publish-username').html(username);
+		    $('#publish-username').val(username);
 		    $("#htrc-publish-dialog").dialog( "open" );
 		}
 		else {
@@ -82,7 +82,7 @@ function solr_ef_login_to_publish()
 	});
     }
     else {
-	$('#publish-username').html(username);
+	$('#publish-username').val(username);
 	$("#htrc-publish-dialog").dialog( "open" );
     }
     

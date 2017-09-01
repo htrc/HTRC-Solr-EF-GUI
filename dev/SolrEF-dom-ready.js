@@ -308,8 +308,8 @@ $(document).ready(function(){
 	modal: true,
 	autoOpen: false,
 	resizable: true,
-	width: 550,
-	height: 420,
+	width: 750,
+	height: 620,
 	buttons: {
 	    "Publish": function() {
 		$( this ).dialog( "close" );

@@ -204,7 +204,8 @@ function show_new_results(delta) {
 				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
-    var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
+    // var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"'; // ****
+    var css_class = 'class="oddevenline"';
     
     var html_item = "";
     var seq_item  = "";
@@ -233,7 +234,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=    '</div>';
 
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
-    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
+    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close"; // ****
     //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
     var delete_div = '<div style="float: right;">';
     delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
@@ -1235,7 +1236,7 @@ function result_set_delete_item(line_num) {
 	var $close_div = $(this).parent();
 	var $wrapper_line_div = $close_div.parent();
 	var id = $close_div.next().attr("name");
-	$wrapper_line_div.remove();
+	$wrapper_line_div.slideUp(500, function() { $wrapper_line_div.remove(); });
 
 	id = id.replace(/:/g,"\\:");
 	console.log("Exclude escaped id: " + id);
