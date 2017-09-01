@@ -407,7 +407,27 @@
 				placeholder="Enter query using raw Solr syntax"></textarea>
 		    </td>
 		    <td>
-		      <span id="advanced-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
+		      <span id="advanced-query-help" style="cursor: help">
+			<span class="ui-icon ui-icon-info"></span> Help
+		      </span>
+
+		      <div id="advanced-query-help-dialog"
+			   title="Help: Advanced Query"
+			   style="height: 500px;">
+			<div id="advanced-query-help-body">
+
+			  <p>
+			    Advancecd quries can be expressed directly using the Solr Query syntax.
+			    A concise guide on this can be found at
+			    <a href="http://www.solrtutorial.com/solr-query-syntax.html" target="_blank">Solr Tutorial</a>.
+			    For comprehensive documentation see the
+			    <a href="https://lucene.apache.org/solr/guide/6_6/the-standard-query-parser.html#the-standard-query-parser" target="_blank">
+			      Apache Solr Reference
+			    </a>.
+			  </p>
+			</div>
+		      </div>
+			    
 		    </td>
 		  </tr>
 
@@ -425,17 +445,9 @@
 		    </td>
 		  </tr>
 
-				  
-		  </tr>
-		  <!-- example facet query
-		       http://solr1.ischool.illinois.edu/solr/faceted-htrc-full-ef20/select?facet.field=genre_ss&facet=on&indent=on&q=title_t:*&rows=0&wt=json&facet.field=issuance_s
--->
 		  <tr>
 		    <td></td>
 		    <td >
-		      <!--
-		      <input type="submit" class="search-in-progress" id="search-submit" style="float: right;"/>
--->
 		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
 		    </td>
 		  </tr>

@@ -1,16 +1,13 @@
+"use strict";
 
-var explain_search = { 'group_by_vol': null,
-		       'volume_level_terms': null, 'volume_level_desc': null,
-		       'page_level_terms': null, 'page_level_desc': null };
+var explain_search = { 'group_by_vol':       null,
+		       'volume_level_terms': null,
+		       'volume_level_desc':  null,
+		       'page_level_terms':   null,
+		       'page_level_desc':    null  };
 
 function add2any_html(store_search_url)
 {
-    //var a2a_config = a2a_config || {};
-    //a2a_config.linkname = "HathiTrust Research Center (HTRC) Extracted Feature Search";
-    //var base_url = location.protocol + '//' + location.host + location.pathname;
-    // //a2a_config.linkurl = base_url + "?pub-name=" + published_id.replace(/ /g,"+");
-    //a2a_config.linkurl = store_search_url;
-
     var data_a2a = "";
     data_a2a += 'data-a2a-url="'+store_search_url+'"';
     data_a2a += ' data-a2a-title="HathiTrust Research Center (HTRC) Extracted Feature Search"';

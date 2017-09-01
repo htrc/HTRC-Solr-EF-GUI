@@ -204,13 +204,10 @@ function show_new_results(delta) {
 				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
-    // var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"'; // ****
     var css_class = 'class="oddevenline"';
     
     var html_item = "";
     var seq_item  = "";
-    
-    // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
     
     var id_pages_len = id_pages.length;
     
@@ -226,7 +223,6 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	download_text += " (complete volume)";
     }
     var download_span = '<div title="'+id+'" style="color: #924a0b;">';
-    //download_span +=      '<a download href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'">';
     download_span +=      '<a download href="'+ef_download_url+'?download-id='+id+'">';
     download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
     download_span +=         download_text;
@@ -234,8 +230,6 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=    '</div>';
 
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
-    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close"; // ****
-    //var delete_div_classes = "ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
     var delete_div = '<div style="float: right;">';
     delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
     delete_div +=          'class="'+delete_div_classes+'" ';
@@ -456,7 +450,6 @@ function show_results(jsonData,newSearch,newResultPage)
 	
 	if (num_docs > 0) {
 
-	    //if (search_start == 0) {
 	    if (newSearch) {
 		// The very beginning of the search results
 
@@ -473,10 +466,7 @@ function show_results(jsonData,newSearch,newResultPage)
 			$('#srt-vol-count').html("");
 			$('#srt-vol-count-span').show();
 			
-			//var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true // ****
 			$("#export-by-vol").show();
-			
-			//var data_str = get_solr_stream_search_data_str(store_search_args.q) // ****
 			$("#export-by-page").show();
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
@@ -499,7 +489,7 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-ef-zip").show();
 			$("#export-ef-to-registry").show();
 
-			$("#srt-ef-export").show(); // ***** does this even exist anymore?
+			//$("#srt-ef-export").show(); // ***** does this even exist anymore?
 			$("#export-by").fadeIn(1500);
 			
 			// restore vol-count display back to default text, ready for next vol count computation
@@ -519,8 +509,6 @@ function show_results(jsonData,newSearch,newResultPage)
 		$('#search-explain').html(explain_html);
 		show_hide_solr_q();
 		
-		//$( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
-	    	    
 		$('#next-prev').show();
 	    }
 	    var from = parseInt(store_search_args.start) + 1;
@@ -731,19 +719,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	progressbar_top.progressbar( "value",0);
 	progressbar_bot.progressbar( "value",0);
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
-    }
-
-    /*
-    var next_prev = '<p style="width:100%;">';
-    next_prev += '<div id="search-prev" style="float: left;">';
-    next_prev += '<a>&lt; <span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a></div>';
-    next_prev += '<div id="search-next" style="float: right;">';
-    next_prev += '<a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span> &gt;</a></div>';
-    next_prev += '</p>';
-    
-    $('#next-prev').html(next_prev);
-    */
-    
+    }    
 
     // Need to hide prev link?
     if (store_start == 0) { 
@@ -786,6 +762,7 @@ function show_results(jsonData,newSearch,newResultPage)
     // Example URL for using the Solr-EF collection to retrieve volume id info
     //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
 
+    // ****
     //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});
 
     var ids_escaped = ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});
@@ -1156,17 +1133,6 @@ function submit_action(event) {
 	    doc_units = " pages ";
 	}
     }
-
-    /*
-    if ($('#vq').attr("data-key") == undefined) {
-	$('#vq').attr("data-key",vq_text);
-    }
-    if ($('#vq').attr("data-key") != vq_text) {
-	$('#vq').attr("data-key",vq_text);
-	facet_filter.resetFilters(); // ****
-	facet_filter.facetlistSet();
-    }
-    */
     
     //console.log("*** NOW arg_q = " + arg_q);
 
@@ -1263,20 +1229,4 @@ function result_set_delete_item(line_num) {
 	show_hide_solr_q(); 
 
     });
-}
-
-	    
-function login_faux()
-{
-    $.ajax({
-	type: "GET",
-	url: "https://analytics.hathitrust.org/login",
-	//data: data_str,
-	dataType: "jsonp",
-	success: function(jsonData) { alert(jsonData); },
-	error: function(jqXHR, textStatus, errorThrown) {
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}
-    });
-
 }

@@ -271,7 +271,7 @@ $(document).ready(function(){
 	modal: true,
 	autoOpen: false,
 	resizable: true,
-	width: 400,
+	width: 450,
 	buttons: {
 	    "OK": function() {
 		$( this ).dialog( "close" );
@@ -382,6 +382,28 @@ $(document).ready(function(){
     
     $("#page-help").click(function () {
 	$("#page-help-dialog").dialog( "open" );
+    });
+
+    $("#advanced-query-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#advanced-query-help").click(function () {
+	$("#advanced-query-help-dialog").dialog( "open" );
     });
 
     
