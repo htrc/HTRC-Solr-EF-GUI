@@ -145,6 +145,6 @@ function stream_export_ef(jsonData)
 	htrc_alert(alert_mess);
     }
 
-    $('#srt-ef-export').attr('href',url);
+    $('#srt-ef-export').attr('href',url); // **** is this still used
     window.location.href = url;    
 }

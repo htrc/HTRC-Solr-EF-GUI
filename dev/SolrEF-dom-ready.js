@@ -186,7 +186,10 @@ function activate_tab_id(tab_id)
     }
 
     store_query_tab_selected = tab_id;
-    
+    if (typeof(Storage) !== "undefined") {
+	localStorage.setItem("htrc-ef-query-tab-selected",store_query_tab_selected);
+    }
+	    
     if (tab_id == QueryTabEnum.Advanced) {
 	$('.volume-query-row').hide();
 	$('.page-query-row').hide();
@@ -236,6 +239,14 @@ $(document).ready(function(){
 	}
     });
 
+    store_query_tab_selected = QueryTabEnum.Page;
+    if (typeof(Storage) !== "undefined") {
+	var ls_qts = localStorage.getItem("htrc-ef-query-tab-selected");
+	if (ls_qts != null) {
+	    store_query_tab_selected = ls_qts;
+	}
+    }
+        
     tabs.tabs({ active: store_query_tab_selected});
     activate_tab_id(store_query_tab_selected);
 	
@@ -245,6 +256,15 @@ $(document).ready(function(){
 	    tabs.tabs( "refresh" );
 	}
     });
+
+    if (typeof(Storage) !== "undefined") {
+	username = sessionStorage.getItem("htrc-username");
+	if ((username != null) && (username != "")) {
+    	    $('#navbar-username').html(username);
+	    $('#navbar-login').hide();
+	    $('#navbar-logout').show();
+	}
+    }
 
     
     $( "#htrc-alert-dialog" ).dialog({
@@ -282,6 +302,32 @@ $(document).ready(function(){
 	if (e.keycode == $.ui.keyCode.ENTER) {
 	    $(this).dialog("close");
 	}
+    });
+
+    $( "#htrc-publish-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	width: 550,
+	height: 420,
+	buttons: {
+	    "Publish": function() {
+		$( this ).dialog( "close" );
+	    },
+	    "Cancel": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
+    $("#export-ef-to-registry").click(function () {
+	solr_ef_login_to_publish();
     });
 
     

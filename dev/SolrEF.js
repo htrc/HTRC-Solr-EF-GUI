@@ -7,7 +7,7 @@ var QueryTabEnum = {
     Advanced: 3
 };
 
-var store_query_tab_selected = QueryTabEnum.Page;
+var store_query_tab_selected = null;
     
 var store_search_xhr = null;
 
@@ -480,6 +480,7 @@ function show_results(jsonData,newSearch,newResultPage)
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 			$("#export-ef-zip").show();
+			$("#export-ef-to-registry").show();
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
@@ -494,7 +495,10 @@ function show_results(jsonData,newSearch,newResultPage)
 		    if (num_found < num_found_vol_limit) {
 			$("#export-by-vol").show();
 			$("#export-by-page").hide();
-			$("#srt-ef-export").show();
+			$("#export-ef-zip").show();
+			$("#export-ef-to-registry").show();
+
+			$("#srt-ef-export").show(); // ***** does this even exist anymore?
 			$("#export-by").fadeIn(1500);
 			
 			// restore vol-count display back to default text, ready for next vol count computation
@@ -1232,8 +1236,9 @@ function result_set_delete_item(line_num) {
 	var $wrapper_line_div = $close_div.parent();
 	var id = $close_div.next().attr("name");
 	$wrapper_line_div.remove();
-	
-	console.log("close: " + id);
+
+	id = id.replace(/:/g,"\\:");
+	console.log("Exclude escaped id: " + id);
 
 	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 	    

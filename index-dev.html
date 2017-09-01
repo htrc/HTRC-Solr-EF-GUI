@@ -143,14 +143,11 @@
                         <li><a href="https://analytics.hathitrust.org/about">About</a>
                     </li></ul>
                     
-                        <ul class="nav pull-right navbar-nav">
+                        <ul class="nav pull-right navbar-nav" id="navbar-login">
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     Sign In<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-				  <!--
-				  <li><a onclick="login_faux()">Test</a></li>
-				  -->
                                   <li><a onclick="solr_ef_login()">Sign In</a></li>
 <!--				  
 				  <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
@@ -160,19 +157,22 @@
                                         Forgot Password?</a></li>
                                 </ul>
                             </li>
-<!--
-			    <ul class="nav pull-right">
-			      <li class="dropdown">
-				<a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;">davidb<b class="caret"></b></a>
-				<ul class="dropdown-menu">
-				  <li><a href="/logout">Logout</a></li>
-				</ul>
-			      </li>
-			    </ul>
--->			    
 
                             <li><a href="https://analytics.hathitrust.org/signup"><span>Sign Up</span></a></li>
                         </ul>
+
+			<ul class="nav pull-right" id="navbar-logout" style="display: none">
+			  <li class="dropdown">
+			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
+			    <ul class="dropdown-menu">
+			      <li><a onclick="solr_ef_logout()">Logout</a></li>
+			      <!--
+				  <li><a href="/logout">Logout</a></li>
+				  -->
+			    </ul>
+			  </li>
+			</ul>
+
                     
                 </div>
                     <!--/.nav-collapse -->
@@ -193,6 +193,26 @@
 	</p>
       </div>
 
+      <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
+	<p id="htrc-publish-body">
+	  Publishing result set in Registry for username: <span id="publish-username"></span>
+	</p>
+	<form>
+	  <div style="padding: 8px;">
+	    <div style="display: inline-block; width: 120px;">
+	      Workset Name:
+	    </div>
+	    <input type="text" style="width: 500px;"/>
+	  </div>
+	  <div style="padding: 8px;">
+	    <div style="display: inline-block; width: 120px;">
+	      Description:
+	    </div>
+	    <textarea style="width: 500px; min-height: 180px;"
+		      placeholder="Please enter some text that describes the focus of your workset"></textarea>
+	  </div>
+	</form>
+      </div>
 
       
         <div class="row">
@@ -465,6 +485,11 @@
 	       download>
 	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 	    </a>
+	    <a id="export-ef-to-registry" class="export-item" style="display: none"
+	       download>
+	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+	    </a>
+
 	  </div>
         </div>
         <div class="narrow">
@@ -538,6 +563,7 @@
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
 	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
+	<li>Total Disk Usage of 20-Core Solr Collection: 4680G</li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
 	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>
