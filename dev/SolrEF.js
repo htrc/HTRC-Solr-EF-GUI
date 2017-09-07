@@ -148,7 +148,8 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	success: function(jsonData) { 
+	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
+	successXXXX: function(jsonData) { 
 	
 		if(num_found==0){
 			num_found=jsonData.response.numFound;
