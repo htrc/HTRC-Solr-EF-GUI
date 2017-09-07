@@ -141,7 +141,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
-	type: "GET",
+	type: "POST", // used to be "GET"
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
@@ -428,7 +428,7 @@ function show_results(jsonData,newSearch,newResultPage)
     var docs = response.docs;
     var num_docs = docs.length;
 
-    // ajax call has returnec successfully
+    // ajax call has returned successfully
     store_search_xhr = null;
     
     var search_start = parseInt(store_search_args.start);
@@ -1045,29 +1045,35 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
     return bool_query;
 }
 
-
-function submit_action(event) {
-    event.preventDefault();
-	num_found=0;
-	$('#page-bar').html('');
-
+function initialize_new_solr_search()
+{
     if ($('#search-results-page').is(":visible")) {
 	$('#search-results-page').hide();
     }
     $('.search-in-progress').css("cursor","wait");
+
+    num_found=0;
+    $('#page-bar').html('');
 
     facet_filter.resetFilters(); // ****
     facet_filter.facetlistSet();    
     
     store_search_action = solr_search_action;
 
-    var arg_indent = $('#indent').attr('value');
-    var arg_wt = $('#wt').attr('value');
-
     explain_search = { 'group_by_vol': null,
 		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
 		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
+
+}
+
+function submit_action(event) {
+    event.preventDefault();
+
+    initialize_new_solr_search();
     
+    //var arg_indent = $('#indent').attr('value'); // ****
+    //var arg_wt = $('#wt').attr('value');
+
     var arg_q = null;
 
     var q_text = $('#q').val().trim();
@@ -1175,8 +1181,13 @@ function submit_action(event) {
     
     var arg_start = $('#start').attr('value');
     
+    initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
+}
+
+function initiate_new_solr_search(arg_q,arg_start,num_rows,group_by_vol_checked)
+{
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
-    
+
     store_search_args = {
 	q: arg_q,
 	indent: arg_indent,
@@ -1185,6 +1196,7 @@ function submit_action(event) {
 	rows: num_rows,
 	facet: "on"
     };
+
     store_search_not_ids = [];
     store_query_level_mix = null;
     
@@ -1192,7 +1204,19 @@ function submit_action(event) {
 	store_search_args.sort = "id asc";
     }
 
-    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
+    // For display purposes, determine how many terms in query
+    var count_terms = 0;
+    var iprogressbar_message = "Searching 20 CPU-Core index";
+    if (store_search_args != null) {
+	count_terms = (store_search_args.q.match(/:/g) || []).length;
+    }
+
+    if (count_terms>1) {
+	iprogressbar_message += " for " + count_terms + " fields/terms";
+    }
+
+    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,
+					 iprogressbar_message);
     
     ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 }
@@ -1228,6 +1252,27 @@ function show_hide_more_seqs(line_num) {
 	}
     });
 }
+
+function show_hide_query_tabs() {
+    var base_id = "#show-hide-query-tabs";
+    var box_id       = base_id+"-box";
+    var turnstyle_id = base_id+"-turnstyle";
+    var block_id     = "#tabs-shared";
+    
+    $(box_id).click(function (event) {
+	event.preventDefault();
+	if ($(block_id+':visible').length) {
+	    $(block_id).hide("slide", { direction: "up" }, 1000);
+	    $(turnstyle_id).html("+");
+	}
+	else {
+	    $(block_id).show("slide", { direction: "up" }, 1000);
+	    $(turnstyle_id).html("-");
+	}
+    });
+}
+
+
 function result_set_delete_item(line_num) {
     var di_id = "result-set-delete-"+line_num;
 

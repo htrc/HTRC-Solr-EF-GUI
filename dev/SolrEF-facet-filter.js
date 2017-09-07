@@ -328,7 +328,8 @@ FacetFilter.prototype.refine_query_unused = function()
     $('.search-in-progress').css("cursor","wait");
     
     store_search_args.start = 0;
-    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
+    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,
+					 "Applying filter");
     
     ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 }
@@ -606,6 +607,7 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 
 var facet_filter = new FacetFilter();
 
+// ####****
 //$(function() {
     //Facet related page setup
     

@@ -243,9 +243,7 @@
                 <img class="img-responsive" src="assets/hathi_medium.png" alt=" ">
             </div>
             <div class="col-md-10 col-sm-10 col-xs-12 col-lg-8" style="margin-left: 0;">
-                <h1 style="font-weight:bold;font-size:56px">
-                    HTRC Extracted Feature Solr Search
-                </h1>
+                <h1 style="font-weight:bold;font-size:56px">HTRC Extracted Feature Solr Search</h1>
             </div>
         </div>
         <div class="row" style="padding-top : 25px; font-size : 17px; line-height : 27px;">
@@ -254,18 +252,24 @@
 	      <h2>Faceted Unigram Page-based Extracted Feature Search (Prototype)</h2>
 
 	      <div id="tabs-search">
+		<div style="float: right; padding: 10px;">
+		  <div id="show-hide-query-tabs-box"
+		       style="width: 20px; height: 20px;" title="Hide query input area">
+		    <div style="text-align: center; vertical-align: middle; line-height: 20px;">
+		      <span id="show-hide-query-tabs-turnstyle">-</span>
+		    </div>
+		  </div>
+		</div>
 		<ul>
 		  <li><a id="tab-page"     href="#tabs-shared">Page-level</a></li>
 		  <li><a id="tab-volume"   href="#tabs-shared">Volume</a></li>
 		  <li><a id="tab-combined" href="#tabs-shared">Combined</a></li>
 		  <li><a id="tab-advanced" href="#tabs-shared">Advanced</a></li>
 		</ul>
-		<div id="tabs-shared" styleXXXX="background: #fffefb;">
+		<div id="tabs-shared">
 
 	      
 	      <form id="search-form">
-		<input type="hidden" id="indent" name="indent" value="on"/>
-		<input type="hidden" id="wt" name="wt" value="json"/>
 		<input type="hidden" id="start" name="start" value="0"/>
 		
 		<table class="query-table">
@@ -484,7 +488,7 @@
 	  </div>
 
 	  <div id="search-indeterminate-div" class="search-indeterminate" style="display:none;">
-	    <span class="progressbar-margin progressbar-label" >Searching 20 CPU-Core index
+	    <span class="progressbar-margin progressbar-label" >
 	      <span id="search-indeterminate-label"></span>
 	    </span>
 	    <div style="height: 34px;">
@@ -598,7 +602,7 @@
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
 	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
-	<li>Total Disk Usage of 20-Core Solr Collection: 4680G</li>
+	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB</li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
 	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>

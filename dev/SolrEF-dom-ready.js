@@ -256,7 +256,8 @@ $(document).ready(function(){
 	    tabs.tabs( "refresh" );
 	}
     });
-
+    show_hide_query_tabs();
+    
     if (typeof(Storage) !== "undefined") {
 	username = sessionStorage.getItem("htrc-username");
 	if ((username != null) && (username != "")) {
@@ -467,6 +468,18 @@ $(document).ready(function(){
 	$('#search-submit').click(submit_action);
     }
 
+    var workset_id = getURLParameter("workset-id");
+    if (workset_id != null) {
+	// hide query input area
+	if ($('#tab-shared:visible').length) {
+	    $('#tab-shared').slideUp(1000, function() { load_worset_id(workset_id) } );
+	    $('#show-hide-query-tabs-turnstyle').html("+");
+	}
+	else {
+	    load_workset_id(workset_id);
+	}
+    }
+    
 });
 
 
