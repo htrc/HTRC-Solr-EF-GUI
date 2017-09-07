@@ -444,7 +444,7 @@
 				ellipseTpl: "...",
 				toolbar: false,
 				hash: false,
-				pageSizeList: [5, 10, 15, 20]
+				pageSizeList: [5, 10, 15, 20, 40, 80]
 			}, settings);
 			this.target = $(this.settings.target);
 			this.container = $('<div id="' + this.id + '" class="ui-paging-container"/>');
