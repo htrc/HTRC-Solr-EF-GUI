@@ -148,7 +148,35 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
+	success: function(jsonData) { 
+	
+		if(num_found==0){
+			num_found=jsonData.response.numFound;
+			if(num_found>0){
+				 
+				 $('#page-bar').Paging({ pagesize: num_results_per_page, count: num_found, toolbar: true ,changePagesize:function(ps){
+					num_results_per_page=ps;
+					 store_search_args.rows=ps;
+					 store_search_args.start =0;
+					 num_found=0;
+					 $('#page-bar').html('');
+					 ajax_solr_text_search(true,true);
+				},callback:function(a){
+				 
+					
+					store_search_args.start = (a-1)* parseInt(num_results_per_page);
+                    show_updated_results();
+				}});
+			}
+			
+			
+			
+		}
+		if(jsonData.response.numFound==0){
+				 $('#page-bar').html('');
+			}
+		show_results(jsonData,newSearch,newResultPage);
+	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
@@ -394,6 +422,7 @@ var store_result_page_starts = [];
 
 function show_results(jsonData,newSearch,newResultPage)
 {
+	 
     var response = jsonData.response;
     var num_found = response.numFound;
     var docs = response.docs;
@@ -509,7 +538,9 @@ function show_results(jsonData,newSearch,newResultPage)
 		$('#search-explain').html(explain_html);
 		show_hide_solr_q();
 		
-		$('#next-prev').show();
+		//$('#next-prev').show();
+		//$('#page-bar').show();
+			
 	    }
 	    var from = parseInt(store_search_args.start) + 1;
 	    var to = from + store_search_args.rows - 1;
@@ -543,7 +574,8 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#search-explain').html(explain_html);
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
-	    $('#next-prev').hide();
+	    //$('#next-prev').hide();
+		//$('#page-bar').hide();
 	}		
 
     }
@@ -1016,6 +1048,8 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
 
 function submit_action(event) {
     event.preventDefault();
+	num_found=0;
+	$('#page-bar').html('');
 
     if ($('#search-results-page').is(":visible")) {
 	$('#search-results-page').hide();

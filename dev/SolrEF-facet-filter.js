@@ -606,13 +606,13 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 
 var facet_filter = new FacetFilter();
 
-$(function() {
+//$(function() {
     //Facet related page setup
     
     $("#facetlist").on("click","a",function() {
-
+     
 	var $class = $(this).attr("class");
-	
+	num_found=0;
 	if ($(this).hasClass("morefacets")) {
 	    var obj = $class.split(" ")[0];
 	    $(this).hide();
@@ -692,7 +692,7 @@ $(function() {
 	    return false;
 	    
 	}
-    });
+   // });
     
     $(".filters").on("click","a",function() {
 	// User has clicked on one of the currently applied filters

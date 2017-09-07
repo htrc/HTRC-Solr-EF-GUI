@@ -1,5 +1,5 @@
 
-var solr_prefix_url = "//solr1.ischool.illinois.edu/solr/";
+var solr_prefix_url = "http://solr1.ischool.illinois.edu/solr/";
 var solr_collection = "faceted-htrc-full-ef20";
 
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
@@ -13,6 +13,7 @@ var num_found_page_limit = num_found_page_limit_str.replace(/,/g,"");
 var num_found_vol_limit  = num_found_vol_limit_str.replace(/,/g,"");
 
 var num_results_per_page = 15;
+var num_found=0;
 
 
 var SolrEFSettings = {
