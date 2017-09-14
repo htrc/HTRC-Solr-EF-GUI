@@ -608,7 +608,7 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 var facet_filter = new FacetFilter();
 
 // ####****
-//$(function() {
+$(function() {
     //Facet related page setup
     
     $("#facetlist").on("click","a",function() {
@@ -694,7 +694,7 @@ var facet_filter = new FacetFilter();
 	    return false;
 	    
 	}
-   // });
+    });
     
     $(".filters").on("click","a",function() {
 	// User has clicked on one of the currently applied filters
