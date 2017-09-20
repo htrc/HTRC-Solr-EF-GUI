@@ -99,7 +99,27 @@ function add_titles_solr(jsonData) {
 	    $(this).html($tooltip_title_clone)
 	});
 	console.log(htid + ", title = " + title);
-	
+
+	// Change any non-public domain seq links to view internal JSON EF-POS volume
+	$("[name='" + htid + "'] ~ nobr>a[class='seq']").each(function () {
+	    //$("[name='" + htid + "'] ~ nobr").each(function () {
+	    var rights = doc_val.rightsAttributes_s;
+	    console.log("rights for " + htid + " = " + doc_val.rightsAttributes_s);
+	    if ((rights != "pd") && (rights != "pdus")) {
+		var href = 'json-page-viewer.html?htid='+htid;
+
+		var seq_str = $(this).text();
+		
+		if (seq_str.match(/^seq\s+/)) {
+		    var seq_num = seq_str.replace(/^seq\s+/,"");
+		    href += "&seq=" + seq_num;
+		}
+		href += "&title=" + title;
+		
+		$(this).attr('href',href);
+	    }
+	});
+					
 	var itemURL = doc_val.handleUrl_s;
 	itemURL = itemURL.replace(/^https:/, "http:");
 	
@@ -286,7 +306,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	var page = id_pages[pi];
 	
 	var seqnum = (page == 0) ? 1 : page;
-	var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
+	var babel_url = babel_prefix_url + "?id=" + id + ";view=1up;seq=" + seqnum;
 	
 	if (id_pages_len > 1) {
 	    
@@ -806,7 +826,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 
     
-    var fl_args = [ "id", "title_s", "handleUrl_s",
+    var fl_args = [ "id", "title_s", "handleUrl_s", "rightsAttributes_s",
 		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s" ];
     var fl_args_str = fl_args.join(",");
     

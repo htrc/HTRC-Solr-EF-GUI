@@ -1,0 +1,47 @@
+
+$(document).ready(function(){
+
+    var title = getURLParameter("title");
+    if (title != null) {
+	title = decodeURI(title);
+	$('#ht-title').html(title);
+    }
+	
+    var htid = getURLParameter("htid");
+    if (htid != null) {
+
+	var babel_url = babel_prefix_url + "?id=" + htid + ";view=1up";
+	
+	var seqnum = getURLParameter("seq");
+	if (seqnum != null) {
+	    babel_url += ";seq=" + seqnum;
+	}
+	else {
+	    babel_url += ";seq=0";
+	}
+	
+	    
+	var $alink = $('<a />')
+	    .attr('href',babel_url)
+	    .html("@ HathiTrust");
+
+	$('#goto-ht').html($alink);
+	
+    }
+
+    var ef_download_args = { "download-id": htid };
+    
+    $.ajax({
+	type: "GET",
+	url: ef_download_url,
+	data: ef_download_args,
+	dataType: "json",
+	success: function(jsonData) { 
+	    $('#json-dump').text(JSON.stringify(jsonData, null, 4));
+	},	
+	error: ajax_error
+    });
+
+    
+	
+});

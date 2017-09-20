@@ -1,0 +1,59 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?q4cabf');
+  src:  url('fonts/icomoon.eot?q4cabf#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?q4cabf') format('truetype'),
+    url('fonts/icomoon.woff?q4cabf') format('woff'),
+    url('fonts/icomoon.svg?q4cabf#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-play3:before {
+  content: "\ea1c";
+}
+.icon-previous2:before {
+  content: "\ea23";
+}
+.icon-next2:before {
+  content: "\ea24";
+}
+.icon-arrow-right:before {
+  content: "\ea34";
+}
+.icon-arrow-left:before {
+  content: "\ea38";
+}
+
+.toolbar .btn {
+    background: #666;
+    color: #eee;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.75);
+    border-color: #333;
+}
+
+.btn {
+    border: 1px solid #bbb;    
+}
+
+.btn:hover {
+    background-color: #333333;
+    text-decoration: none;
+}
+
+

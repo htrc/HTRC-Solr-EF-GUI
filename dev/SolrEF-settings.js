@@ -4,6 +4,8 @@ var solr_collection = "faceted-htrc-full-ef20";
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
+var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
+
 //var ef_download_url  = "http://solr1.ischool.illinois.edu:8080/get";
 var ef_download_url  = "https://solr1.ischool.illinois.edu/htrc-ef-access/get";
 
