@@ -8,7 +8,8 @@ function get_solr_stream_search_clause(arg_q)
     var arg_indent = $('#indent').attr('value');
     var arg_wt = $('#wt').attr('value');
 
-    var escaped_arg_q = arg_q.replace(/,/g,"\\,");
+    var escaped_arg_q = arg_q.replace(/,/g,"\\,").replace(/'/g,"\\'");
+    //var escaped_arg_q = escape_solr_query(arg_q);
     
     var vol_count_args = {
 	qt: "/export",

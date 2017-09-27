@@ -56,4 +56,32 @@
     text-decoration: none;
 }
 
+#display-mode label {
+    font-weight: normal;
+}
 
+#display-mode label {
+    padding-left: 16px;
+}
+    
+tr.oddevenline:nth-child(odd) {
+    background-color: #eee;
+    margin: 0 0 0 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+tr.oddevenline:nth-child(even) {
+    background-color: #fff;
+    margin: 0 0 0 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.show-hide-label {
+    padding: 10px;
+}
+
+.show-hide-label:hover {
+    background-color: #ccc;
+}

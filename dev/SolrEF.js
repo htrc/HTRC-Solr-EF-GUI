@@ -101,20 +101,30 @@ function add_titles_solr(jsonData) {
 	console.log(htid + ", title = " + title);
 
 	// Change any non-public domain seq links to view internal JSON EF-POS volume
-	$("[name='" + htid + "'] ~ nobr>a[class='seq']").each(function () {
-	    //$("[name='" + htid + "'] ~ nobr").each(function () {
+	var $result_line = $("[name='" + htid + "']").parent();
+	var $seq_matches = $result_line.find("nobr>a[class^='seq']");
+	
+	//$("[name='" + htid + "'] ~ nobr>a[class^='seq']").each(function () {
+
+	$seq_matches.each(function() {
 	    var rights = doc_val.rightsAttributes_s;
-	    console.log("rights for " + htid + " = " + doc_val.rightsAttributes_s);
-	    if ((rights != "pd") && (rights != "pdus")) {
+
+	    //if ((rights != "pd") && (rights != "pdus")) { // ****
+	    if (rights != "pd") {
 		var href = 'json-page-viewer.html?htid='+htid;
 
 		var seq_str = $(this).text();
-		
-		if (seq_str.match(/^seq\s+/)) {
+
+		if (seq_str == "all pages") {
+		    href += "&seq=1";
+		}
+		else if (seq_str.match(/^seq\s+/)) {
 		    var seq_num = seq_str.replace(/^seq\s+/,"");
 		    href += "&seq=" + seq_num;
 		}
+		href += "&rights=" + rights;
 		href += "&title=" + title;
+		
 		
 		$(this).attr('href',href);
 	    }
@@ -170,33 +180,42 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	},
 	successXXXX: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
 	success: function(jsonData) { 
-	
-		if(num_found==0){
-			num_found=jsonData.response.numFound;
-			if(num_found>0){
-				 
-				 $('#page-bar').Paging({ pagesize: num_results_per_page, count: num_found, toolbar: true ,changePagesize:function(ps){
-					num_results_per_page=ps;
-					 store_search_args.rows=ps;
-					 store_search_args.start =0;
-					 num_found=0;
-					 $('#page-bar').html('');
-					 ajax_solr_text_search(true,true);
-				},callback:function(a){
-				 
-					
-					store_search_args.start = (a-1)* parseInt(num_results_per_page);
-                    show_updated_results();
-				}});
-			}
-			
-			
-			
-		}
-		if(jsonData.response.numFound==0){
-				 $('#page-bar').html('');
-			}
+	    if (group_by_vol_checked) {
+		// Possible merging of items in search results means
+		// page-bar next pages not directly computable
+		// => don't show page-bar, only give 'next' and 'prev'
 		show_results(jsonData,newSearch,newResultPage);
+	    }
+	    else {
+		// No merging of search result items possible
+		// => can provide page-bar to user
+		if (num_found==0) {
+		    num_found=jsonData.response.numFound;
+		    if (num_found>0) {
+				 
+			$('#page-bar').Paging({
+			    pagesize: num_results_per_page,
+			    count: num_found,
+			    toolbar: true ,changePagesize: function(ps) {
+				num_results_per_page=ps;
+				store_search_args.rows=ps;
+				store_search_args.start =0;
+				num_found=0;
+				$('#page-bar').html('');
+				ajax_solr_text_search(true,true);
+			    },
+			    callback: function(a) {
+				store_search_args.start = (a-1)* parseInt(num_results_per_page);
+				show_updated_results();
+			    }
+			});
+		    }
+		}
+		if (jsonData.response.numFound==0) {
+		    $('#page-bar').html('');
+		}
+		show_results(jsonData,newSearch,newResultPage);
+	    }
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
@@ -743,7 +762,7 @@ function show_results(jsonData,newSearch,newResultPage)
     
     var search_end = search_start + num_pages;
     
-    //console.log("*** search_end < num_found: " + search_end + " < " + num_found);
+    console.log("*** search_end < num_found: " + search_end + " < " + num_found);
     if (search_end < num_found) {
 	// more results exist
 	//console.log("*** line_num < num_results_per_page: " + line_num + " < " + num_results_per_page);
@@ -1205,7 +1224,7 @@ function submit_action(event) {
     initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
 }
 
-function initiate_new_solr_search(arg_q,arg_start,num_rows,group_by_vol_checked)
+function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 {
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
 

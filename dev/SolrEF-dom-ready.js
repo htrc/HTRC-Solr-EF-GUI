@@ -483,3 +483,106 @@ $(document).ready(function(){
 });
 
 
+$(function() {
+    //Facet related page setup
+    
+    $("#facetlist").on("click","a",function() {
+     
+	var $class = $(this).attr("class");
+	num_found=0;
+	if ($(this).hasClass("morefacets")) {
+	    var obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " lessfacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "block",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else if ($(this).hasClass("lessfacets")) {
+	    var obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " morefacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "none",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else {
+	    // User has clicked on a facet
+	    // => Add it to 'filters', then instigate an updated search
+
+	    //var filter_key_count = Object.keys(facet_filter.refine_query).length;
+
+	    	
+	    var facet_key = $(this).attr("data-key");
+	    var term = $(this).attr("data-term");
+
+	    var pending_filters = facet_filter.hasPendingFilters(facet_key,term);
+	    
+	    /*
+	    var pending_filters = false;
+	    for (var pending_key in facet_filter.refine_query) {
+		if (pending_key != facet_key) {
+		    pending_filters = true;
+		    break;
+		}
+		else {
+		    var refine_terms = facet_filter.refine_query[pending_key];
+		    for (var pending_term in refine_terms) {
+			
+			if (pending_term != term) {
+			    pending_filters = true;
+			}
+		    }
+		}
+	    }*/
+	    	    
+	    var clicked_elem = this;
+
+	    //var facet_key_count = facet_filter.refine_query_count[facet_key];
+	    
+	    //if ((filter_key_count>1) || (facet_key_count > 1)) {
+	    if (pending_filters) {
+		var pp_field = facet_filter.prettyPrintField(facet_key);
+		var pp_term = facet_filter.prettyPrintTerm(facet_key,term);
+
+		var message = "Other filter(s) are checked but not yet applied.<br/>";
+		message += "Do you want to ignore them and apply just the '"+pp_term+"' filter to "+pp_field+"?",
+		
+		htrc_confirm(message,
+			     function() {
+				 $(this).dialog("close");
+				 facet_filter.applySingleFilter(clicked_elem,facet_key,term);
+			     },
+			     function() {
+				 $(this).dialog("close");
+			     }
+			    );
+	    }
+	    else {
+		facet_filter.applySingleFilter(clicked_elem,facet_key,term);
+	    }
+
+	    return false;
+	    
+	}
+    });
+    
+    $(".filters").on("click","a",function() {
+	// User has clicked on one of the currently applied filters
+	// => remove it from 'filters', then instigate an updated search
+	
+	facet_filter.filters.splice($(this).parent().index(), 1);
+	facet_filter.facetlistSet();
+	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
+	
+	store_search_args.start = store_start;
+	show_updated_results();
+    });
+
+
+});
+
