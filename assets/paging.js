@@ -569,7 +569,7 @@
 			var sel = $('.ui-select-pagesize', html);
 			var str = '';
 			for (var i = 0, l = this.settings.pageSizeList.length; i < l; i++) {
-				str += '<option value="' + this.settings.pageSizeList[i] + '">' + this.settings.pageSizeList[i] + 'per page</option>';
+				str += '<option value="' + this.settings.pageSizeList[i] + '">' + this.settings.pageSizeList[i] + ' per page</option>';
 			}
 			sel.html(str);
 			sel.val(this.pagesize);
