@@ -201,11 +201,14 @@
       
       <div class="row">
         <div style="float:left;">
-          <a href="index-dev.html"><img class="img-responsive" src="assets/hathi_medium.png" alt=" " width="100"></a>
+          <a href="index-dev.html">
+	    <img class="img-responsive" src="assets/hathi_medium.png" alt=" " width="100"
+		 title="Return to the Extract Features Solr Search Page">
+	  </a>
         </div>
-        <div style="margin-left: 20px; float:left;">
-          <h1 style="font-weight:bold; font-size:22px; margin-top:4px;">HTRC Extracted Feature Part-of-Speech Page Viewer</h1>
-	  <h2 style="font-size:20px" id="ht-title"></h2>
+        <div style="margin-left: 20px; float: left; width: 88%">
+          <h1 style="font-weight:bold; font-size: 22px; margin-top:4px;">HTRC Extracted Feature Part-of-Speech Page Viewer</h1>
+	  <h2 style="font-size: 20px" id="ht-title"></h2>
 	  <div>
 	    <div id="show-hide-metadata" class="show-hide-label">
 	      Show metadata <span class="ui-icon ui-icon-triangle-1-e">
@@ -224,7 +227,6 @@
         <div id="toolbar-horizontal" class="toolbar" classXX="toolbar toolbar-horizontal fixed fixed-y" data-margin-top="40">
 	    
 	  <div style="float:left;">
-	    <p id="vol-info" style="font-style: italic;"></p>
 	    <p style="margin: 0">
 	      <span class="ui-icon ui-icon-extlink"></span><span id="goto-ht" style="padding-left: 2pt;"></span>
 	    </p>
@@ -233,7 +235,10 @@
 		<span class="ui-icon ui-icon-circle-arrow-s"></span>&nbsp;Download Extracted Features (complete volume)
 	      </a>
 	    </p>
+	    <p id="vol-info" style="font-style: italic; padding-top: 12px;"></p>
 	    
+	  </div>
+	  <div id="image-preview" style="float: left;">	    
 	  </div>
 		
 	  <div class="options btn-toolbar" styleXX="float: right;" style="position: absolute; right: 20px; bottom: 0px">
@@ -285,7 +290,7 @@
 
 	
 	<div id="json-ef-text-label" style="display: none;">
-	  <div style="float: right; padding: 12px;">
+	  <div style="float: right; background-color: #ccc; margin: 8px; padding: 8px;">
 	    <fieldset id="display-mode">
 	      <span><b>Text Display:</b> </span>
 	      <label for="display-sort-alpha">Alphabetical</label>
@@ -306,7 +311,20 @@
 	</div>
 	<div style="clear: both;"></div>
 	
-	<p id="json-ef-no-text" style="display: none;"><i>The page contains no text</i></p>
+	<div id="json-ef-no-text" style="display: none;">
+	  <i>This page contains no text</i>
+	  <span id="json-ef-no-text-rew-ff">
+	    <hr />
+	    Closest text:
+	    <span id="json-ef-no-text-rew-goto" class="show-hide-label">
+	      <span class="ui-icon ui-icon-seek-prev"></span> Rewind
+	    </span>
+	    |
+	    <span id="json-ef-no-text-ff-goto" class="show-hide-label">
+	      Fast forward <span class="ui-icon ui-icon-seek-next"></span>	      
+	    </span>
+	  </span>
+	</div>
 
 	<div id="json-dump">
 	  <div id="json-ef-page-header"></div>

@@ -196,7 +196,15 @@
       </div>
 
       <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
-	<p id="htrc-publish-body">
+
+	  
+	<p id="htrc-publish-body" style="color: red; font-size: 120%;">
+	  This feature of the Extracted Features Solr Search site is a placeholder.
+	  The form below is disable, as it is currently non-functional.
+	</p>
+	<div class="disabled-div">
+
+	<p id="htrc-publish-body">	 
 	  Publishing result set in HathiTrust Research Center
 	  Registry:
 	</p>
@@ -237,6 +245,7 @@
 	  </div>
 
 	</form>
+	</div>
       </div>
 
       
@@ -258,7 +267,9 @@
 		  <div id="show-hide-query-tabs-box"
 		       style="width: 20px; height: 20px;" title="Hide query input area">
 		    <div style="text-align: center; vertical-align: middle; line-height: 20px;">
-		      <span id="show-hide-query-tabs-turnstyle">-</span>
+		      <span id="show-hide-query-tabs-turnstyle">
+			<span class="ui-icon ui-icon-triangle-1-s"></span>
+		      </span>
 		    </div>
 		  </div>
 		</div>
@@ -372,7 +383,7 @@
 			  <p>
 			    To gather all thre matching results from
 			    one volume together when searching, tick
-			    the <i>Group by volume</i> checkbox
+			    the <i>Sort &amp; Group by volume</i> checkbox
 			    below the search box.
 			  </p>
 
@@ -446,7 +457,7 @@
 		    <td>
 		      <nobr>
 			<input type="checkbox" id="group-results-by-vol" name="group-results-by-vol" value="on">
-			<span>Group by Volume</span>
+			<span>Sort &amp; Group by Volume</span>
 		      </nobr>
 		    </td>
 		  </tr>
@@ -511,28 +522,49 @@
  
           </ul>
 	</div>
-	<div id="export-by" class="narrow" style="display: none">
-          <h3 class="narrowexport">Export Results</h3>
-	  <div>
-	    <a id="export-by-vol"  class="export-item" style="display: none"
-	       download="htrc-volume-export.json" target="_blank">
-	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
-	    </a>
-	    <a id="export-by-page" class="export-item" style="display: none"
-	       download="htrc-page-export.json" target="_blank">
-	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
-	    </a>
-	    <a id="export-ef-zip" class="export-item" style="display: none"
-	       download>
-	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
-	    </a>
-	    <a id="export-ef-to-registry" class="export-item" style="display: none"
-	       download>
-	      <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
-	    </a>
-
+	<div style="position: relative;">
+	  <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
+            <h3 class="narrowexport">Export Results</h3>
+	    <div>
+	      <a id="export-by-vol"  class="export-item" style="display: none"
+		 download="htrc-volume-export.json" target="_blank">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+	      </a>
+	      <a id="export-by-page" class="export-item" style="display: none"
+		 download="htrc-page-export.json" target="_blank">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+	      </a>
+	      <a id="export-ef-zip" class="export-item" style="display: none"
+		 download>
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
+	      </a>
+	      <a id="export-ef-to-registry" class="export-item" style="display: none"
+		 download>
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+	      </a>
+	      
+	    </div>
+          </div>
+	  <div id="coverup-export-by"
+	       style="position: relative; z-index: 1; visibility: hidden;">
+	    <h3 class="narrowexport">Export Results</h3>
+	    <div>
+	      <a id="coverup-export-by-vol"  class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+	      </a>
+	      <a id="coverup-export-by-page" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+	      </a>
+	      <a id="coverup-export-ef-zip" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
+	      </a>
+	      <a id="coverup-export-ef-to-registry" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+	      </a>	      
+	    </div>
 	  </div>
-        </div>
+	  
+	</div>
         <div class="narrow">
           <h3 class="narrowsearch" style="display: none">Refine Results
 	    <span id="facet-units" class="page-count"></span></h3>

@@ -11,6 +11,10 @@ var store_query_tab_selected = null;
     
 var store_search_xhr = null;
 
+var group_by_vol_checked = 0;
+var doc_units = "";
+
+
 // add_titles_ht() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
 
@@ -110,7 +114,7 @@ function add_titles_solr(jsonData) {
 	    var rights = doc_val.rightsAttributes_s;
 
 	    //if ((rights != "pd") && (rights != "pdus")) { // ****
-	    if (rights != "pd") {
+	    //if (rights != "pd") { // ****
 		var href = 'json-page-viewer.html?htid='+htid;
 
 		var seq_str = $(this).text();
@@ -127,7 +131,7 @@ function add_titles_solr(jsonData) {
 		
 		
 		$(this).attr('href',href);
-	    }
+	    //}
 	});
 					
 	var itemURL = doc_val.handleUrl_s;
@@ -184,6 +188,8 @@ function ajax_solr_text_search(newSearch,newResultPage)
 		// Possible merging of items in search results means
 		// page-bar next pages not directly computable
 		// => don't show page-bar, only give 'next' and 'prev'
+		$('#page-bar').hide();
+		$('#next-prev').show();
 		show_results(jsonData,newSearch,newResultPage);
 	    }
 	    else {
@@ -192,7 +198,10 @@ function ajax_solr_text_search(newSearch,newResultPage)
 		if (num_found==0) {
 		    num_found=jsonData.response.numFound;
 		    if (num_found>0) {
-				 
+
+			$('#next-prev').hide();
+			$('#page-bar').show();
+			
 			$('#page-bar').Paging({
 			    pagesize: num_results_per_page,
 			    count: num_found,
@@ -878,9 +887,6 @@ var store_search_url = null;
 var store_search_not_ids = null;
 var store_query_level_mix = null;
 
-var group_by_vol_checked = 0;
-var doc_units = "";
-
 
 function expand_vfield(q_term, all_vfields, query_level) {
     var vfields = [];
@@ -1154,7 +1160,7 @@ function submit_action(event) {
 	}
 	else {	
 	    doc_units = " volumes ";
-	    explain_search.volume_level_desc  = "[Volume: TERMS]";
+	    explain_search.volume_level_desc  = "[Volume: TERMS]";	    
 	}
 	
     }
@@ -1303,11 +1309,11 @@ function show_hide_query_tabs() {
 	event.preventDefault();
 	if ($(block_id+':visible').length) {
 	    $(block_id).hide("slide", { direction: "up" }, 1000);
-	    $(turnstyle_id).html("+");
+	    $(turnstyle_id).html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
 	}
 	else {
 	    $(block_id).show("slide", { direction: "up" }, 1000);
-	    $(turnstyle_id).html("-");
+	    $(turnstyle_id).html('<span class="ui-icon ui-icon-triangle-1-s"></span>');
 	}
     });
 }

@@ -1,4 +1,21 @@
 
+.disabled-div {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.clickable:hover {
+    background-color: #ccc;
+}
+
+.clickable-image {
+    padding: 2px;
+    background-color: #428bca;
+}
+
+.clickable-image:hover {
+    background-color: #2a6496;
+}
 
 table.query-table tr td {
     padding-top: 4px;

@@ -1,5 +1,6 @@
 
 var store_ef_data    = null;
+var store_htid       = null;
 var store_seq_num    = null;
 var store_page_count = null;
 
@@ -31,12 +32,15 @@ function posmap_to_text(block,pos_map,display_mode)
 	}
     }
     else if (display_mode == "display-sort-alpha") {
-	for(var k in pos_map) pos_keys.push(k);
-//	pos_keys = Object.keys(pos_map).sort(function(cur_key,next_key) {
-//	pos_keys = pos_keys.sort(function(cur_key,next_key) {
-//	    return cur_key > next_key;
-//	});
-	pos_keys = pos_keys.sort();
+	//for (var k in pos_map) pos_keys.push(k);
+	pos_keys = Object.keys(pos_map).sort(function(cur_key,next_key) {
+	    //pos_keys = pos_keys.sort(function(cur_key,next_key) {
+	    // comparison needs to return -1, 0, +1 (not boolean value)
+	    if (cur_key < next_key) return -1;
+	    if (cur_key > next_key) return 1;
+	    return 0;
+	});
+	//pos_keys = pos_keys.sort();
     }
     else if (display_mode == "display-sort-freq") {
 	var pos_freq = {};
@@ -52,7 +56,7 @@ function posmap_to_text(block,pos_map,display_mode)
 	}
 	   
 	var sorted_pos_freq = Object.keys(pos_freq).sort(function(cur_key,next_key) {
-	    return pos_freq[cur_key] < pos_freq[next_key];
+	    return pos_freq[next_key] - pos_freq[cur_key];
 	});
 
 	for (var key_i in sorted_pos_freq) {
@@ -62,7 +66,7 @@ function posmap_to_text(block,pos_map,display_mode)
     }
     
     if (pos_keys.length>0) {
-	var keys_html = "<i>"+block.capitalize() + "</i>: " + pos_keys.join(", ",pos_keys) + "<hr />";
+	var keys_html = '<i class="no-user-select">'+block.capitalize() + "</i>: " + pos_keys.join(", ",pos_keys) + "<hr />";
 	$('#json-ef-page-'+block).html(keys_html);
     }
     else {
@@ -73,10 +77,113 @@ function posmap_to_text(block,pos_map,display_mode)
 
 }
 
+function find_rewind_text(seq_num)
+{
+    var found_text = false;
+    var found_seq_num = seq_num;
+
+    var pages = store_ef_data.features.pages;    
+
+    while (found_seq_num >= 1) {
+	var page = pages[found_seq_num-1];
+	var page_text_total = 
+	    Object.keys(page.header.tokenPosCount).length
+	    + Object.keys(page.body.tokenPosCount).length
+	    + Object.keys(page.footer.tokenPosCount).length
+
+	if (page_text_total>0) {
+	    found_text = true;
+	    break;
+	}
+
+	found_seq_num--;
+    }
+
+    if (!found_text) {
+	found_seq_num = null;
+    }
+    
+    return found_seq_num;
+}
+
+
+function find_forward_text(seq_num)
+{
+    var found_text = false;
+    var found_seq_num = seq_num;
+
+    var pages = store_ef_data.features.pages;    
+
+    while (found_seq_num <= pages.length) {
+	var page = pages[found_seq_num-1];
+	var page_text_total = 
+	    Object.keys(page.header.tokenPosCount).length
+	    + Object.keys(page.body.tokenPosCount).length
+	    + Object.keys(page.footer.tokenPosCount).length
+	//console.log("** page num: " + found_seq_num + ", total = " + page_text_total);
+	if (page_text_total>0) {
+	    found_text = true;
+	    break;
+	}
+
+	found_seq_num++;
+    }
+
+    if (!found_text) {
+	found_seq_num = null;
+    }
+    
+    return found_seq_num;
+}
+
+function display_view_and_download(htid,seq_num,unit_type)
+{
+    var babel_url = babel_prefix_url + "?id=" + htid + ";view=1up";
+	
+    babel_url += ";seq=" + seq_num;	
+	    
+    var $alink = $('<a />')
+	.attr('href',babel_url)
+	.attr('target','_blank')
+	.html("View this "+unit_type+" @ the HathiTrust Digital Library");
+
+    $('#goto-ht').html($alink);
+    
+    var rights = getURLParameter("rights");
+    if ((rights != null) && (rights == "pd")) {
+	// If Image of page available, display a thumbnail of that linked to HT as well
+	// Example image server URL
+	//  https://babel.hathitrust.org/cgi/imgsrv/image?id=uc1.32106002115449;seq=7;width=1360	
+
+	var $existing_img_thumbnail = $('#img-thumbnail');
+	if ($existing_img_thumbnail.length>0) {
+	    $existing_img_thumbnail.css("cursor", "progress");
+	}
+	var thumbnail_url = image_server_base_url + '?id='+htid+';seq='+seq_num+';height=110';
+	var $img_thumbnail = $('<img>')
+	    .attr('id','img-thumbnail')
+	    .attr('class','clickable-image')
+	    .attr('src',thumbnail_url)
+	    .load(function() {
+		var $image_preview = $('<a>')
+		    .attr('href',babel_url)
+		    .attr('target','_blank')
+		    .attr('style','padding-left: 8pt;')
+		    .attr('title',"Click to view this "+unit_type+" @ the HathiTrust Digital Library in a new tab/window")
+		    .html($img_thumbnail);
+		
+		$('#image-preview').html($image_preview);
+	    });	
+    }
+}
+
 function display_ef_page_text(seq_num)
 {
     store_seq_num = seq_num;
 
+    var unit_type = ((seq_num == null) || (seq_num == 0)) ? "item" : "page";
+    display_view_and_download(store_htid,seq_num,unit_type);
+    
     var display_mode = $("#display-mode :radio:checked").attr('id');
 	    
     var pages = store_ef_data.features.pages;
@@ -118,6 +225,35 @@ function display_ef_page_text(seq_num)
     else {
 	$('#json-ef-text-label').hide();
 	$('#json-ef-no-text').show();
+
+	var found_rew_seq_num = find_rewind_text(seq_num);
+	var nontrivial_rew = false;
+	if ((found_rew_seq_num != null) && ((seq_num - found_rew_seq_num)>1)) {
+	    $('#json-ef-no-text-rew-goto').data('go-page',found_rew_seq_num);	   
+	    $('#json-ef-no-text-rew-goto').show();
+	    nontrivial_rew = true;
+	}
+	else {
+	    $('#json-ef-no-text-rew-goto').hide();
+	}
+
+	var found_ff_seq_num = find_forward_text(seq_num);
+	var nontrivial_ff = false;
+	if ((found_ff_seq_num != null) && ((found_ff_seq_num - seq_num)>1)) {
+	    $('#json-ef-no-text-ff-goto').data('go-page',found_ff_seq_num);	   
+	    $('#json-ef-no-text-ff-goto').show();
+	    nontrivial_ff = true;
+	}
+	else {
+	    $('#json-ef-no-text-ff-goto').hide();
+	}
+
+	if (nontrivial_rew || nontrivial_ff) {
+	    $('#json-ef-no-text-rew-ff').show();
+	}
+	else {
+	    $('#json-ef-no-text-rew-ff').hide();
+	}
     }
     
 
@@ -159,30 +295,23 @@ $(document).ready(function() {
 	$('#ht-title').html(title);
     }
 	
-    var htid = getURLParameter("htid");
-    if (htid != null) {
+    store_htid = getURLParameter("htid");
+    if (store_htid != null) {
 
-	var babel_url = babel_prefix_url + "?id=" + htid + ";view=1up";
-	
 	seq_num = getURLParameter("seq");
-	
+
+	var unit_type;
 	if (seq_num == null) {
 	    seq_num = 0;
+	    unit_type = "item";
 	}
 	else {
 	    // ensure it is numeric
 	    seq_num = parseInt(seq_num);
+	    unit_type = "page";
 	}
 	
-	babel_url += ";seq=" + seq_num;	
-	    
-	var $alink = $('<a />')
-	    .attr('href',babel_url)
-	    .attr('target','_blank')
-	    .html("View this item @ the HathiTrust Digital Library");
-
-	$('#goto-ht').html($alink);
-	
+	display_view_and_download(store_htid,seq_num,unit_type);
     }
 
     $('#ht-show-metadata').click(function(event) {
@@ -226,8 +355,19 @@ $(document).ready(function() {
 	    
     });
 
+
+    $('#json-ef-no-text-rew-goto').click(function(event) {
+	var go_page_seq_num = $('#json-ef-no-text-rew-goto').data('go-page');	
+	display_ef_page_text(go_page_seq_num);
+    });
+
+    $('#json-ef-no-text-ff-goto').click(function(event) {
+	var go_page_seq_num = $('#json-ef-no-text-ff-goto').data('go-page');	
+	display_ef_page_text(go_page_seq_num);
+    });
+
     
-    var ef_download_args = { "download-id": htid };
+    var ef_download_args = { "download-id": store_htid };
 
     store_search_xhr = new window.XMLHttpRequest();
     
@@ -259,8 +399,8 @@ $(document).ready(function() {
 	    }
 	    $vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of ' + store_page_count + ' pages</span>');
 
-	    var href = ef_download_url+'?download-id='+htid;
-	    $('#download-json-ef').attr('href',href);
+	    var download_ef_href = ef_download_url+'?download-id='+store_htid;
+	    $('#download-json-ef').attr('href',download_ef_href);
 
 	    display_ef_page_text(seq_num);
 	    

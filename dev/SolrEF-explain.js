@@ -24,7 +24,14 @@ function add2any_html(store_search_url)
     a2a_html += '  </div>\n';
     a2a_html += '</div>\n';
     a2a_html += '\n';
-    a2a_html += '<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>\n';
+    a2a_html += '<script type="text/javascript">\n';
+    a2a_html += '  var a2a_config = a2a_config || {};\n';
+    //a2a_html += '  a2a_config.track_links = "googl";\n';
+    a2a_html += '  a2a_config.track_links = "bitly";\n';
+    a2a_html += '  a2a_config.track_links_key = "addtoany|R_cc6a4017b0274d1d86f2397771b70136";\n';
+
+    a2a_html += '</script>\n';
+    a2a_html += '<script type="text/javascript" async="" src="//static.addtoany.com/menu/page.js"></script>\n';
 
     return a2a_html;
 }
