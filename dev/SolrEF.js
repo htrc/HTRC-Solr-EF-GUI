@@ -182,7 +182,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	successXXXX: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
+	successXXXX: function(jsonData) { show_results(jsonData,newSearch,newResultPage); }, // ****
 	success: function(jsonData) { 
 	    if (group_by_vol_checked) {
 		// Possible merging of items in search results means
@@ -235,15 +235,23 @@ function ajax_solr_text_search(newSearch,newResultPage)
 }
 
 
-function show_volume_count(jsonData) {
+function show_volume_count(jsonData)
+{
+    $('#srt-vol-count').css("cursor","auto");
+    
     var response = jsonData["result-set"];
     var docs = response.docs;
     var num_docs = docs.length;
 
     num_docs--; // last entry provides response time data
 
+    var $num_docs_span = $('<span>')
+	.attr('id','srt-vol-count-num')
+	.data('raw-num',num_docs)
+	.append(num_docs.toLocaleString());
+    
     $('#srt-vol-count-computing').hide();
-    $('#srt-vol-count').html(" in " + num_docs + " volumes");
+    $('#srt-vol-count').html(" in ").append($num_docs_span).append(" volumes");
     $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
@@ -254,8 +262,9 @@ function show_volume_count(jsonData) {
     else {
 	$('#export-by').hide("slide", { direction: "up" }, 1000);
 
-	$('#srt-vol-count').append(' <span style="color:#BB0000;">[Note: Volume count exceeds limit of '
-				   + num_found_vol_limit_str + ' for exporting]</span>');
+	$('#srt-vol-count').append(' <span style="color:#BB0000;">'
+				   +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
+				   + num_found_vol_limit.toLocaleString() + ']</span>');
     }
 
 
@@ -534,7 +543,15 @@ function show_results(jsonData,newSearch,newResultPage)
 		$('#search-results-total').show();
 	    }
 	    
-	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+	    var $num_found_span = $('<span>')
+		.attr('id','results-total-num')
+	    	.data('raw-num',num_found)
+		.append(num_found.toLocaleString());
+	    
+	    $('#search-results-total-span')
+		.html("Results: ")
+		.append($num_found_span)
+		.append(doc_units + "matched");
 
 	    if (search_start == 0) {
 
@@ -553,8 +570,9 @@ function show_results(jsonData,newSearch,newResultPage)
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Page count exceeds limit of '
-						 + num_found_page_limit_str + ' for exporting result set]</span>');
+			$('#srt-vol-count').html('<span style="color:#BB0000;">'
+						 +'[Note: Exporting disabled for this search. Page count exceeds limit of '
+						 + num_found_page_limit.toLocaleString() + ']</span>');
 			$('#srt-vol-count').show();
 			$('#srt-vol-count-span').show();
 		    }
@@ -577,8 +595,9 @@ function show_results(jsonData,newSearch,newResultPage)
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Volume count exceeds limit of '
-						 + num_found_vol_limit_str + ' for exporting]</span>');
+			$('#srt-vol-count').html('<span style="color:#BB0000;">'
+						 +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
+						 + num_found_vol_limit.toLocaleString() + ']</span>');
 			$('#srt-vol-count').show();
 			$('#srt-vol-count-span').show();
 		    }		
@@ -604,12 +623,13 @@ function show_results(jsonData,newSearch,newResultPage)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
 	    
-	    showing_matches += '<span id="sm-from">' + from + '</span>';
+	    showing_matches += '<span id="sm-from">' + from.toLocaleString() + '</span>';
 	    showing_matches += "-";
-	    showing_matches += '<span id="sm-to">' + to + '</span>';
+	    showing_matches += '<span id="sm-to">' + to.toLocaleString() + '</span>';
 	    showing_matches += "</p>";
 	    
 	    $('#search-showing').html(showing_matches);
+	    $('#sm-to').data('raw-num',to);
 	    
 	}
 	else {
@@ -771,7 +791,7 @@ function show_results(jsonData,newSearch,newResultPage)
     
     var search_end = search_start + num_pages;
     
-    console.log("*** search_end < num_found: " + search_end + " < " + num_found);
+    //console.log("*** search_end < num_found: " + search_end + " < " + num_found);
     if (search_end < num_found) {
 	// more results exist
 	//console.log("*** line_num < num_results_per_page: " + line_num + " < " + num_results_per_page);
@@ -819,8 +839,9 @@ function show_results(jsonData,newSearch,newResultPage)
     }
     
     // Showing matches to ...
-    $('#sm-to').html(search_start + num_pages);
-    
+    var new_to = search_start + num_pages;
+    $('#sm-to').data('raw-num',new_to);
+    $('#sm-to').html(new_to.toLocaleString());
 
     // Now setup and invoke ajax call to add title metadta (etc) into result set page
 
@@ -1182,7 +1203,7 @@ function submit_action(event) {
 	    facet_filter.setFacetLevel(FacetLevelEnum.Page);
 	}
 
-	var query_level = facet_filter.getFacetLevel();    
+	var query_level = facet_filter.getFacetLevel();
 	var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
 	
 	if (arg_q == "") {
@@ -1326,11 +1347,14 @@ function result_set_delete_item(line_num) {
 	
 	var $close_div = $(this).parent();
 	var $wrapper_line_div = $close_div.parent();
+	
 	var id = $close_div.next().attr("name");
 	$wrapper_line_div.slideUp(500, function() { $wrapper_line_div.remove(); });
 
-	id = id.replace(/:/g,"\\:");
-	console.log("Exclude escaped id: " + id);
+	//var escaped_id = id.replace(/:/g,"\\:").replace(/\\/g,"\\\\");
+	var escaped_id = id.replace(/:/g,"\\:");
+	
+	console.log("Exclude escaped id: " + escaped_id);
 
 	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 	    
@@ -1342,11 +1366,75 @@ function result_set_delete_item(line_num) {
 		var page_str = "" + (seq-1);
 		var pad = "000000";
 		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
-		store_search_not_ids.push("-id:"+id+".page-"+seq_pad);		
+		store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad);		
 	    });
 	}
 	else {
-	    store_search_not_ids.push("-id:"+id);		
+	    store_search_not_ids.push("-id:"+escaped_id);		
+	}
+
+	var $results_total_num = $('#results-total-num');
+	var results_total_int = parseInt($results_total_num.data('raw-num'));
+
+	//var $result_line = $("[name='" + htid + "']").parent(); // ****
+	var query_level = facet_filter.getFacetLevel();
+	if (query_level == FacetLevelEnum.Volume) {
+	    // decrease num results found by 1
+
+	    results_total_int--;
+	    $results_total_num.data('raw-num',results_total_int)
+	    $results_total_num.text(results_total_int.toLocaleString());
+
+	    // 2. decrease 'showing page-level matches ... to' by 1
+	    var $sm_to_num = $('#sm-to');		
+	    var sm_to_int = parseInt($sm_to_num.text());
+	    sm_to_int--;
+	    $sm_to_num.data('raw-num',sm_to_int);
+	    $sm_to_num.text(sm_to_int.toLocaleString());
+
+	}
+	else {
+	    // Page level
+	    if (group_by_vol_checked) {
+		// 1. decrease num results by num_deleted
+
+		var $seq_matches = $wrapper_line_div.find("nobr>a[class^='seq']");	    
+		var num_deleted = $seq_matches.length;
+		results_total_int -= num_deleted;
+		$results_total_num.data('raw-num',results_total_int);
+		$results_total_num.text(results_total_int.toLocaleString());
+		
+		// 2. decrease volume count by 1
+		var $vol_count_num = $('#srt-vol-count-num');
+		var vol_count_int = parseInt($vol_count_num.data('raw-num'));
+		vol_count_int--;
+		$vol_count_num.data('raw-num',vol_count_int);
+		$vol_count_num.text(vol_count_int.toLocaleString());
+
+		// 3. decrease 'showing page-level matches ... to' by num_deleted
+		var $sm_to_num = $('#sm-to');		
+		var sm_to_int = parseInt($sm_to_num.text());
+		sm_to_int -= num_deleted;
+		$sm_to_num.data('raw-num',sm_to_int);
+		$sm_to_num.text(sm_to_int.toLocaleString());
+	    }
+	    else {
+		// 1. decrease num results by 1
+		results_total_int--;
+		$results_total_num.data('raw-num',results_total_int);
+		$results_total_num.text(results_total_int.toLocaleString());
+		
+		// 2. recompute num vols in case this seq entry was the last one for this volume
+		$('#srt-vol-count').css("cursor","wait");
+		ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
+
+		// 3. decrease 'showing page-level matches ... to' by 1
+		var $sm_to_num = $('#sm-to');		
+		var sm_to_int = parseInt($sm_to_num.text());
+		sm_to_int--;
+		$sm_to_num.data('raw-num',sm_to_int);
+		$sm_to_num.text(sm_to_int.toLocaleString());		
+	    }
 	}
 
 	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)

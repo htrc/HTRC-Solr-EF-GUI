@@ -108,6 +108,10 @@ div.oddevenline:nth-child(odd) {
     padding-bottom: 5px;
 }
 
+button.htrc-delete {
+    margin-left: 3px;
+}
+
 .htrc-delete .ui-button .ui-icon {
 
     /*background-image: url("images/ui-icons_ef8c08_256x240.png"); */
