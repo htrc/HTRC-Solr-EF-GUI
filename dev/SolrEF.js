@@ -116,7 +116,7 @@ function add_titles_solr(jsonData) {
 
 	    //if ((rights != "pd") && (rights != "pdus")) { // ****
 	    //if (rights != "pd") { // ****
-		var href = 'json-page-viewer.html?htid='+htid;
+		var href = 'json-page-viewer-dev.html?htid='+htid;
 
 		var seq_str = $(this).text();
 
