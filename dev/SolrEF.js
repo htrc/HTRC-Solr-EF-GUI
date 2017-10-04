@@ -12,6 +12,7 @@ var store_query_tab_selected = null;
 var store_search_xhr = null;
 
 var group_by_vol_checked = 0;
+var doc_unit  = "";
 var doc_units = "";
 
 
@@ -249,9 +250,10 @@ function show_volume_count(jsonData)
 	.attr('id','srt-vol-count-num')
 	.data('raw-num',num_docs)
 	.append(num_docs.toLocaleString());
-    
+
+    var vol_label = (num_docs==1) ? " volume" : " volumes";
     $('#srt-vol-count-computing').hide();
-    $('#srt-vol-count').html(" in ").append($num_docs_span).append(" volumes");
+    $('#srt-vol-count').html(" in ").append($num_docs_span).append(vol_label);
     $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
@@ -547,11 +549,12 @@ function show_results(jsonData,newSearch,newResultPage)
 		.attr('id','results-total-num')
 	    	.data('raw-num',num_found)
 		.append(num_found.toLocaleString());
-	    
+
+	    var doc_units_label = (num_found==1) ? doc_unit : doc_units;
 	    $('#search-results-total-span')
 		.html("Results: ")
 		.append($num_found_span)
-		.append(doc_units + "matched");
+		.append(doc_units_label + "matched");
 
 	    if (search_start == 0) {
 
@@ -1162,6 +1165,7 @@ function submit_action(event) {
 
 
 	if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+	    doc_unit  = " page ";
 	    doc_units = " pages ";
 
 	    if (arg_q.match(/volume[^_]+_txt:/)) {
@@ -1176,10 +1180,12 @@ function submit_action(event) {
 	    }
 	    
 	    if (arg_q.match(/[^_]+_t:/)) {
+		doc_unit  = " page/volume mix ";
 		doc_units = " page/volume mix ";
 	    }
 	}
-	else {	
+	else {
+	    doc_unit  = " volume ";
 	    doc_units = " volumes ";
 	    explain_search.volume_level_desc  = "[Volume: TERMS]";	    
 	}
@@ -1215,6 +1221,7 @@ function submit_action(event) {
 		return;
 	    } else {
 		arg_q = arg_vq;
+		doc_unit = " volume ";
 		doc_units = " volumes ";
 		explain_search.volume_level_desc  = "[Volume: Terms]";
 		if (group_by_vol_checked) {
@@ -1237,6 +1244,7 @@ function submit_action(event) {
 		explain_search.group_by_vol = "Search results sorted by volume ID";
 	    }		    
 	    
+	    doc_unit  = " page ";
 	    doc_units = " pages ";
 	}
     }

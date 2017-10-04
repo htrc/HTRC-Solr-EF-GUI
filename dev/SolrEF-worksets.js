@@ -66,8 +66,8 @@ function parse_workset_results(jsonData)
     
     initialize_new_solr_search();
 
+    doc_unit  = " volume ";
     doc_units = " volumes ";
-    
 
     // work out arg_q
     var gathers = jsonData.gathers;
