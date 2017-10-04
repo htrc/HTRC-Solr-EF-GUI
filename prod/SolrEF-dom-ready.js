@@ -186,7 +186,10 @@ function activate_tab_id(tab_id)
     }
 
     store_query_tab_selected = tab_id;
-    
+    if (typeof(Storage) !== "undefined") {
+	localStorage.setItem("htrc-ef-query-tab-selected",store_query_tab_selected);
+    }
+	    
     if (tab_id == QueryTabEnum.Advanced) {
 	$('.volume-query-row').hide();
 	$('.page-query-row').hide();
@@ -236,6 +239,14 @@ $(document).ready(function(){
 	}
     });
 
+    store_query_tab_selected = QueryTabEnum.Page;
+    if (typeof(Storage) !== "undefined") {
+	var ls_qts = localStorage.getItem("htrc-ef-query-tab-selected");
+	if (ls_qts != null) {
+	    store_query_tab_selected = ls_qts;
+	}
+    }
+        
     tabs.tabs({ active: store_query_tab_selected});
     activate_tab_id(store_query_tab_selected);
 	
@@ -245,13 +256,23 @@ $(document).ready(function(){
 	    tabs.tabs( "refresh" );
 	}
     });
+    show_hide_query_tabs();
+    
+    if (typeof(Storage) !== "undefined") {
+	username = sessionStorage.getItem("htrc-username");
+	if ((username != null) && (username != "")) {
+    	    $('#navbar-username').html(username);
+	    $('#navbar-login').hide();
+	    $('#navbar-logout').show();
+	}
+    }
 
     
     $( "#htrc-alert-dialog" ).dialog({
 	modal: true,
 	autoOpen: false,
 	resizable: true,
-	width: 400,
+	width: 450,
 	buttons: {
 	    "OK": function() {
 		$( this ).dialog( "close" );
@@ -282,6 +303,32 @@ $(document).ready(function(){
 	if (e.keycode == $.ui.keyCode.ENTER) {
 	    $(this).dialog("close");
 	}
+    });
+
+    $( "#htrc-publish-dialog" ).dialog({
+	modal: true,
+	autoOpen: false,
+	resizable: true,
+	width: 750,
+	height: 620,
+	buttons: {
+	    "Publish": function() {
+		$( this ).dialog( "close" );
+	    },
+	    "Cancel": function() {
+		$( this ).dialog( "close" );
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
+    $("#export-ef-to-registry").click(function () {
+	solr_ef_login_to_publish();
     });
 
     
@@ -336,6 +383,28 @@ $(document).ready(function(){
     
     $("#page-help").click(function () {
 	$("#page-help-dialog").dialog( "open" );
+    });
+
+    $("#advanced-query-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#advanced-query-help").click(function () {
+	$("#advanced-query-help-dialog").dialog( "open" );
     });
 
     
@@ -399,6 +468,121 @@ $(document).ready(function(){
 	$('#search-submit').click(submit_action);
     }
 
+    var workset_id = getURLParameter("workset-id");
+    if (workset_id != null) {
+	// hide query input area
+	if ($('#tab-shared:visible').length) {
+	    $('#tab-shared').slideUp(1000, function() { load_worset_id(workset_id) } );
+	    $('#show-hide-query-tabs-turnstyle').html("+");
+	}
+	else {
+	    load_workset_id(workset_id);
+	}
+    }
+    
 });
 
+
+$(function() {
+    //Facet related page setup
+    
+    $("#facetlist").on("click","a",function() {
+     
+	var $class = $(this).attr("class");
+	num_found=0;
+	if ($(this).hasClass("morefacets")) {
+	    var obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " lessfacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "block",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else if ($(this).hasClass("lessfacets")) {
+	    var obj = $class.split(" ")[0];
+	    $(this).hide();
+	    $("[class='" + obj + " morefacets']").show();
+	    $("[class='hidefacet " + obj + "']").css({
+		display: "none",
+		visibility: "visible"
+	    });
+	    return false;
+	}
+	else {
+	    // User has clicked on a facet
+	    // => Add it to 'filters', then instigate an updated search
+
+	    //var filter_key_count = Object.keys(facet_filter.refine_query).length;
+
+	    	
+	    var facet_key = $(this).attr("data-key");
+	    var term = $(this).attr("data-term");
+
+	    var pending_filters = facet_filter.hasPendingFilters(facet_key,term);
+	    
+	    /*
+	    var pending_filters = false;
+	    for (var pending_key in facet_filter.refine_query) {
+		if (pending_key != facet_key) {
+		    pending_filters = true;
+		    break;
+		}
+		else {
+		    var refine_terms = facet_filter.refine_query[pending_key];
+		    for (var pending_term in refine_terms) {
+			
+			if (pending_term != term) {
+			    pending_filters = true;
+			}
+		    }
+		}
+	    }*/
+	    	    
+	    var clicked_elem = this;
+
+	    //var facet_key_count = facet_filter.refine_query_count[facet_key];
+	    
+	    //if ((filter_key_count>1) || (facet_key_count > 1)) {
+	    if (pending_filters) {
+		var pp_field = facet_filter.prettyPrintField(facet_key);
+		var pp_term = facet_filter.prettyPrintTerm(facet_key,term);
+
+		var message = "Other filter(s) are checked but not yet applied.<br/>";
+		message += "Do you want to ignore them and apply just the '"+pp_term+"' filter to "+pp_field+"?",
+		
+		htrc_confirm(message,
+			     function() {
+				 $(this).dialog("close");
+				 facet_filter.applySingleFilter(clicked_elem,facet_key,term);
+			     },
+			     function() {
+				 $(this).dialog("close");
+			     }
+			    );
+	    }
+	    else {
+		facet_filter.applySingleFilter(clicked_elem,facet_key,term);
+	    }
+
+	    return false;
+	    
+	}
+    });
+    
+    $(".filters").on("click","a",function() {
+	// User has clicked on one of the currently applied filters
+	// => remove it from 'filters', then instigate an updated search
+	
+	facet_filter.filters.splice($(this).parent().index(), 1);
+	facet_filter.facetlistSet();
+	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
+	
+	store_search_args.start = store_start;
+	show_updated_results();
+    });
+
+
+});
 

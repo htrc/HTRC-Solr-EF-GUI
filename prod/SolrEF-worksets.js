@@ -1,5 +1,133 @@
+"use strict";
 
-function add_worksets(json_data) {
+/*
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+	sURLVariables = sPageURL.split('&'),
+	sParameterName,
+	i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+	sParameterName = sURLVariables[i].split('=');
+
+	if (sParameterName[0] === sParam) {
+	    return sParameterName[1] === undefined ? true : sParameterName[1];
+	}
+    }
+};
+
+*/
+
+function getURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+
+    for (var i=0; i<sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam)
+	{
+	    return sParameterName[1];
+	}
+    }
+
+    return null;
+}
+
+
+
+function newWindowSolrEF(workset_id)
+{
+    var load_workset_url = window.location.pathname + "?workset-id=" + workset_id;    
+    var win = window.open(load_workset_url, '_blank');
+    if (win) {
+	// => Browser has allowed it to be opened
+	win.focus();
+    }
+    else {
+	// => Browser has blocked it
+	alert('New window/tab request blocked by browser.\nPlease enable popups for this website');
+    }
+    
+}
+
+function parse_workset_results(jsonData)
+{
+    console.log("*** parse workset results()");
+    
+    // ajax call has returned successfully
+    store_search_xhr = null;
+
+    iprogressbar.cancel();
+
+    //console.log("jsonData = " + JSON.stringify(jsonData));
+    
+    // $('.search-in-progress').css("cursor","auto");
+    
+    initialize_new_solr_search();
+
+    doc_unit  = " volume ";
+    doc_units = " volumes ";
+
+    // work out arg_q
+    var gathers = jsonData.gathers;
+    var gathers_len = gathers.length;
+
+    if (gathers_len>1000) {
+	console.log("Workset size of " + gathers_len + " exceeds limit of 1000");
+	console.log("Applying cap of 1000 items");
+	gathers_len = 1000;
+    }
+    
+    var q_terms = [];
+    
+    for (var i=0; i<gathers_len; i++) {
+	var item = gathers[i];
+	var id = item.id;
+
+	id = id.replace(/^https?:\/\/hdl.handle.net\/\d+\//,"")	
+	//var escaped_id = id.replace(/\//g,"\\/").replace(/:/g,"\\:");
+	var escaped_id = escape_solr_query(id);
+	
+	q_terms.push("id:" + escaped_id);
+    }
+    var arg_q = q_terms.join(" OR ");
+    
+    var arg_start = 0;
+    var group_by_vol_checked = false;
+
+    initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
+}
+
+function load_workset_id(workset_id)
+{
+    var workset_items_url = workset_base_url + "getItems";
+    var data_str = "id=" + workset_id;
+
+    store_search_xhr = new window.XMLHttpRequest();
+
+    console.log("worket items url = " + workset_items_url + "?" + data_str);
+    iprogressbar.trigger_delayed_display(3,"Retrieving workset");
+    
+    $.ajax({
+	type: "GET", 
+	url: workset_items_url,
+	data: data_str,
+	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
+	success: function(jsonData) { parse_workset_results(jsonData); },
+	error: function(jqXHR, textStatus, errorThrown) {
+	    $('.search-in-progress').css("cursor","auto");
+	    iprogressbar.cancel();
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+}
+
+function add_worksets(json_data)
+{
 
     if (json_data.hasOwnProperty('@graph')) {
 	$.each(json_data["@graph"], function (ws_index, ws_val) {
@@ -14,9 +142,11 @@ function add_worksets(json_data) {
 	    
 	    // http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=http://worksets.hathitrust.org/wsid/147967316
 	    //var describe_url = "http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
-	    var describe_url = "https://solr1.ischool.illinois.edu/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+	    //var describe_url = "https://solr1.ischool.illinois.edu/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+	    var describe_url = workset_base_url + "getWsDescripWithVolMeta?id=" + workset_id;
 	    
-	    var hyperlinked_workset_title = '<a target="_blank" href="' + describe_url + '">' + workset_title + '</a>';
+	    //var hyperlinked_workset_title = '<a target="_blank" href="' + describe_url + '">' + workset_title + '</a>';
+	    var hyperlinked_workset_title = '<a onclick="newWindowSolrEF(\'' + workset_id + '\')">' + workset_title + '</a>';
 	    
 	    var gathers = ws_val["http://www.europeana.eu/schemas/edm/gathers"]
 	    

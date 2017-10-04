@@ -7,9 +7,14 @@ var QueryTabEnum = {
     Advanced: 3
 };
 
-var store_query_tab_selected = QueryTabEnum.Page;
+var store_query_tab_selected = null;
     
 var store_search_xhr = null;
+
+var group_by_vol_checked = 0;
+var doc_unit  = "";
+var doc_units = "";
+
 
 // add_titles_ht() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
@@ -99,7 +104,37 @@ function add_titles_solr(jsonData) {
 	    $(this).html($tooltip_title_clone)
 	});
 	console.log(htid + ", title = " + title);
+
+	// Change any non-public domain seq links to view internal JSON EF-POS volume
+	var $result_line = $("[name='" + htid + "']").parent();
+	var $seq_matches = $result_line.find("nobr>a[class^='seq']");
 	
+	//$("[name='" + htid + "'] ~ nobr>a[class^='seq']").each(function () {
+
+	$seq_matches.each(function() {
+	    var rights = doc_val.rightsAttributes_s;
+
+	    //if ((rights != "pd") && (rights != "pdus")) { // ****
+	    //if (rights != "pd") { // ****
+		var href = 'json-page-viewer.html?htid='+htid;
+
+		var seq_str = $(this).text();
+
+		if (seq_str == "all pages") {
+		    href += "&seq=1";
+		}
+		else if (seq_str.match(/^seq\s+/)) {
+		    var seq_num = seq_str.replace(/^seq\s+/,"");
+		    href += "&seq=" + seq_num;
+		}
+		href += "&rights=" + rights;
+		href += "&title=" + title;
+		
+		
+		$(this).attr('href',href);
+	    //}
+	});
+					
 	var itemURL = doc_val.handleUrl_s;
 	itemURL = itemURL.replace(/^https:/, "http:");
 	
@@ -122,7 +157,14 @@ function ajax_solr_text_search(newSearch,newResultPage)
     var url_args = [];
 
     for (var ka in store_search_args) {
-	url_args.push(ka + '=' + store_search_args[ka]);
+	var ka_arg = store_search_args[ka];
+	
+	if (ka == "q") {
+	    if (store_search_not_ids.length>0) {
+		ka_arg += store_search_not_ids.join(" ");
+	    }
+	}
+	url_args.push(ka + '=' + ka_arg);
     }
 
     url_args = facet_filter.solrSearchAppendArgs(url_args);
@@ -134,14 +176,57 @@ function ajax_solr_text_search(newSearch,newResultPage)
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
-	type: "GET",
+	type: "POST", // used to be "GET"
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	success: function(jsonData) { show_results(jsonData,newSearch,newResultPage); },
+	successXXXX: function(jsonData) { show_results(jsonData,newSearch,newResultPage); }, // ****
+	success: function(jsonData) { 
+	    if (group_by_vol_checked) {
+		// Possible merging of items in search results means
+		// page-bar next pages not directly computable
+		// => don't show page-bar, only give 'next' and 'prev'
+		$('#page-bar').hide();
+		$('#next-prev').show();
+		show_results(jsonData,newSearch,newResultPage);
+	    }
+	    else {
+		// No merging of search result items possible
+		// => can provide page-bar to user
+		if (num_found==0) {
+		    num_found=jsonData.response.numFound;
+		    if (num_found>0) {
+
+			$('#next-prev').hide();
+			$('#page-bar').show();
+			
+			$('#page-bar').Paging({
+			    pagesize: num_results_per_page,
+			    count: num_found,
+			    toolbar: true ,changePagesize: function(ps) {
+				num_results_per_page=ps;
+				store_search_args.rows=ps;
+				store_search_args.start =0;
+				num_found=0;
+				$('#page-bar').html('');
+				ajax_solr_text_search(true,true);
+			    },
+			    callback: function(a) {
+				store_search_args.start = (a-1)* parseInt(num_results_per_page);
+				show_updated_results();
+			    }
+			});
+		    }
+		}
+		if (jsonData.response.numFound==0) {
+		    $('#page-bar').html('');
+		}
+		show_results(jsonData,newSearch,newResultPage);
+	    }
+	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
@@ -151,15 +236,24 @@ function ajax_solr_text_search(newSearch,newResultPage)
 }
 
 
-function show_volume_count(jsonData) {
+function show_volume_count(jsonData)
+{
+    $('#srt-vol-count').css("cursor","auto");
+    
     var response = jsonData["result-set"];
     var docs = response.docs;
     var num_docs = docs.length;
 
     num_docs--; // last entry provides response time data
 
+    var $num_docs_span = $('<span>')
+	.attr('id','srt-vol-count-num')
+	.data('raw-num',num_docs)
+	.append(num_docs.toLocaleString());
+
+    var vol_label = (num_docs==1) ? " volume" : " volumes";
     $('#srt-vol-count-computing').hide();
-    $('#srt-vol-count').html(" in " + num_docs + " volumes");
+    $('#srt-vol-count').html(" in ").append($num_docs_span).append(vol_label);
     $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
@@ -170,8 +264,9 @@ function show_volume_count(jsonData) {
     else {
 	$('#export-by').hide("slide", { direction: "up" }, 1000);
 
-	$('#srt-vol-count').append(' <span style="color:#BB0000;">[Note: Volume count exceeds limit of '
-				   + num_found_vol_limit_str + ' for exporting]</span>');
+	$('#srt-vol-count').append(' <span style="color:#BB0000;">'
+				   +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
+				   + num_found_vol_limit.toLocaleString() + ']</span>');
     }
 
 
@@ -194,14 +289,13 @@ function show_new_results(delta) {
     show_updated_results();
 }
 
+				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
-    var css_class = (line_num % 2 == 0) ? 'class="evenline"' : 'class="oddline"';
+    var css_class = 'class="oddevenline"';
     
     var html_item = "";
     var seq_item  = "";
-    
-    // <li title="nc01.ark:/13960/t78s5b569" style="color: #924a0b;"><a href="https://data.analytics.hathitrust.org/features/get?download-id=nc01.ark%3A%2F13960%2Ft78s5b569"><span class="icomoon icomoon-download"></span>Download Extracted Features</a></li>
     
     var id_pages_len = id_pages.length;
     
@@ -217,13 +311,23 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	download_text += " (complete volume)";
     }
     var download_span = '<div title="'+id+'" style="color: #924a0b;">';
-    //download_span +=      '<a download href="https://data.analytics.hathitrust.org/features/get?download-id='+id+'">';
     download_span +=      '<a download href="'+ef_download_url+'?download-id='+id+'">';
     download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
     download_span +=         download_text;
     download_span +=      '</a>';
     download_span +=    '</div>';
 
+    var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
+    var delete_div = '<div style="float: right;">';
+    delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
+    delete_div +=          'class="'+delete_div_classes+'" ';
+    delete_div +=          'title="Remove item from result set">';
+    delete_div +=         '<span class="ui-button-icon ui-icon ui-icon-closethick"></span>';
+    delete_div +=         '<span class="ui-button-icon-space"> </span>';
+    delete_div +=      '</button>';
+    delete_div +=    '</div>';
+
+    
     var prev_seq_count = 0;
     
     if (merge_with_previous) {
@@ -241,14 +345,15 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	var page = id_pages[pi];
 	
 	var seqnum = (page == 0) ? 1 : page;
-	var babel_url = "https://babel.hathitrust.org/cgi/pt?id=" + id + ";view=1up;seq=" + seqnum;
+	var babel_url = babel_prefix_url + "?id=" + id + ";view=1up;seq=" + seqnum;
 	
 	if (id_pages_len > 1) {
 	    
 	    if (pi == 0) {
 		var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-
+		html_item += delete_div;
+		
 		html_item += '<span style="font-style: italic;" name="' + id + '">';
 		html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 		
@@ -308,7 +413,8 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	else {
 	    var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 	    html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-
+	    html_item += delete_div;
+	    
 	    html_item += '<span style="font-style: italic;" name="' + id + '">';
 	    html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 	    
@@ -376,12 +482,13 @@ var store_result_page_starts = [];
 
 function show_results(jsonData,newSearch,newResultPage)
 {
+	 
     var response = jsonData.response;
     var num_found = response.numFound;
     var docs = response.docs;
     var num_docs = docs.length;
 
-    // ajax call has returnec successfully
+    // ajax call has returned successfully
     store_search_xhr = null;
     
     var search_start = parseInt(store_search_args.start);
@@ -415,31 +522,39 @@ function show_results(jsonData,newSearch,newResultPage)
 	page_level_desc = page_level_desc.replace("TERMS",page_level_terms);
     }
 
-    var query_level_mix = volume_level_desc;
+    store_query_level_mix = volume_level_desc;
     
-    if (query_level_mix != null) {
+    if (store_query_level_mix != null) {
 	if (page_level_desc != null) {
-	    query_level_mix += " AND " + page_level_desc; 
+	    store_query_level_mix += " AND " + page_level_desc; 
 	}
     }
     else {
-	query_level_mix = page_level_desc;
+	store_query_level_mix = page_level_desc;
     }
 
     if (newResultPage) {
 	    
-	var explain_html = show_results_explain_html(query_level_mix,store_search_url)
+	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
 	
 	if (num_docs > 0) {
 
-	    //if (search_start == 0) {
 	    if (newSearch) {
 		// The very beginning of the search results
 
 		$('#search-results-total').show();
 	    }
 	    
-	    $('#search-results-total-span').html("Results: " + num_found + doc_units + "matched");
+	    var $num_found_span = $('<span>')
+		.attr('id','results-total-num')
+	    	.data('raw-num',num_found)
+		.append(num_found.toLocaleString());
+
+	    var doc_units_label = (num_found==1) ? doc_unit : doc_units;
+	    $('#search-results-total-span')
+		.html("Results: ")
+		.append($num_found_span)
+		.append(doc_units_label + "matched");
 
 	    if (search_start == 0) {
 
@@ -449,19 +564,18 @@ function show_results(jsonData,newSearch,newResultPage)
 			$('#srt-vol-count').html("");
 			$('#srt-vol-count-span').show();
 			
-			//var data_str = get_solr_stream_data_str(store_search_args.q,true) // doRollup=true // ****
 			$("#export-by-vol").show();
-			
-			//var data_str = get_solr_stream_search_data_str(store_search_args.q) // ****
 			$("#export-by-page").show();
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 			$("#export-ef-zip").show();
+			$("#export-ef-to-registry").show();
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Page count exceeds limit of '
-						 + num_found_page_limit_str + ' for exporting result set]</span>');
+			$('#srt-vol-count').html('<span style="color:#BB0000;">'
+						 +'[Note: Exporting disabled for this search. Page count exceeds limit of '
+						 + num_found_page_limit.toLocaleString() + ']</span>');
 			$('#srt-vol-count').show();
 			$('#srt-vol-count-span').show();
 		    }
@@ -471,7 +585,10 @@ function show_results(jsonData,newSearch,newResultPage)
 		    if (num_found < num_found_vol_limit) {
 			$("#export-by-vol").show();
 			$("#export-by-page").hide();
-			$("#srt-ef-export").show();
+			$("#export-ef-zip").show();
+			$("#export-ef-to-registry").show();
+
+			//$("#srt-ef-export").show(); // ***** does this even exist anymore?
 			$("#export-by").fadeIn(1500);
 			
 			// restore vol-count display back to default text, ready for next vol count computation
@@ -481,8 +598,9 @@ function show_results(jsonData,newSearch,newResultPage)
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">[Note: Volume count exceeds limit of '
-						 + num_found_vol_limit_str + ' for exporting]</span>');
+			$('#srt-vol-count').html('<span style="color:#BB0000;">'
+						 +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
+						 + num_found_vol_limit.toLocaleString() + ']</span>');
 			$('#srt-vol-count').show();
 			$('#srt-vol-count-span').show();
 		    }		
@@ -491,9 +609,9 @@ function show_results(jsonData,newSearch,newResultPage)
 		$('#search-explain').html(explain_html);
 		show_hide_solr_q();
 		
-		//$( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
-	    	    
-		$('#next-prev').show();
+		//$('#next-prev').show();
+		//$('#page-bar').show();
+			
 	    }
 	    var from = parseInt(store_search_args.start) + 1;
 	    var to = from + store_search_args.rows - 1;
@@ -508,12 +626,13 @@ function show_results(jsonData,newSearch,newResultPage)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
 	    
-	    showing_matches += '<span id="sm-from">' + from + '</span>';
+	    showing_matches += '<span id="sm-from">' + from.toLocaleString() + '</span>';
 	    showing_matches += "-";
-	    showing_matches += '<span id="sm-to">' + to + '</span>';
+	    showing_matches += '<span id="sm-to">' + to.toLocaleString() + '</span>';
 	    showing_matches += "</p>";
 	    
 	    $('#search-showing').html(showing_matches);
+	    $('#sm-to').data('raw-num',to);
 	    
 	}
 	else {
@@ -527,7 +646,8 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#search-explain').html(explain_html);
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
-	    $('#next-prev').hide();
+	    //$('#next-prev').hide();
+		//$('#page-bar').hide();
 	}		
 
     }
@@ -596,6 +716,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		else {
 		    $search_results.append(html_item);
 		    show_hide_more_seqs(line_num);
+		    result_set_delete_item(line_num);
 		    prev_i_boundary = i;
 		    line_num++;
 		}
@@ -613,6 +734,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		var html_item = generate_item(line_num, prev_id, prev_pages, false);
 		$search_results.append(html_item);
 		show_hide_more_seqs(line_num);
+		result_set_delete_item(line_num);
 		prev_i_boundary = i;
 		line_num++;
 		prev_pages = [page];
@@ -650,6 +772,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		// no merge
 		$search_results.append(html_item);
 		show_hide_more_seqs(line_num);
+		result_set_delete_item(line_num);
 		store_line_num = line_num +1; // next line position
 	    }	    
 	}
@@ -657,6 +780,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    var html_item = generate_item(line_num, prev_id, prev_pages, false); // merge_with_previous=false
 	    $search_results.append(html_item);
 	    show_hide_more_seqs(line_num);
+	    result_set_delete_item(line_num);
 	    store_line_num = line_num +1; // next line position
 	}
     }
@@ -699,19 +823,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	progressbar_top.progressbar( "value",0);
 	progressbar_bot.progressbar( "value",0);
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
-    }
-
-    /*
-    var next_prev = '<p style="width:100%;">';
-    next_prev += '<div id="search-prev" style="float: left;">';
-    next_prev += '<a>&lt; <span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a></div>';
-    next_prev += '<div id="search-next" style="float: right;">';
-    next_prev += '<a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span> &gt;</a></div>';
-    next_prev += '</p>';
-    
-    $('#next-prev').html(next_prev);
-    */
-    
+    }    
 
     // Need to hide prev link?
     if (store_start == 0) { 
@@ -730,8 +842,9 @@ function show_results(jsonData,newSearch,newResultPage)
     }
     
     // Showing matches to ...
-    $('#sm-to').html(search_start + num_pages);
-    
+    var new_to = search_start + num_pages;
+    $('#sm-to').data('raw-num',new_to);
+    $('#sm-to').html(new_to.toLocaleString());
 
     // Now setup and invoke ajax call to add title metadta (etc) into result set page
 
@@ -754,6 +867,7 @@ function show_results(jsonData,newSearch,newResultPage)
     // Example URL for using the Solr-EF collection to retrieve volume id info
     //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
 
+    // ****
     //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});
 
     var ids_escaped = ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});
@@ -764,7 +878,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 
     
-    var fl_args = [ "id", "title_s", "handleUrl_s",
+    var fl_args = [ "id", "title_s", "handleUrl_s", "rightsAttributes_s",
 		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s" ];
     var fl_args_str = fl_args.join(",");
     
@@ -794,9 +908,8 @@ function show_results(jsonData,newSearch,newResultPage)
 var store_search_args = null;
 var store_search_action = null;
 var store_search_url = null;
-
-var group_by_vol_checked = 0;
-var doc_units = "";
+var store_search_not_ids = null;
+var store_query_level_mix = null;
 
 
 function expand_vfield(q_term, all_vfields, query_level) {
@@ -1002,27 +1115,35 @@ function expand_query_field_and_boolean(query, langs_with_pos, langs_without_pos
     return bool_query;
 }
 
-
-function submit_action(event) {
-    event.preventDefault();
-
+function initialize_new_solr_search()
+{
     if ($('#search-results-page').is(":visible")) {
 	$('#search-results-page').hide();
     }
     $('.search-in-progress').css("cursor","wait");
+
+    num_found=0;
+    $('#page-bar').html('');
 
     facet_filter.resetFilters(); // ****
     facet_filter.facetlistSet();    
     
     store_search_action = solr_search_action;
 
-    var arg_indent = $('#indent').attr('value');
-    var arg_wt = $('#wt').attr('value');
-
     explain_search = { 'group_by_vol': null,
 		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
 		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
+
+}
+
+function submit_action(event) {
+    event.preventDefault();
+
+    initialize_new_solr_search();
     
+    //var arg_indent = $('#indent').attr('value'); // ****
+    //var arg_wt = $('#wt').attr('value');
+
     var arg_q = null;
 
     var q_text = $('#q').val().trim();
@@ -1044,6 +1165,7 @@ function submit_action(event) {
 
 
 	if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+	    doc_unit  = " page ";
 	    doc_units = " pages ";
 
 	    if (arg_q.match(/volume[^_]+_txt:/)) {
@@ -1058,12 +1180,14 @@ function submit_action(event) {
 	    }
 	    
 	    if (arg_q.match(/[^_]+_t:/)) {
+		doc_unit  = " page/volume mix ";
 		doc_units = " page/volume mix ";
 	    }
 	}
-	else {	
+	else {
+	    doc_unit  = " volume ";
 	    doc_units = " volumes ";
-	    explain_search.volume_level_desc  = "[Volume: TERMS]";
+	    explain_search.volume_level_desc  = "[Volume: TERMS]";	    
 	}
 	
     }
@@ -1085,7 +1209,7 @@ function submit_action(event) {
 	    facet_filter.setFacetLevel(FacetLevelEnum.Page);
 	}
 
-	var query_level = facet_filter.getFacetLevel();    
+	var query_level = facet_filter.getFacetLevel();
 	var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
 	
 	if (arg_q == "") {
@@ -1097,6 +1221,7 @@ function submit_action(event) {
 		return;
 	    } else {
 		arg_q = arg_vq;
+		doc_unit = " volume ";
 		doc_units = " volumes ";
 		explain_search.volume_level_desc  = "[Volume: Terms]";
 		if (group_by_vol_checked) {
@@ -1119,20 +1244,10 @@ function submit_action(event) {
 		explain_search.group_by_vol = "Search results sorted by volume ID";
 	    }		    
 	    
+	    doc_unit  = " page ";
 	    doc_units = " pages ";
 	}
     }
-
-    /*
-    if ($('#vq').attr("data-key") == undefined) {
-	$('#vq').attr("data-key",vq_text);
-    }
-    if ($('#vq').attr("data-key") != vq_text) {
-	$('#vq').attr("data-key",vq_text);
-	facet_filter.resetFilters(); // ****
-	facet_filter.facetlistSet();
-    }
-    */
     
     //console.log("*** NOW arg_q = " + arg_q);
 
@@ -1141,8 +1256,13 @@ function submit_action(event) {
     
     var arg_start = $('#start').attr('value');
     
+    initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
+}
+
+function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
+{
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
-    
+
     store_search_args = {
 	q: arg_q,
 	indent: arg_indent,
@@ -1151,12 +1271,27 @@ function submit_action(event) {
 	rows: num_rows,
 	facet: "on"
     };
+
+    store_search_not_ids = [];
+    store_query_level_mix = null;
     
     if (group_by_vol_checked) {
 	store_search_args.sort = "id asc";
     }
 
-    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
+    // For display purposes, determine how many terms in query
+    var count_terms = 0;
+    var iprogressbar_message = "Searching 20 CPU-Core index";
+    if (store_search_args != null) {
+	count_terms = (store_search_args.q.match(/:/g) || []).length;
+    }
+
+    if (count_terms>1) {
+	iprogressbar_message += " for " + count_terms + " fields/terms";
+    }
+
+    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,
+					 iprogressbar_message);
     
     ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 }
@@ -1193,18 +1328,126 @@ function show_hide_more_seqs(line_num) {
     });
 }
 
-
-function login_faux()
-{
-    $.ajax({
-	type: "GET",
-	url: "https://analytics.hathitrust.org/login",
-	//data: data_str,
-	dataType: "jsonp",
-	success: function(jsonData) { alert(jsonData); },
-	error: function(jqXHR, textStatus, errorThrown) {
-	    ajax_error(jqXHR, textStatus, errorThrown)
+function show_hide_query_tabs() {
+    var base_id = "#show-hide-query-tabs";
+    var box_id       = base_id+"-box";
+    var turnstyle_id = base_id+"-turnstyle";
+    var block_id     = "#tabs-shared";
+    
+    $(box_id).click(function (event) {
+	event.preventDefault();
+	if ($(block_id+':visible').length) {
+	    $(block_id).hide("slide", { direction: "up" }, 1000);
+	    $(turnstyle_id).html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
+	}
+	else {
+	    $(block_id).show("slide", { direction: "up" }, 1000);
+	    $(turnstyle_id).html('<span class="ui-icon ui-icon-triangle-1-s"></span>');
 	}
     });
+}
 
+
+function result_set_delete_item(line_num) {
+    var di_id = "result-set-delete-"+line_num;
+
+    $('#'+di_id).click(function (event) {
+	
+	var $close_div = $(this).parent();
+	var $wrapper_line_div = $close_div.parent();
+	
+	var id = $close_div.next().attr("name");
+	$wrapper_line_div.slideUp(500, function() { $wrapper_line_div.remove(); });
+
+	//var escaped_id = id.replace(/:/g,"\\:").replace(/\\/g,"\\\\");
+	var escaped_id = id.replace(/:/g,"\\:");
+	
+	console.log("Exclude escaped id: " + escaped_id);
+
+	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+	    
+	    var $a_seqs = $wrapper_line_div.find('a[class="seq"]');
+	    $a_seqs.each(function() {
+		var seq_str = $(this).text();
+		var seq = seq_str.replace(/^seq\s+/,"");
+		// sprintf("%06d")
+		var page_str = "" + (seq-1);
+		var pad = "000000";
+		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
+		store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad);		
+	    });
+	}
+	else {
+	    store_search_not_ids.push("-id:"+escaped_id);		
+	}
+
+	var $results_total_num = $('#results-total-num');
+	var results_total_int = parseInt($results_total_num.data('raw-num'));
+
+	//var $result_line = $("[name='" + htid + "']").parent(); // ****
+	var query_level = facet_filter.getFacetLevel();
+	if (query_level == FacetLevelEnum.Volume) {
+	    // decrease num results found by 1
+
+	    results_total_int--;
+	    $results_total_num.data('raw-num',results_total_int)
+	    $results_total_num.text(results_total_int.toLocaleString());
+
+	    // 2. decrease 'showing page-level matches ... to' by 1
+	    var $sm_to_num = $('#sm-to');		
+	    var sm_to_int = parseInt($sm_to_num.text());
+	    sm_to_int--;
+	    $sm_to_num.data('raw-num',sm_to_int);
+	    $sm_to_num.text(sm_to_int.toLocaleString());
+
+	}
+	else {
+	    // Page level
+	    if (group_by_vol_checked) {
+		// 1. decrease num results by num_deleted
+
+		var $seq_matches = $wrapper_line_div.find("nobr>a[class^='seq']");	    
+		var num_deleted = $seq_matches.length;
+		results_total_int -= num_deleted;
+		$results_total_num.data('raw-num',results_total_int);
+		$results_total_num.text(results_total_int.toLocaleString());
+		
+		// 2. decrease volume count by 1
+		var $vol_count_num = $('#srt-vol-count-num');
+		var vol_count_int = parseInt($vol_count_num.data('raw-num'));
+		vol_count_int--;
+		$vol_count_num.data('raw-num',vol_count_int);
+		$vol_count_num.text(vol_count_int.toLocaleString());
+
+		// 3. decrease 'showing page-level matches ... to' by num_deleted
+		var $sm_to_num = $('#sm-to');		
+		var sm_to_int = parseInt($sm_to_num.text());
+		sm_to_int -= num_deleted;
+		$sm_to_num.data('raw-num',sm_to_int);
+		$sm_to_num.text(sm_to_int.toLocaleString());
+	    }
+	    else {
+		// 1. decrease num results by 1
+		results_total_int--;
+		$results_total_num.data('raw-num',results_total_int);
+		$results_total_num.text(results_total_int.toLocaleString());
+		
+		// 2. recompute num vols in case this seq entry was the last one for this volume
+		$('#srt-vol-count').css("cursor","wait");
+		ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
+
+		// 3. decrease 'showing page-level matches ... to' by 1
+		var $sm_to_num = $('#sm-to');		
+		var sm_to_int = parseInt($sm_to_num.text());
+		sm_to_int--;
+		$sm_to_num.data('raw-num',sm_to_int);
+		$sm_to_num.text(sm_to_int.toLocaleString());		
+	    }
+	}
+
+	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
+	$('#search-explain').html(explain_html);
+	show_hide_solr_q(); 
+
+    });
 }

@@ -263,11 +263,10 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 
 // **** Not currently used, would need updating
 
-FacetFilter.prototype.refine_query_usused = function()
+FacetFilter.prototype.refine_query_unused = function()
 {
     // merge items in refine_query and filter into into main Solr query q= ...
     
-
     // "refine-"+key
     console.log("***refine: " + facet_key);
     
@@ -329,7 +328,8 @@ FacetFilter.prototype.refine_query_usused = function()
     $('.search-in-progress').css("cursor","wait");
     
     store_search_args.start = 0;
-    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold);
+    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,
+					 "Applying filter");
     
     ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 }
@@ -607,107 +607,5 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 
 var facet_filter = new FacetFilter();
 
-$(function() {
-    //Facet related page setup
-    
-    $("#facetlist").on("click","a",function() {
-
-	var $class = $(this).attr("class");
-	
-	if ($(this).hasClass("morefacets")) {
-	    var obj = $class.split(" ")[0];
-	    $(this).hide();
-	    $("[class='" + obj + " lessfacets']").show();
-	    $("[class='hidefacet " + obj + "']").css({
-		display: "block",
-		visibility: "visible"
-	    });
-	    return false;
-	}
-	else if ($(this).hasClass("lessfacets")) {
-	    var obj = $class.split(" ")[0];
-	    $(this).hide();
-	    $("[class='" + obj + " morefacets']").show();
-	    $("[class='hidefacet " + obj + "']").css({
-		display: "none",
-		visibility: "visible"
-	    });
-	    return false;
-	}
-	else {
-	    // User has clicked on a facet
-	    // => Add it to 'filters', then instigate an updated search
-
-	    //var filter_key_count = Object.keys(facet_filter.refine_query).length;
-
-	    	
-	    var facet_key = $(this).attr("data-key");
-	    var term = $(this).attr("data-term");
-
-	    var pending_filters = facet_filter.hasPendingFilters(facet_key,term);
-	    
-	    /*
-	    var pending_filters = false;
-	    for (var pending_key in facet_filter.refine_query) {
-		if (pending_key != facet_key) {
-		    pending_filters = true;
-		    break;
-		}
-		else {
-		    var refine_terms = facet_filter.refine_query[pending_key];
-		    for (var pending_term in refine_terms) {
-			
-			if (pending_term != term) {
-			    pending_filters = true;
-			}
-		    }
-		}
-	    }*/
-	    	    
-	    var clicked_elem = this;
-
-	    //var facet_key_count = facet_filter.refine_query_count[facet_key];
-	    
-	    //if ((filter_key_count>1) || (facet_key_count > 1)) {
-	    if (pending_filters) {
-		var pp_field = facet_filter.prettyPrintField(facet_key);
-		var pp_term = facet_filter.prettyPrintTerm(facet_key,term);
-
-		var message = "Other filter(s) are checked but not yet applied.<br/>";
-		message += "Do you want to ignore them and apply just the '"+pp_term+"' filter to "+pp_field+"?",
-		
-		htrc_confirm(message,
-			     function() {
-				 $(this).dialog("close");
-				 facet_filter.applySingleFilter(clicked_elem,facet_key,term);
-			     },
-			     function() {
-				 $(this).dialog("close");
-			     }
-			    );
-	    }
-	    else {
-		facet_filter.applySingleFilter(clicked_elem,facet_key,term);
-	    }
-
-	    return false;
-	    
-	}
-    });
-    
-    $(".filters").on("click","a",function() {
-	// User has clicked on one of the currently applied filters
-	// => remove it from 'filters', then instigate an updated search
-	
-	facet_filter.filters.splice($(this).parent().index(), 1);
-	facet_filter.facetlistSet();
-	//console.log("*** filters on-click: store_search_args.start = " + store_search_args.start + ", store_start = " + store_start);
-	
-	store_search_args.start = store_start;
-	show_updated_results();
-    });
-
-
-});
 
 

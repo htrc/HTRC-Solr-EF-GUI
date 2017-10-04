@@ -18,19 +18,11 @@ IndeterminateProgressbar.prototype.abort = function()
     store_search_xhr = null;
 }
 
-IndeterminateProgressbar.prototype.display = function()
+IndeterminateProgressbar.prototype.display = function(message)
 {
     this.timeout_id = null;
 
-    // For display purposes, determine how many terms in query
-    var count_terms = (store_search_args.q.match(/:/g) || []).length;
-
-    if (count_terms>1) {
-	$('#'+this.label_id).html("for " + count_terms + " fields/terms");
-    }
-    else {
-	$('#'+this.label_id).html("");
-    }
+    $('#'+this.label_id).html(message);
     
     $('#'+this.wrapper_id).show("slide", { direction: "up" }, 1000);
 }
@@ -46,10 +38,10 @@ IndeterminateProgressbar.prototype.cancel = function()
 }
 
 
-IndeterminateProgressbar.prototype.trigger_delayed_display = function(delay)
+IndeterminateProgressbar.prototype.trigger_delayed_display = function(delay,message)
 {
     var that = this;
-    this.timeout_id = window.setTimeout(function() { that.display() },delay);
+    this.timeout_id = window.setTimeout(function() { that.display(message) },delay);
 }
 
 var iprogressbar = new IndeterminateProgressbar('search-indeterminate-div',
