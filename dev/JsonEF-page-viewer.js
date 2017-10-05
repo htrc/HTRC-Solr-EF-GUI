@@ -1,12 +1,35 @@
+"use strict";
 
-var store_ef_data    = null;
-var store_htid       = null;
-var store_seq_num    = null;
-var store_page_count = null;
+function JsonEFPageViewer()
+{
+    this.store_ef_data    = null;
+    this.store_htid       = null;
+    this.store_seq_num    = null;
+    this.store_page_count = null;
 
-var store_search_xhr = null;
+    this.store_search_xhr = null;
 
-function hashmap_to_html_table(hashmap)
+    this.flatUniversalPOSMapping = {};
+    for (var lang_key in universalPOSMapping) {
+	var lang_pos_map = universalPOSMapping[lang_key];
+	
+	for (var pos_key in lang_pos_map) {
+	    this.flatUniversalPOSMapping[pos_key] = lang_pos_map[pos_key];
+	}
+    }
+
+    this.universalPOStoLabel = {};
+    this.universalPOStoTooltip = {};
+    
+    for (var pos_i in pos_checkbox) {
+	var pos_rec = pos_checkbox[pos_i];
+	this.universalPOStoLabel[pos_rec.pos] = pos_rec.label;
+	this.universalPOStoTooltip[pos_rec.pos] = pos_rec.tooltip;
+    }	
+}
+
+
+JsonEFPageViewer.prototype.hashmap_to_html_table = function(hashmap)
 {
     var $table = $("<table />");
 
@@ -23,13 +46,16 @@ function hashmap_to_html_table(hashmap)
     return $table;
 }
 
-function posmap_to_text(block,pos_map,display_mode)
+JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
 {
     var pos_keys = [];
+    var pos_keys_pp = "";
+    
     if (display_mode == "display-raw") {
 	for (var pos_key in pos_map) {
 	    pos_keys.push(pos_key);
 	}
+	pos_keys_pp = pos_keys.join(", ");
     }
     else if (display_mode == "display-sort-alpha") {
 	//for (var k in pos_map) pos_keys.push(k);
@@ -40,7 +66,7 @@ function posmap_to_text(block,pos_map,display_mode)
 	    if (cur_key > next_key) return 1;
 	    return 0;
 	});
-	//pos_keys = pos_keys.sort();
+	pos_keys_pp = pos_keys.join(", ");
     }
     else if (display_mode == "display-sort-freq") {
 	var pos_freq = {};
@@ -63,10 +89,55 @@ function posmap_to_text(block,pos_map,display_mode)
 	    var pos_key = sorted_pos_freq[key_i];
 	    pos_keys.push(pos_key+":"+pos_freq[pos_key]);
 	}
+
+	pos_keys_pp = pos_keys.join(", ");
+    }
+    else if (display_mode == "display-sort-pos") {
+
+	var pos_term_mapping = {};
+	
+	for (var pos_key in pos_map) {
+	    var pos_terms = pos_map[pos_key];
+	    for (var pos_term in pos_terms) {
+		var universal_pos_term = this.flatUniversalPOSMapping[pos_term];
+		var universal_pos_term_label = this.universalPOStoLabel[universal_pos_term] || universal_pos_term;
+		
+		if (!pos_term_mapping.hasOwnProperty(universal_pos_term_label)) {
+		    pos_term_mapping[universal_pos_term_label] = [];
+		}
+		pos_term_mapping[universal_pos_term_label].push(pos_key);
+	    }
+	}
+
+	var sorted_pos_terms = Object.keys(pos_term_mapping).sort(function(cur_key,next_key) {
+	    if (cur_key < next_key) return -1;
+	    if (cur_key > next_key) return 1;
+	    return 0;
+	});
+	
+	var universal_pos_pair = [];
+
+	for (var key_i in sorted_pos_terms) {
+	    var pos_key = sorted_pos_terms[key_i];
+	    universal_pos_pair.push({ "key": pos_key, "terms": pos_term_mapping[pos_key] });	    
+	}
+	
+
+	for (var pos_pair_i in universal_pos_pair) {
+	    var pos_pair = universal_pos_pair[pos_pair_i];
+	    pos_keys.push('<li><i>'+pos_pair.key+"</i>: "+pos_pair.terms.sort().join(", ") + '</li>'); // ****
+	}
+
+	pos_keys_pp = '<ul>'+pos_keys.join("\n") + '</ul>';
+	
+	//isoLangs[lang_key].name // nativeName
+	
+	//universalPOSMapping
+	
     }
     
     if (pos_keys.length>0) {
-	var keys_html = '<i class="no-user-select">'+block.capitalize() + "</i>: " + pos_keys.join(", ",pos_keys) + "<hr />";
+	var keys_html = '<i class="no-user-select">'+block.capitalize() + "</i>: " + pos_keys_pp + "<hr />";
 	$('#json-ef-page-'+block).html(keys_html);
     }
     else {
@@ -77,12 +148,12 @@ function posmap_to_text(block,pos_map,display_mode)
 
 }
 
-function find_rewind_text(seq_num)
+JsonEFPageViewer.prototype._find_rewind_text = function(seq_num)
 {
     var found_text = false;
     var found_seq_num = seq_num;
 
-    var pages = store_ef_data.features.pages;    
+    var pages = this.store_ef_data.features.pages;    
 
     while (found_seq_num >= 1) {
 	var page = pages[found_seq_num-1];
@@ -107,12 +178,12 @@ function find_rewind_text(seq_num)
 }
 
 
-function find_forward_text(seq_num)
+JsonEFPageViewer.prototype._find_forward_text = function(seq_num)
 {
     var found_text = false;
     var found_seq_num = seq_num;
 
-    var pages = store_ef_data.features.pages;    
+    var pages = this.store_ef_data.features.pages;    
 
     while (found_seq_num <= pages.length) {
 	var page = pages[found_seq_num-1];
@@ -136,7 +207,7 @@ function find_forward_text(seq_num)
     return found_seq_num;
 }
 
-function display_view_and_download(htid,seq_num,unit_type)
+JsonEFPageViewer.prototype.display_view_and_download = function(htid,seq_num,unit_type)
 {
     var babel_url = babel_prefix_url + "?id=" + htid + ";view=1up";
 	
@@ -177,16 +248,16 @@ function display_view_and_download(htid,seq_num,unit_type)
     }
 }
 
-function display_ef_page_text(seq_num)
+JsonEFPageViewer.prototype.display_ef_page_text = function(seq_num)
 {
-    store_seq_num = seq_num;
+    this.store_seq_num = seq_num;
 
     var unit_type = ((seq_num == null) || (seq_num == 0)) ? "item" : "page";
-    display_view_and_download(store_htid,seq_num,unit_type);
+    this.display_view_and_download(this.store_htid,seq_num,unit_type);
     
     var display_mode = $("#display-mode :radio:checked").attr('id');
 	    
-    var pages = store_ef_data.features.pages;
+    var pages = this.store_ef_data.features.pages;
     var page = pages[seq_num-1];
     
     console.log("Generating POS text for seq-num: " + seq_num);
@@ -202,7 +273,7 @@ function display_ef_page_text(seq_num)
 	$('#action-go-prev').prop('disabled', false);
     }
 
-    if (seq_num >= store_page_count) {
+    if (seq_num >= this.store_page_count) {
 	$('#action-go-next').prop('disabled', true);
 	$('#action-go-last').prop('disabled', true);
     }
@@ -212,9 +283,9 @@ function display_ef_page_text(seq_num)
     }
     
 
-    var header_text_len = posmap_to_text("header",page.header.tokenPosCount, display_mode);
-    var body_text_len   = posmap_to_text("body",  page.body.tokenPosCount, display_mode);
-    var footer_text_len = posmap_to_text("footer",page.footer.tokenPosCount, display_mode);
+    var header_text_len = this._posmap_to_text("header",page.header.tokenPosCount, display_mode);
+    var body_text_len   = this._posmap_to_text("body",  page.body.tokenPosCount, display_mode);
+    var footer_text_len = this._posmap_to_text("footer",page.footer.tokenPosCount, display_mode);
 
     var text_len_total = header_text_len + body_text_len + footer_text_len;
     
@@ -226,7 +297,7 @@ function display_ef_page_text(seq_num)
 	$('#json-ef-text-label').hide();
 	$('#json-ef-no-text').show();
 
-	var found_rew_seq_num = find_rewind_text(seq_num);
+	var found_rew_seq_num = this._find_rewind_text(seq_num);
 	var nontrivial_rew = false;
 	if ((found_rew_seq_num != null) && ((seq_num - found_rew_seq_num)>1)) {
 	    $('#json-ef-no-text-rew-goto').data('go-page',found_rew_seq_num);	   
@@ -237,7 +308,7 @@ function display_ef_page_text(seq_num)
 	    $('#json-ef-no-text-rew-goto').hide();
 	}
 
-	var found_ff_seq_num = find_forward_text(seq_num);
+	var found_ff_seq_num = this._find_forward_text(seq_num);
 	var nontrivial_ff = false;
 	if ((found_ff_seq_num != null) && ((found_ff_seq_num - seq_num)>1)) {
 	    $('#json-ef-no-text-ff-goto').data('go-page',found_ff_seq_num);	   
@@ -259,7 +330,7 @@ function display_ef_page_text(seq_num)
 
 }
 
-function show_hide_more_metadata()
+JsonEFPageViewer.prototype.show_hide_more_metadata = function()
 {
     var shid_label = "#show-hide-metadata";
     var shid_block = shid_label + "-block";
@@ -277,6 +348,7 @@ function show_hide_more_metadata()
     });
 }
 
+var ef_page_viewer = new JsonEFPageViewer();
 
 $(document).ready(function() {
 
@@ -285,7 +357,7 @@ $(document).ready(function() {
     //$("#display-mode input").checkboxradio();
     $( "input[name='display-mode']").on( "change", function handleShape(event) {
 	console.log("Refreshing page display");
-	display_ef_page_text(store_seq_num);
+	ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num);
     });
     
     
@@ -295,8 +367,8 @@ $(document).ready(function() {
 	$('#ht-title').html(title);
     }
 	
-    store_htid = getURLParameter("htid");
-    if (store_htid != null) {
+    ef_page_viewer.store_htid = getURLParameter("htid");
+    if (ef_page_viewer.store_htid != null) {
 
 	seq_num = getURLParameter("seq");
 
@@ -311,7 +383,7 @@ $(document).ready(function() {
 	    unit_type = "page";
 	}
 	
-	display_view_and_download(store_htid,seq_num,unit_type);
+	ef_page_viewer.display_view_and_download(ef_page_viewer.store_htid,seq_num,unit_type);
     }
 
     $('#ht-show-metadata').click(function(event) {
@@ -319,34 +391,34 @@ $(document).ready(function() {
     });
 
     $('#action-go-first').click(function(event) {
-	display_ef_page_text(1);
+	ef_page_viewer.display_ef_page_text(1);
     });
 
     $('#action-go-prev').click(function(event) {
-	if (store_seq_num>1) {
-	    display_ef_page_text(store_seq_num-1);
+	if (ef_page_viewer.store_seq_num>1) {
+	    ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num-1);
 	}
     });
 
     $('#action-go-next').click(function(event) {
-	if (store_seq_num<store_page_count) {
-	    display_ef_page_text(store_seq_num+1);
+	if (ef_page_viewer.store_seq_num<ef_page_viewer.store_page_count) {
+	    ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num+1);
 	}
     });
 
     $('#action-go-last').click(function(event) {
-	display_ef_page_text(store_page_count);
+	ef_page_viewer.display_ef_page_text(ef_page_viewer.store_page_count);
     });
 
     $('#action-go-page').click(function(event) {
 	var seq_num = parseInt($('#input-go-page').val());
 	
 	if (!isNaN(seq_num)) {
-	    if ((seq_num>0) && (seq_num<=store_page_count)) {
-		display_ef_page_text(seq_num);
+	    if ((seq_num>0) && (seq_num<=ef_page_viewer.store_page_count)) {
+		ef_page_viewer.display_ef_page_text(seq_num);
 	    }
 	    else {
-		htrc_alert("Page number out of range.<br />Please enter a value between 1-" + store_page_count);
+		htrc_alert("Page number out of range.<br />Please enter a value between 1-" + ef_page_viewer.store_page_count);
 	    }
 	}
 	else {
@@ -358,18 +430,18 @@ $(document).ready(function() {
 
     $('#json-ef-no-text-rew-goto').click(function(event) {
 	var go_page_seq_num = $('#json-ef-no-text-rew-goto').data('go-page');	
-	display_ef_page_text(go_page_seq_num);
+	ef_page_viewer.display_ef_page_text(go_page_seq_num);
     });
 
     $('#json-ef-no-text-ff-goto').click(function(event) {
 	var go_page_seq_num = $('#json-ef-no-text-ff-goto').data('go-page');	
-	display_ef_page_text(go_page_seq_num);
+	ef_page_viewer.display_ef_page_text(go_page_seq_num);
     });
 
     
-    var ef_download_args = { "download-id": store_htid };
+    var ef_download_args = { "download-id": ef_page_viewer.store_htid };
 
-    store_search_xhr = new window.XMLHttpRequest();
+    ef_page_viewer.store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
 	type: "GET",
@@ -377,18 +449,18 @@ $(document).ready(function() {
 	data: ef_download_args,
 	dataType: "json",
 		xhr : function() {
-	    return store_search_xhr;
-	},
+		    return ef_page_viewer.store_search_xhr;
+		},
 	success: function(jsonData) {
-	    store_ef_data = jsonData;
-	    store_page_count = jsonData.features.pageCount;
+	    ef_page_viewer.store_ef_data = jsonData;
+	    ef_page_viewer.store_page_count = jsonData.features.pageCount;
 
 	    iprogressbar.cancel();
 	    
-	    //console.log(JSON.stringify(jsonData, null, 4));
-	    var $metadata_table = hashmap_to_html_table(jsonData.metadata);
+	    //console.log(JSON.stringify(jsonData, null, 4)); // ****
+	    var $metadata_table = ef_page_viewer.hashmap_to_html_table(jsonData.metadata);
 	    $('#show-hide-metadata-block').html($metadata_table);
-	    show_hide_more_metadata();
+	    ef_page_viewer.show_hide_more_metadata();
 	    
 	    var $vol_info = $('#vol-info');
 	    var rights = getURLParameter("rights");
@@ -397,12 +469,12 @@ $(document).ready(function() {
 		
 		$vol_info.append("<span>Copyright status: " + rights_pp + "</span><br />");
 	    }
-	    $vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of ' + store_page_count + ' pages</span>');
+	    $vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of ' + ef_page_viewer.store_page_count + ' pages</span>');
 
-	    var download_ef_href = ef_download_url+'?download-id='+store_htid;
+	    var download_ef_href = ef_download_url+'?download-id='+ef_page_viewer.store_htid;
 	    $('#download-json-ef').attr('href',download_ef_href);
 
-	    display_ef_page_text(seq_num);
+	    ef_page_viewer.display_ef_page_text(seq_num);
 	    
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
@@ -411,7 +483,5 @@ $(document).ready(function() {
 	    ajax_error(jqXHR, textStatus, errorThrown)
 	}
     });
-
-    
-	
+   	
 });

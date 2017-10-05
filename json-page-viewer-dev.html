@@ -34,6 +34,7 @@
 	<script type="text/javascript" src="assets/paging.js"></script>
 	
 	<script src="dev/iso-639-1.js"></script> <!-- defines var 'isoLangs' -->
+	<script src="dev/opennlp-lang-pos-mapping.js"></script> <!-- defines var 'universalPOSMapping' -->
 	<script src="dev/lookup-vars.js"></script>
 
 	<script src="dev/SolrEF-settings.js"></script>
@@ -297,8 +298,10 @@
 	      <input type="radio" name="display-mode" id="display-sort-alpha">
 	      <label for="display-sort-freq">Frequency</label>
 	      <input type="radio" name="display-mode" id="display-sort-freq">
+	      <label for="display-sort-pos">Part-of-Speech</label>
+	      <input type="radio" name="display-mode" id="display-sort-pos" checked="checked">
 	      <label for="display-raw">Raw</label>
-	      <input type="radio" name="display-mode" id="display-raw" checked="checked">
+	      <input type="radio" name="display-mode" id="display-raw" >
 	      <!--
 	      <label for="display-pos">Part-of-speech</label>
 	      <input type="radio" name="display-mode" id="display-pos">

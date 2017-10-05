@@ -1,6 +1,4 @@
 
-
-
 function lang_pos_toggle(event) {
 	var $this = $(this);
 	var checked_state = $this.prop("checked");
@@ -15,47 +13,6 @@ function lang_pos_toggle(event) {
 
 
 function generate_pos_langs() {
-	var pos_checkbox = [{
-		pos: "VERB",
-		label: "Verbs",
-		tooltip: "Verbs (all tenses and modes)"
-	}, {
-		pos: "NOUN",
-		label: "Nouns",
-		tooltip: "Nouns (common and proper)"
-	}, {
-		pos: "ADJ",
-		label: "Adjectives",
-		tooltip: null
-	}, {
-		pos: "ADV",
-		label: "Adverbs",
-		tooltip: null
-	}, {
-		pos: "ADP",
-		label: "Adpositions",
-		tooltip: "Adpositions (prepositions and postpositions)"
-	}, {
-		pos: "CONJ",
-		label: "Conjunctions",
-		tooltip: null
-	}, {
-		pos: "DET",
-		label: "Determiners",
-		tooltip: null
-	}, {
-		pos: "NUM",
-		label: "Numbers",
-		tooltip: "Cardinal numbers"
-	}, {
-		pos: "PRT",
-		label: "Particles",
-		tooltip: "Particles or other function words"
-	}, {
-		pos: "X",
-		label: "Other",
-		tooltip: "Other words, such as foreign words, typos, abbreviations"
-	}];
 
 	var $pos_fieldsets = $('#pos-fieldsets');
 
