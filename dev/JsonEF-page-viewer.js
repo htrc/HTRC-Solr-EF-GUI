@@ -95,7 +95,8 @@ JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
     else if (display_mode == "display-sort-pos") {
 
 	var pos_term_mapping = {};
-	
+
+	// Map all the different words on the page to their respective Universal POS label
 	for (var pos_key in pos_map) {
 	    var pos_terms = pos_map[pos_key];
 	    for (var pos_term in pos_terms) {
@@ -109,6 +110,7 @@ JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
 	    }
 	}
 
+	// Sort by Universal OS label
 	var sorted_pos_terms = Object.keys(pos_term_mapping).sort(function(cur_key,next_key) {
 	    if (cur_key < next_key) return -1;
 	    if (cur_key > next_key) return 1;
@@ -117,23 +119,20 @@ JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
 	
 	var universal_pos_pair = [];
 
+	// Generate array of Univeral POS {key,terms} in sort order
 	for (var key_i in sorted_pos_terms) {
 	    var pos_key = sorted_pos_terms[key_i];
 	    universal_pos_pair.push({ "key": pos_key, "terms": pos_term_mapping[pos_key] });	    
 	}
 	
 
+	// Turn the sorted array of pairs into <li> suitable for HTML display
 	for (var pos_pair_i in universal_pos_pair) {
 	    var pos_pair = universal_pos_pair[pos_pair_i];
-	    pos_keys.push('<li><i>'+pos_pair.key+"</i>: "+pos_pair.terms.sort().join(", ") + '</li>'); // ****
+	    pos_keys.push('<li><i class="no-user-select" style="color:black;">'+pos_pair.key+":</i> "+pos_pair.terms.sort().join(", ") + '</li>');
 	}
 
-	pos_keys_pp = '<ul>'+pos_keys.join("\n") + '</ul>';
-	
-	//isoLangs[lang_key].name // nativeName
-	
-	//universalPOSMapping
-	
+	pos_keys_pp = '<ul>'+pos_keys.join("\n") + '</ul>';		
     }
     
     if (pos_keys.length>0) {
