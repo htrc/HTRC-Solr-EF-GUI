@@ -197,13 +197,15 @@
 
       <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
 
-	  
+	<!--
 	<p id="htrc-publish-body" style="color: red; font-size: 120%;">
 	  This feature of the Extracted Features Solr Search site is a placeholder.
 	  The form below is disable, as it is currently non-functional.
 	</p>
-	<div class="disabled-div">
 
+	<div class="disabled-div">
+	  -->
+	
 	<p id="htrc-publish-body">	 
 	  Publishing result set in HathiTrust Research Center
 	  Registry:
@@ -213,7 +215,7 @@
 	    <div>
 	      Workset Title:
 	    </div>
-	    <input type="text"/>
+	    <input id="publish-ws-title" type="text"/>
 	  </div>
 
 	  <div>
@@ -227,25 +229,30 @@
 	    <div>
 	      Abstract:
 	    </div>
-	    <textarea placeholder="Please enter an abstract of your workset"></textarea>
+	    <textarea id="publish-ws-abstract"
+		      placeholder="Please enter an abstract of your workset"></textarea>
 	  </div>
 
 	  <div>
 	    <div>
 	      Criteria:
 	    </div>
-	    <textarea placeholder="What was the criteria established for including items in this workset?"></textarea>
+	    <textarea id="publish-ws-criteria"
+		      placeholder="What was the criteria established for including items in this workset?"></textarea>
 	  </div>
 
 	  <div>
 	    <div>
 	      Research Motivation:
 	    </div>
-	    <textarea placeholder="What was the research motivation for forming this workset?"></textarea>
+	    <textarea id="publish-ws-motivation"
+		      placeholder="What was the research motivation for forming this workset?"></textarea>
 	  </div>
 
 	</form>
-	</div>
+      <!--
+      </div>
+      -->
       </div>
 
       

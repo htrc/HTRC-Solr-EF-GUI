@@ -88,3 +88,103 @@ function solr_ef_login_to_publish()
     
     
 }
+
+function published_workset_success(data)
+{
+    console.log("published workset success(): data = " + data);
+}
+
+
+function ajax_save_workset_to_triplestore($dialog,jsonData)
+{
+    var ids = stream_get_ids(jsonData);
+    var ids_len = ids.length;
+
+    $dialog.css("cursor","auto");
+    $dialog.parent().find('.ui-dialog-buttonpane').css("cursor","auto");
+    $dialog.dialog("close");
+
+    if (ids_len==0) {
+	htrc_alert("No items in workset to export");
+	return;
+    }
+    
+    var username;
+    if (typeof(Storage) !== "undefined") {
+	username = sessionStorage.getItem("htrc-username");
+    }
+
+    // example JSON record to post to triple-store
+    // var source_data = 
+    // {
+    //	"extent": "2",
+    //	"created": "Deren Emre Kudeki",
+    //	"title": "Arabic Test",
+    //	"description": "For testing how fetchCollections handles non-roman character sets",
+    //	"gathers": [ { "htitem_id": "mdp.39015079132745" }, { "htitem_id": "mdp.39015079130095" } ]
+    // }
+		     
+    var created     = $('publish-username').val();
+    var title       = $('publish-ws-title').val();
+    var description = $('publish-ws-abstract').val();
+
+    // Additional CGI arguments
+    
+    var source_url = store_search_url;
+    var criteria             = $('publish-ws-criteria').val();
+    var research_motivation  = $('publish-ws-motivation').val();
+
+    var source_data = {
+	"extent": ids.length,
+	"created": username || "Anonymous",
+	"title": title,
+	"description": description,
+	"gathers": []    
+    }
+    
+    for (var i=0; i<ids.length; i++) {
+	source_data.gathers.push({"htitem_id": ids[i] });
+    }
+    
+    console.log("*** source data = " + JSON.stringify(source_data));
+    
+    var publish_workset_url = "https://worksets.hathitrust.org/fetchCollection";
+    
+    var url_args = {
+	source_data: source_data,
+	source_url: source_url,
+	research_motivation: research_motivation,
+	criteria: criteria
+    };
+    
+    $.ajax({
+	type: "POST",
+	url: publish_workset_url,
+	data: url_args,
+	//dataType: "json",
+	//processData: false,
+	//contentType: 'multipart/form-data',
+	contentType: false,
+	processData: false,
+	enctype: 'multipart/form-data',
+	success: published_workset_success,
+	error: ajax_error
+    });
+}
+
+    
+function solr_ef_publish_workset($dialog)
+{    
+    $dialog.css("cursor","wait"); 
+    $dialog.parent().find('.ui-dialog-buttonpane').css("cursor","wait");
+    
+    // Need small delay to let busy cursor change to take affect
+    setTimeout(function() {
+	var doRollup = (facet_filter.getFacetLevel() == FacetLevelEnum.Page) ? true : false;
+    
+	ajax_solr_stream_volume_count(store_search_args.q,doRollup, function(jsonData) {
+	    ajax_save_workset_to_triplestore($dialog,jsonData)
+	});
+    }, 10);
+
+}

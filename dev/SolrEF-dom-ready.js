@@ -251,7 +251,7 @@ $(document).ready(function(){
 	height: 620,
 	buttons: {
 	    "Sign In": function() {
-		$( this ).dialog( "close" );
+		$(this).dialog("close");
 	    }
 	},
 	hide: { effect: "fadeOut" },
@@ -270,10 +270,10 @@ $(document).ready(function(){
 	height: 620,
 	buttons: {
 	    "Publish": function() {
-		$( this ).dialog( "close" );
+		solr_ef_publish_workset($(this));
 	    },
 	    "Cancel": function() {
-		$( this ).dialog( "close" );
+		$(this).dialog("close");
 	    }
 	},
 	hide: { effect: "fadeOut" },

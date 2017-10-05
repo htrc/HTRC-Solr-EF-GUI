@@ -1,13 +1,13 @@
 "use strict";
 
+var store_search_xhr = null; // used in iprogressbar.cancel()
+
 function JsonEFPageViewer()
 {
     this.store_ef_data    = null;
     this.store_htid       = null;
     this.store_seq_num    = null;
     this.store_page_count = null;
-
-    this.store_search_xhr = null;
 
     this.flatUniversalPOSMapping = {};
     for (var lang_key in universalPOSMapping) {
@@ -28,6 +28,60 @@ function JsonEFPageViewer()
     }	
 }
 
+JsonEFPageViewer.prototype.setEFJsonData = function(json_data)
+{
+    this.store_ef_data = json_data;
+}
+
+JsonEFPageViewer.prototype.setPageCount = function(page_count)
+{
+    this.store_page_count = page_count;
+}
+
+JsonEFPageViewer.prototype.getPageCount = function()
+{
+    return this.store_page_count;
+}
+
+JsonEFPageViewer.prototype.getSeqNum = function()
+{
+    return this.store_seq_num;
+}
+
+JsonEFPageViewer.prototype.setHTID = function(htid)
+{
+    this.store_htid = htid;
+}
+
+JsonEFPageViewer.prototype.getHTID = function()
+{
+    return this.store_htid;
+}
+
+JsonEFPageViewer.prototype.isFirstPage = function()
+{
+    return this.store_seq_num <= 1;
+}
+
+JsonEFPageViewer.prototype.beforeFirstPage = function()
+{
+    return this.store_seq_num > 1;
+}
+    
+JsonEFPageViewer.prototype.beforeLastPage = function()
+{
+    return this.store_seq_num < this.store_page_count;
+}
+
+JsonEFPageViewer.prototype.isLastPage = function()
+{
+    return this.store_seq_num >= this.store_page_count;
+}
+
+JsonEFPageViewer.prototype.isValidPageNum = function(seq_num)
+{
+    return ((seq_num >= 1) && (seq_num <= this.store_page_count));
+}
 
 JsonEFPageViewer.prototype.hashmap_to_html_table = function(hashmap)
 {
@@ -206,9 +260,9 @@ JsonEFPageViewer.prototype._find_forward_text = function(seq_num)
     return found_seq_num;
 }
 
-JsonEFPageViewer.prototype.display_view_and_download = function(htid,seq_num,unit_type)
+JsonEFPageViewer.prototype.display_view_and_download = function(seq_num,unit_type)
 {
-    var babel_url = babel_prefix_url + "?id=" + htid + ";view=1up";
+    var babel_url = babel_prefix_url + "?id=" + this.store_htid + ";view=1up";
 	
     babel_url += ";seq=" + seq_num;	
 	    
@@ -229,7 +283,7 @@ JsonEFPageViewer.prototype.display_view_and_download = function(htid,seq_num,uni
 	if ($existing_img_thumbnail.length>0) {
 	    $existing_img_thumbnail.css("cursor", "progress");
 	}
-	var thumbnail_url = image_server_base_url + '?id='+htid+';seq='+seq_num+';height=110';
+	var thumbnail_url = image_server_base_url + '?id='+this.store_htid+';seq='+seq_num+';height=110';
 	var $img_thumbnail = $('<img>')
 	    .attr('id','img-thumbnail')
 	    .attr('class','clickable-image')
@@ -252,7 +306,7 @@ JsonEFPageViewer.prototype.display_ef_page_text = function(seq_num)
     this.store_seq_num = seq_num;
 
     var unit_type = ((seq_num == null) || (seq_num == 0)) ? "item" : "page";
-    this.display_view_and_download(this.store_htid,seq_num,unit_type);
+    this.display_view_and_download(seq_num,unit_type);
     
     var display_mode = $("#display-mode :radio:checked").attr('id');
 	    
@@ -263,7 +317,7 @@ JsonEFPageViewer.prototype.display_ef_page_text = function(seq_num)
     $('#input-go-page').val(seq_num);
     $('#seq-num').html(seq_num);
     
-    if (seq_num <= 1) {
+    if (this.isFirstPage()) {
 	$('#action-go-first').prop('disabled', true);
 	$('#action-go-prev').prop('disabled', true);
     }
@@ -272,7 +326,7 @@ JsonEFPageViewer.prototype.display_ef_page_text = function(seq_num)
 	$('#action-go-prev').prop('disabled', false);
     }
 
-    if (seq_num >= this.store_page_count) {
+    if (this.isLastPage()) {
 	$('#action-go-next').prop('disabled', true);
 	$('#action-go-last').prop('disabled', true);
     }
@@ -356,7 +410,7 @@ $(document).ready(function() {
     //$("#display-mode input").checkboxradio();
     $( "input[name='display-mode']").on( "change", function handleShape(event) {
 	console.log("Refreshing page display");
-	ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num);
+	ef_page_viewer.display_ef_page_text(ef_page_viewer.getSeqNum());
     });
     
     
@@ -365,9 +419,10 @@ $(document).ready(function() {
 	title = decodeURI(title);
 	$('#ht-title').html(title);
     }
-	
-    ef_page_viewer.store_htid = getURLParameter("htid");
-    if (ef_page_viewer.store_htid != null) {
+
+    var htid = getURLParameter("htid");
+    if (htid != null) {
+	ef_page_viewer.setHTID(htid);
 
 	seq_num = getURLParameter("seq");
 
@@ -382,7 +437,7 @@ $(document).ready(function() {
 	    unit_type = "page";
 	}
 	
-	ef_page_viewer.display_view_and_download(ef_page_viewer.store_htid,seq_num,unit_type);
+	ef_page_viewer.display_view_and_download(seq_num,unit_type);
     }
 
     $('#ht-show-metadata').click(function(event) {
@@ -394,30 +449,31 @@ $(document).ready(function() {
     });
 
     $('#action-go-prev').click(function(event) {
-	if (ef_page_viewer.store_seq_num>1) {
-	    ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num-1);
+	if (ef_page_viewer.beforeFirstPage()) {
+	    ef_page_viewer.display_ef_page_text(ef_page_viewer.getSeqNum()-1);
 	}
     });
 
     $('#action-go-next').click(function(event) {
-	if (ef_page_viewer.store_seq_num<ef_page_viewer.store_page_count) {
-	    ef_page_viewer.display_ef_page_text(ef_page_viewer.store_seq_num+1);
+	if (ef_page_viewer.beforeLastPage()) {
+	    ef_page_viewer.display_ef_page_text(ef_page_viewer.getSeqNum()+1);
 	}
     });
 
     $('#action-go-last').click(function(event) {
-	ef_page_viewer.display_ef_page_text(ef_page_viewer.store_page_count);
+	ef_page_viewer.display_ef_page_text(ef_page_viewer.getPageCount());
     });
 
     $('#action-go-page').click(function(event) {
 	var seq_num = parseInt($('#input-go-page').val());
 	
 	if (!isNaN(seq_num)) {
-	    if ((seq_num>0) && (seq_num<=ef_page_viewer.store_page_count)) {
+	    if (ef_page_viewer.isValidPageNum(seq_num)) {
 		ef_page_viewer.display_ef_page_text(seq_num);
 	    }
 	    else {
-		htrc_alert("Page number out of range.<br />Please enter a value between 1-" + ef_page_viewer.store_page_count);
+		htrc_alert("Page number out of range.<br />Please enter a value between 1-"
+			   + ef_page_viewer.getPageCount());
 	    }
 	}
 	else {
@@ -437,50 +493,58 @@ $(document).ready(function() {
 	ef_page_viewer.display_ef_page_text(go_page_seq_num);
     });
 
-    
-    var ef_download_args = { "download-id": ef_page_viewer.store_htid };
 
-    ef_page_viewer.store_search_xhr = new window.XMLHttpRequest();
-    
-    $.ajax({
-	type: "GET",
-	url: ef_download_url,
-	data: ef_download_args,
-	dataType: "json",
-		xhr : function() {
-		    return ef_page_viewer.store_search_xhr;
-		},
-	success: function(jsonData) {
-	    ef_page_viewer.store_ef_data = jsonData;
-	    ef_page_viewer.store_page_count = jsonData.features.pageCount;
+    if (htid != null) {
+	
+	var ef_download_args = { "download-id": htid };
 
-	    iprogressbar.cancel();
-	    
-	    //console.log(JSON.stringify(jsonData, null, 4)); // ****
-	    var $metadata_table = ef_page_viewer.hashmap_to_html_table(jsonData.metadata);
-	    $('#show-hide-metadata-block').html($metadata_table);
-	    ef_page_viewer.show_hide_more_metadata();
-	    
-	    var $vol_info = $('#vol-info');
-	    var rights = getURLParameter("rights");
-	    if (rights != null) {
-		var rights_pp = facet_filter.prettyPrintTerm("rightsAttributes_s",rights)
+	store_search_xhr = new window.XMLHttpRequest();
+	
+	$.ajax({
+	    type: "GET",
+	    url: ef_download_url,
+	    data: ef_download_args,
+	    dataType: "json",
+	    xhr : function() {
+		return store_search_xhr;
+	    },
+	    success: function(jsonData) {
+		ef_page_viewer.setEFJsonData(jsonData);
+		ef_page_viewer.setPageCount(jsonData.features.pageCount);
 		
-		$vol_info.append("<span>Copyright status: " + rights_pp + "</span><br />");
-	    }
-	    $vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of ' + ef_page_viewer.store_page_count + ' pages</span>');
-
-	    var download_ef_href = ef_download_url+'?download-id='+ef_page_viewer.store_htid;
-	    $('#download-json-ef').attr('href',download_ef_href);
-
-	    ef_page_viewer.display_ef_page_text(seq_num);
+		iprogressbar.cancel();
 	    
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    $('.search-in-progress').css("cursor","auto");
-	    iprogressbar.cancel();
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}
-    });
+		//console.log(JSON.stringify(jsonData, null, 4)); // ****
+		var $metadata_table = ef_page_viewer.hashmap_to_html_table(jsonData.metadata);
+		$('#show-hide-metadata-block').html($metadata_table);
+		ef_page_viewer.show_hide_more_metadata();
+		
+		var $vol_info = $('#vol-info');
+		var rights = getURLParameter("rights");
+		if (rights != null) {
+		    var rights_pp = facet_filter.prettyPrintTerm("rightsAttributes_s",rights)
+		    
+		    $vol_info.append("<span>Copyright status: " + rights_pp + "</span><br />");
+		}
+		$vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of '
+				 + ef_page_viewer.getPageCount() + ' pages</span>');
+		
+		var download_ef_href = ef_download_url+'?download-id='+ef_page_viewer.getHTID();
+		$('#download-json-ef').attr('href',download_ef_href);
+		
+		ef_page_viewer.display_ef_page_text(seq_num);
+		
+	    },
+	    error: function(jqXHR, textStatus, errorThrown) {
+		$('.search-in-progress').css("cursor","auto");
+		iprogressbar.cancel();
+		ajax_error(jqXHR, textStatus, errorThrown)
+	    }
+	});
+    }
+    else {
+	iprogressbar.cancel();
+	htrc_alert("Missing URL parameter 'htid'");
+    }
    	
 });
