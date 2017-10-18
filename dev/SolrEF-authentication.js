@@ -124,15 +124,15 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
     //	"gathers": [ { "htitem_id": "mdp.39015079132745" }, { "htitem_id": "mdp.39015079130095" } ]
     // }
 		     
-    var created     = $('publish-username').val();
-    var title       = $('publish-ws-title').val();
-    var description = $('publish-ws-abstract').val();
+    var created     = $('#publish-username').val();
+    var title       = $('#publish-ws-title').val();
+    var description = $('#publish-ws-abstract').val();
 
     // Additional CGI arguments
     
     var source_url = store_search_url;
-    var criteria             = $('publish-ws-criteria').val();
-    var research_motivation  = $('publish-ws-motivation').val();
+    var criteria             = $('#publish-ws-criteria').val();
+    var research_motivation  = $('#publish-ws-motivation').val();
 
     var source_data = {
 	"extent": ids.length,
@@ -151,22 +151,29 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
     var publish_workset_url = "https://worksets.hathitrust.org/fetchCollection";
     
     var url_args = {
-	source_data: source_data,
-	source_url: source_url,
-	research_motivation: research_motivation,
-	criteria: criteria
+	source_data: JSON.stringify(source_data),
+	//source_url: source_url,
+	//research_motivation: research_motivation,
+	//criteria: criteria
     };
+
+    //var form_data = new FormData();
+    //form_data.append("source_data",source_data);
     
     $.ajax({
 	type: "POST",
 	url: publish_workset_url,
 	data: url_args,
-	//dataType: "json",
+	//data: source_data,
+	//data: JSON.stringify(url_args),
+	//data: form_data,
+	dataType: "html",
+	//dataType: "html",
 	//processData: false,
 	//contentType: 'multipart/form-data',
-	contentType: false,
-	processData: false,
-	enctype: 'multipart/form-data',
+	//contentType: false,
+	//processData: false,
+	//enctype: 'multipart/form-data',
 	success: published_workset_success,
 	error: ajax_error
     });

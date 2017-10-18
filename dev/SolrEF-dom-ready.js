@@ -428,14 +428,31 @@ $(document).ready(function(){
     var workset_id = getURLParameter("workset-id");
     if (workset_id != null) {
 	// hide query input area
-	if ($('#tab-shared:visible').length) {
-	    $('#tab-shared').slideUp(1000, function() { load_worset_id(workset_id) } );
-	    $('#show-hide-query-tabs-turnstyle').html("+");
+	if ($('#tabs-shared:visible').length) {
+	    $('#tabs-shared').slideUp(1000, function() { load_workset_id(workset_id) } );
+	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
 	}
 	else {
 	    load_workset_id(workset_id);
 	}
     }
+
+    var solr_q = getURLParameter("solr-q");
+    if (solr_q != null) {
+	// hide query input area
+	console.log("*** tabs shared len = " + $('#tabs-shared').length);
+    	console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
+	    
+	if ($('#tabs-shared:visible').length) {
+	    $('#tabs-shared').slideUp(1000, function() { load_solr_q(solr_q) } );
+	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
+	}
+	else {
+	    load_solr_q(solr_q);
+	}
+    }
+
+
     
 });
 

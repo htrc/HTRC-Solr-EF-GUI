@@ -44,6 +44,7 @@
 	<script src="dev/SolrEF-stream.js"></script>
 	<script src="dev/SolrEF-explain.js"></script>
 	<script src="dev/SolrEF-facet-filter.js"></script>
+	<script src="dev/SolrEF-shoppingcart.js"></script>
 	<script src="dev/SolrEF.js"></script>
 	<script src="dev/SolrEF-dom-ready.js"></script>
 	
@@ -569,9 +570,9 @@
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
 	      </a>	      
 	    </div>
-	  </div>
-	  
+	  </div>	  
 	</div>
+	
         <div class="narrow">
           <h3 class="narrowsearch" style="display: none">Refine Results
 	    <span id="facet-units" class="page-count"></span></h3>
@@ -582,6 +583,21 @@
       </div>
 
       <div class="main">
+
+	<div id="droppable-targets">
+	  <div id="trashcan-drop" style="display: none; float: left">
+	  </div>
+	  <div id="shoppingcart-drop-wrapper" style="display: none; float: right; position: relative">
+	    <div id="shoppingcart-drop" style="position: relative">
+	    </div>
+	    <div id="shoppingcart-label"
+		 style="position: absolute; bottom: -10px; left: 15px; font-style: italic; font-size: 90%">(0 items)</div>
+	  </div>
+	  <div style="clear:both"></div>	  
+	</div>
+
+	
+
 	<div id="search-results-total">
 	  <div style="float:left;">
 	    <span id="search-results-total-span"></span>
@@ -606,8 +622,9 @@
 	<div id="search-showing">
 	</div>
 
-      	<div id="search-results">
+      	<div id="search-results">	  
 	</div>
+	
       	<div class="search-loading-more" style="display:none;">
 	  <span class="progressbar-label">Loading more results: </span>
 	  <div id="search-lm-progressbar-bot"></div>	    

@@ -39,7 +39,7 @@ function add_titles_ht(json_data)
 		var itemURL = item_val.itemURL;
 		itemURL = itemURL.replace(/^https:/, "http:");
 		
-		var ws_span = '<span class="workset" style="display: none;"><br>[Workset: <span name="' + itemURL + '"></span>]</span>';
+		var ws_span = '<span class="workset" style="display: none;"><br />[Workset: <span name="' + itemURL + '"></span>]</span>';
 		$("[name='" + htid + "']").each(function () {
 		    $(this).append(ws_span)
 		});
@@ -318,7 +318,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=    '</div>';
 
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
-    var delete_div = '<div style="float: right;">';
+    var delete_div = '<div class="htrc-delete-container" style="float: right;">';
     delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
     delete_div +=          'class="'+delete_div_classes+'" ';
     delete_div +=          'title="Remove item from result set">';
@@ -419,11 +419,11 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	    html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 	    
 	    if (page > 0) {
-		html_item += id + ': ';
+		html_item += '<span>'+id + ':</span> ';
 		seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a>';
 	    } else {
 		// dealing with 'phony' page => show 'all pages'
-		html_item += id + ': ';
+		html_item += '<span>'+id + ':</span> ';
 		seq_item += '<nobr><a class="seqall" target="_blank" href="' + babel_url + '">all pages</a>';
 	    }
 
@@ -785,6 +785,13 @@ function show_results(jsonData,newSearch,newResultPage)
 	}
     }
 
+    //var selectable_on = getURLParameter("selectable"); // ****
+    //if (parseInt(selectable_on)) {
+	$('#trashcan-drop').show();
+	$('#shoppingcart-drop-wrapper').show();
+	make_selectable_and_draggable($search_results);
+    //}
+    
     var progressbar_top = $( "#search-lm-progressbar-top" );
     var progressbar_bot = $( "#search-lm-progressbar-bot" );
 
@@ -1351,7 +1358,8 @@ function show_hide_query_tabs() {
 function result_set_delete_item(line_num) {
     var di_id = "result-set-delete-"+line_num;
 
-    $('#'+di_id).click(function (event) {
+    $('#'+di_id).on("click.deleteitem", function (event) {
+	event.stopImmediatePropagation()
 	
 	var $close_div = $(this).parent();
 	var $wrapper_line_div = $close_div.parent();

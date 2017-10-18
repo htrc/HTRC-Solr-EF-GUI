@@ -25,6 +25,35 @@ function getURLParameter(sParam)
     return null;
 }
 
+function getXSessionId()
+{
+    var xsId = document.cookie.match(/XSESSIONID=[^;]+/);
+
+    if (xsId != null) {
+	if (xsId instanceof Array)
+	    xsId = xsId[0].substring(11);
+	else
+	    xsId = xsId.substring(11);
+    }
+    return xsId;
+}
+
+function getSelectedText()
+{
+    // retrieve highlighted text the user has selected
+    // return empty string if none present
+    
+    var text = "";
+
+    if (window.getSelection) {
+	text = window.getSelection().toString();
+    }
+    else if (document.selection && document.selection.type != "Control") {
+	text = document.selection.createRange().text;
+    }
+
+    return text;
+}
 
 function htrc_alert(message)
 {
