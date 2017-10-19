@@ -191,7 +191,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 		// => don't show page-bar, only give 'next' and 'prev'
 		$('#page-bar').hide();
 		$('#next-prev').show();
-		show_results(jsonData,newSearch,newResultPage);
+		show_results(jsonData,newSearch,newResultPage);		
 	    }
 	    else {
 		// No merging of search result items possible
@@ -292,7 +292,7 @@ function show_new_results(delta) {
 				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
-    var css_class = 'class="oddevenline"';
+    var css_class = 'class="oddevenline" style="position: relative;"';
     
     var html_item = "";
     var seq_item  = "";
@@ -346,12 +346,19 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	
 	var seqnum = (page == 0) ? 1 : page;
 	var babel_url = babel_prefix_url + "?id=" + id + ";view=1up;seq=" + seqnum;
+
+	var seqs_outer_div_id = "seqs-outer-div-"+line_num;
+
+	var checkbox_input = '<div class="sr-input-item" style="position: absolute; left: -18px;">';
+	checkbox_input += '<input type="checkbox" class="sr-input-item-pending" name="checkbox-'+seqs_outer_div_id+'" id="checkbox-' + seqs_outer_div_id+'" />';
+	checkbox_input += '</div>';
+
 	
 	if (id_pages_len > 1) {
 	    
 	    if (pi == 0) {
-		var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
+		html_item += checkbox_input;		    
 		html_item += delete_div;
 		
 		html_item += '<span style="font-style: italic;" name="' + id + '">';
@@ -411,8 +418,8 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 
 	}
 	else {
-	    var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 	    html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
+	    html_item += checkbox_input;
 	    html_item += delete_div;
 	    
 	    html_item += '<span style="font-style: italic;" name="' + id + '">';
@@ -621,7 +628,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		to = num_found;
 	    }
 	    
-	    var showing_matches = "<hr /><p>";
+	    var showing_matches = "<div>";
 	    showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
@@ -629,7 +636,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    showing_matches += '<span id="sm-from">' + from.toLocaleString() + '</span>';
 	    showing_matches += "-";
 	    showing_matches += '<span id="sm-to">' + to.toLocaleString() + '</span>';
-	    showing_matches += "</p>";
+	    showing_matches += "</div>";
 	    
 	    $('#search-showing').html(showing_matches);
 	    $('#sm-to').data('raw-num',to);
@@ -756,7 +763,7 @@ function show_results(jsonData,newSearch,newResultPage)
     }
     var num_pages = i;
     store_num_pages = num_pages;
-    
+	
     if (line_num <= num_results_per_page) {
 
 	if (group_by_vol_checked) {
@@ -785,6 +792,52 @@ function show_results(jsonData,newSearch,newResultPage)
 	}
     }
 
+    // Add change listeners to newly added items
+    $('input.sr-input-item-pending').each(function() {
+	var $this_checkbox = $(this);
+	
+	$this_checkbox.on("change",function(event) {
+	    
+	    var $selected_item = $this_checkbox.closest("#search-results > div.ui-selectee");
+
+	    if ($this_checkbox.is(':checked')) {
+		console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked ON");
+		
+		if (!$selected_item.hasClass("ui-draggable")) {		    
+		    console.log("** making draggable, selected_item = " + $selected_item[0]);
+		    $selected_item.addClass("ui-selected");
+		    make_draggable($selected_item);
+		}
+
+	    }
+	    else {
+		console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked OFF");
+		if ($selected_item.hasClass("ui-draggable")) {
+		    console.log("*** removing draggable");
+		    $selected_item.draggable("destroy");
+		    $selected_item.find(".ui-selected").removeClass("ui-selected"); // in case an inner element selected from a rubber-band drag
+		    $selected_item.removeClass("ui-selected");
+		}
+	    }
+	});
+
+	$this_checkbox.attr("class","sr-input-item");
+    });
+
+    // update display for any items that are already in the shoppingcart
+    $("#search-results .htrc-delete").each(function() {
+	var $close_button = $(this);
+	var $close_div = $close_button.parent();
+	var id = $close_div.next().attr("name");
+
+//	if (jQuery.inArray(id,store_shoppingcart_ids) >= 0) { // ****
+	if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
+	    console.log("**** updating icon to be shopping cart!!");
+	    convert_close_to_shoppingcart_action($close_button);
+	}
+    });
+    
+    
     //var selectable_on = getURLParameter("selectable"); // ****
     //if (parseInt(selectable_on)) {
 	$('#trashcan-drop').show();

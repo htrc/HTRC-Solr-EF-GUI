@@ -440,9 +440,12 @@ $(document).ready(function(){
     var solr_q = getURLParameter("solr-q");
     if (solr_q != null) {
 	// hide query input area
-	console.log("*** tabs shared len = " + $('#tabs-shared').length);
-    	console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
-	    
+	//console.log("*** tabs shared len = " + $('#tabs-shared').length); // ****
+    	//console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
+
+	$('#tabs-search').hide();
+	load_solr_q(solr_q);
+	/* // ****
 	if ($('#tabs-shared:visible').length) {
 	    $('#tabs-shared').slideUp(1000, function() { load_solr_q(solr_q) } );
 	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
@@ -450,15 +453,47 @@ $(document).ready(function(){
 	else {
 	    load_solr_q(solr_q);
 	}
+*/
     }
 
+    $('#sr-select-all').on("click",function(event) {
+	event.preventDefault();
+	$('#search-results > div.ui-selectee').each(function() {
+	    var $this = $(this);
+	    $this.addClass("ui-selected");
+	    make_draggable($this);
+	});
+    });
+    
+    $('#sr-deselect-all').on("click",function(event) {
+	event.preventDefault();
+	selectable_and_draggable_hard_reset();
+    });
+
+    $('#sr-invert-selection').on("click",function(event) {
+	event.preventDefault();
+	$('#search-results > div.ui-selectee').each(function() {
+
+	    var $this = $(this);
+	    
+	    var $checkbox = $this.find('input.sr-input-item');	    
+	    console.log("*** invert: checkbox = " + $checkbox.prop("checked"));
+	    
+	    if ($checkbox.prop("checked")) {
+		make_undraggable($this);
+	    }
+	    else {
+		$this.addClass("ui-selected");
+		make_draggable($this);
+	    }
+	});
+
+    });
 
     
-});
-
-
-$(function() {
+    // 
     //Facet related page setup
+    //
     
     $("#facetlist").on("click","a",function() {
      
