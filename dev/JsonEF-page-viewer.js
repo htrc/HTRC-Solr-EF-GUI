@@ -274,7 +274,7 @@ JsonEFPageViewer.prototype.display_view_and_download = function(seq_num,unit_typ
     $('#goto-ht').html($alink);
     
     var rights = getURLParameter("rights");
-    if ((rights != null) && (rights == "pd")) {
+    if ((rights != null) && ((rights == "pd") || (rights == "pdus"))) {
 	// If Image of page available, display a thumbnail of that linked to HT as well
 	// Example image server URL
 	//  https://babel.hathitrust.org/cgi/imgsrv/image?id=uc1.32106002115449;seq=7;width=1360	
