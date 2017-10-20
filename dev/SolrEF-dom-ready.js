@@ -456,13 +456,58 @@ $(document).ready(function(){
 */
     }
 
+    $('input[name="interactive-style"]:radio').on("click",function(event) {
+	var radio_id = $(this).attr("id");
+	console.log("radio id = " + radio_id);
+	if (radio_id == "pref-drag-and-drop") {
+	    $('.drag-and-drop-style').removeClass("style-hidden");
+	    
+	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+	    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
+
+	    selectable_and_draggable_hard_reset();
+	    store_interaction_style = InteractionStyleEnum.DragAndDrop;
+	}
+	else if (radio_id == "pref-checkboxes") {
+	    $('.checkbox-style').removeClass("style-hidden");
+
+	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+	    $('.drag-and-drop-style').hide("slide", { direction: "up" }, 1000);
+
+	    make_unselectable();
+	    //selectable_and_draggable_hard_reset();
+	    //$('.drag-and-drop-style').addClass("style-hidden");
+	    store_interaction_style = InteractionStyleEnum.Checkboxes;
+	}
+	else if (radio_id == "pref-hybrid") {
+	    $('.drag-and-drop-style').removeClass("style-hidden");
+	    $('.checkbox-style').removeClass("style-hidden");
+	    
+	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+
+	    selectable_and_draggable_hard_reset();
+	    
+	    store_interaction_style = InteractionStyleEnum.Hybrid;
+	}
+	else {
+	    console.error("Error: unrecognized interaction style '" + radio_id + "'");
+	}
+    });
+	
     $('#sr-select-all').on("click",function(event) {
 	event.preventDefault();
-	$('#search-results > div.ui-selectee').each(function() {
-	    var $this = $(this);
-	    $this.addClass("ui-selected");
-	    make_draggable($this);
-	});
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    $('#search-results input.sr-input-item').prop("checked",true);
+	    update_select_all_none_buttons();
+	}
+	else {
+	    $('#search-results > div.ui-selectee').each(function() {
+		var $this = $(this);
+		$this.addClass("ui-selected");
+		make_draggable($this);
+	    });
+	}
     });
     
     $('#sr-deselect-all').on("click",function(event) {
@@ -472,24 +517,56 @@ $(document).ready(function(){
 
     $('#sr-invert-selection').on("click",function(event) {
 	event.preventDefault();
-	$('#search-results > div.ui-selectee').each(function() {
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    var $my_checkboxes = $('#search-results input.sr-input-item');
+	    $my_checkboxes.each(function() {
+		var $this = $(this);
+		if ($this.prop("checked")) {
+		    $this.prop("checked",false);
+		}
+		else {
+		    $this.prop("checked",true);
+		}
+	    });
+	    update_select_all_none_buttons();
+	}
+	else {
+	    $('#search-results > div.ui-selectee').each(function() {
 
-	    var $this = $(this);
-	    
-	    var $checkbox = $this.find('input.sr-input-item');	    
-	    console.log("*** invert: checkbox = " + $checkbox.prop("checked"));
-	    
-	    if ($checkbox.prop("checked")) {
-		make_undraggable($this);
-	    }
-	    else {
-		$this.addClass("ui-selected");
-		make_draggable($this);
-	    }
-	});
+		var $this = $(this);	    
+		var $checkbox = $this.find('input.sr-input-item');	    
+		
+		if ($checkbox.prop("checked")) {
+		    make_undraggable($this);
+		}
+		else {
+		    $this.addClass("ui-selected");
+		    make_draggable($this);
+		}
+	    });
+	}
 
     });
 
+    $('#sr-delete-item').on("click",function(event) {
+	event.preventDefault();
+	do_delete_drop_action();
+    });
+
+    $('#sr-add-item').on("click",function(event) {
+	event.preventDefault();
+	do_shoppingcart_drop_action();
+    });
+
+    $('#sr-goto-cart').on("click",function(event) {
+	event.preventDefault();
+	open_shoppingcart();
+    });
+
+    $('#pref-drag-and-drop').prop("checked",true);
+    store_interaction_style = InteractionStyleEnum.DragAndDrop;
+    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
     
     // 
     //Facet related page setup

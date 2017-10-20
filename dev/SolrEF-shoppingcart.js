@@ -3,15 +3,20 @@
 var store_shoppingcart_ids = [];
 var store_shoppingcart_ids_hash = {};
 
-var $selected_items = $([]);
-
 var dragging_started = false;
 
 var shoppingcart_debug = false;
 
 function update_select_all_none_buttons()
 {
-    var num_selected_items = $("#search-results .ui-draggable").length;
+    var num_selected_items;
+    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	num_selected_items = $('#search-results input.sr-input-item:checked').length;
+    }
+    else {
+	num_selected_items = $("#search-results .ui-draggable").length;
+    }
+    
     if (num_selected_items == 0) {
 	$('#sr-deselect-all').prop('disabled',true);
 	$('#sr-invert-selection').prop('disabled',true);
@@ -46,8 +51,8 @@ function make_draggable($elem)
 	    
 	    $dragging_helper.append($dragging_helper_label);
     
-	    $selected_items = $("#search-results .ui-draggable");
-	    var num_selected_items = $selected_items.length;
+	    var $my_selected_items = $("#search-results .ui-draggable");
+	    var num_selected_items = $my_selected_items.length;
 	    
 	    var units = (num_selected_items == 1) ? "item" : "items";
 	    var label = num_selected_items + " selected " + units;
@@ -111,7 +116,9 @@ function make_selectable()
 	
 	distance: 2,
 	create: function(ev, ui) {
-	    console.log("selectable create()");
+	    if (shoppingcart_debug) {
+		console.log("selectable create()");
+	    }
 	},
 
 	start: function(ev, ui) {
@@ -159,12 +166,28 @@ function make_selectable()
     });
 }
 
+function make_unselectable()
+{
+    $('#search-results').find(".ui-selected").removeClass("ui-selected"); // ****
+    
+    if ($('#search-results').hasClass("ui-selectable")) {
+	$('#search-results').selectable("destroy");
+    }
+}
+
 
 function make_clickable()
-{
+{    
     var selectable_prev_pos = -1;
     
     $('#search-results > div.ui-selectee').on("click.drag", function(ev) {
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    if (shoppingcart_debug) {
+		console.log("*** preventing click.drag");
+	    }
+	    return;
+	}
+
 	var $this = $(this);
 	if (shoppingcart_debug) {
 	    console.log("*** clickable item() : ev.target = " + ev.target + ", this = " + this);
@@ -252,6 +275,85 @@ function convert_close_to_shoppingcart_action($close_button)
     $close_button.on("click.openshoppingcart",open_shoppingcart);
 }
 
+function do_delete_drop_action()
+{
+    // Check to see if any of the items selected are in the shopping cart
+    // => popup alert if there are
+
+    var delete_list = []
+    
+    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	var $my_checkboxes = $('#search-results input.sr-input-item:checked');
+
+	$my_checkboxes.each(function() {
+	    var $close_div = $(this).parent().parent().find(".htrc-delete");
+	    delete_list.push($close_div);
+	    $close_div.trigger("click");
+	});
+    }		       
+    else {
+	var $my_selected_items = $("#search-results .ui-draggable");
+    
+	$my_selected_items.each(function() {
+	    var $close_div = $(this).find(".htrc-delete");
+	    delete_list.push($close_div);
+	    $close_div.trigger("click");
+	});
+    }
+    selectable_and_draggable_hard_reset();
+}
+
+function do_shoppingcart_drop_action()
+{
+    var $my_selected_items = $("#search-results .ui-draggable");
+    if (shoppingcart_debug) {
+	console.log("*** XSession ID = " + getXSessionId());
+    }
+
+    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	var $my_checkboxes = $('#search-results input.sr-input-item:checked');
+
+	$my_checkboxes.each(function() {
+	    var item_id = $(this).parent().parent().find('span[name]').attr("name");
+	    store_shoppingcart_ids.push(item_id);
+	    store_shoppingcart_ids_hash[item_id] = item_id;
+	});
+
+    }
+    else {
+	$my_selected_items.each(function() {
+	    var $this = $(this);
+	    
+	    var item_id = $this.find('span[name]').attr("name");
+	    store_shoppingcart_ids.push(item_id);
+	    store_shoppingcart_ids_hash[item_id] = item_id;
+	    
+	    // Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
+	    var $close_button = $this.find(".htrc-delete");
+	    
+	    convert_close_to_shoppingcart_action($close_button);
+	    
+	    make_undraggable($this);
+	});
+    }
+    
+    var shoppingcart_len = store_shoppingcart_ids.length;
+    if (shoppingcart_len == 1) {
+	$('#shoppingcart-label').html("(1 item)")
+	$('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
+    }
+    else {
+	$('#shoppingcart-label').html("(" + shoppingcart_len + " items)");
+	if (shoppingcart_len == 0) {
+	    $('#shoppingcart-drop-wrapper').attr("title","");
+	}
+	else {
+	    $('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
+	}
+    }
+    
+    selectable_and_draggable_hard_reset();
+}
 
 function make_selectable_and_draggable($search_results)
 {        
@@ -263,11 +365,7 @@ function make_selectable_and_draggable($search_results)
 	},
 	tolerance: "pointer",
 	drop: function(event,ui) {
-	    $selected_items.each(function() {
-		var $close_div = $(this).find(".htrc-delete");
-		$close_div.trigger("click");
-	    });
-	    selectable_and_draggable_hard_reset();
+	    do_delete_drop_action();	    
 	}
     });
 
@@ -279,48 +377,20 @@ function make_selectable_and_draggable($search_results)
 	},
 	tolerance: "pointer",
 	drop: function(event,ui) {
-	    if (shoppingcart_debug) {
-		console.log("*** XSession ID = " + getXSessionId());
-	    }
-
-	    $selected_items.each(function() {
-		var $this = $(this);
-
-		var item_id = $this.find('span[name]').attr("name");
-		store_shoppingcart_ids.push(item_id);
-		store_shoppingcart_ids_hash[item_id] = item_id;
-		
-		// Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
-		var $close_button = $this.find(".htrc-delete");
-
-		convert_close_to_shoppingcart_action($close_button);
-		
-		make_undraggable($this);
-	    });
-
-	    var shoppingcart_len = store_shoppingcart_ids.length;
-	    if (shoppingcart_len == 1) {
-		$('#shoppingcart-label').html("(1 item)")
-		$('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
-	    }
-	    else {
-		$('#shoppingcart-label').html("(" + shoppingcart_len + " items)");
-		if (shoppingcart_len == 0) {
-		    $('#shoppingcart-drop-wrapper').attr("title","");
-		}
-		else {
-		    $('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
-		}
-	    }
-
-	    selectable_and_draggable_hard_reset();
+	    do_shoppingcart_drop_action();
 	}
     });
 
     $("#shoppingcart-drop").click(open_shoppingcart);
-	
-    make_selectable();
-    make_clickable();    
+
+    if (store_interaction_style != InteractionStyleEnum.Checkboxes) {
+
+	make_selectable();
+	make_clickable();
+    }
+    else {
+	make_unselectable();
+    }
 }
 
 function open_shoppingcart()
@@ -360,9 +430,16 @@ function selectable_and_draggable_hard_reset()
 {
     $('#search-results > div.ui-draggable').removeClass("ui-selected");
     $('#search-results > div.ui-draggable').draggable("destroy");
-    $('#search-results').selectable("destroy");
-    make_selectable();
-	
+    make_unselectable();
+
+    //if ($('#search-results').hasClass("ui-selectable")) { // ****
+//	$('#search-results').selectable("destroy");
+  //  }
+
+    if (store_interaction_style != InteractionStyleEnum.Checkboxes) {
+	make_selectable();
+    }
+    
     $('#search-results input.sr-input-item').prop("checked",false);
 
     $('#sr-deselect-all').prop('disabled',true);
@@ -371,7 +448,11 @@ function selectable_and_draggable_hard_reset()
 
 $(document).ready(function() {
     
-    $('body').keyup(function(ev) {	
+    $('body').keyup(function(ev) {
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    return;
+	}
+
 	if (ev.keyCode == 27){
 	    // reset selctable area
 	    if ($("#search-results .ui-draggable").length>0) {
@@ -385,11 +466,18 @@ $(document).ready(function() {
 
 
     $('body').click(function(ev) {
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    if (shoppingcart_debug) {
+		console.log("*** in checkbox only mode => returning");
+	    }
+	    return;
+	}
+		    
 	// ev.target is inner element => check ancestors to see if within #search-results area
 	// Only if it *isn't* an ancestor should we look to reset
 
 	if ($(ev.target).hasClass("sr-item-multisel")) {
-	    // click on one of the multiple select/deselect/invert buttons
+	    // clicked on one of the multiple select/deselect/invert buttons
 	    return;
 	}
 	

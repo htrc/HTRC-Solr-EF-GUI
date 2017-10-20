@@ -7,8 +7,16 @@ var QueryTabEnum = {
     Advanced: 3
 };
 
+var InteractionStyleEnum = {
+    DragAndDrop: 1,
+    Checkboxes: 2,
+    Hybrid: 3
+};
+
+
 var store_query_tab_selected = null;
-    
+var store_interaction_style = null;
+
 var store_search_xhr = null;
 
 var group_by_vol_checked = 0;
@@ -317,8 +325,14 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=      '</a>';
     download_span +=    '</div>';
 
+    var opt_dnd_style = "";
+    if ((store_interaction_style != InteractionStyleEnum.DragAndDrop) 
+    	&& (store_interaction_style != InteractionStyleEnum.Hybrid)) {
+	opt_dnd_style = " style-hidden";
+    }
+
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
-    var delete_div = '<div class="htrc-delete-container" style="float: right;">';
+    var delete_div = '<div class="htrc-delete-container drag-and-drop-style'+opt_dnd_style+'" style="float: right;">';
     delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
     delete_div +=          'class="'+delete_div_classes+'" ';
     delete_div +=          'title="Remove item from result set">';
@@ -341,6 +355,12 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     
     var show_more = false;
 
+    var opt_checkbox_style = "";
+    if ((store_interaction_style != InteractionStyleEnum.Checkboxes) 
+    	&& (store_interaction_style != InteractionStyleEnum.Hybrid)) {
+	opt_checkbox_style = " style-hidden";
+    }
+
     for (var pi = 0; pi < id_pages_len; pi++) {
 	var page = id_pages[pi];
 	
@@ -349,7 +369,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 
 	var seqs_outer_div_id = "seqs-outer-div-"+line_num;
 
-	var checkbox_input = '<div class="sr-input-item" style="position: absolute; left: -18px;">';
+	var checkbox_input = '<div class="sr-input-item checkbox-style'+opt_checkbox_style+'" style="position: absolute; left: -18px;">';
 	checkbox_input += '<input type="checkbox" class="sr-input-item-pending" name="checkbox-'+seqs_outer_div_id+'" id="checkbox-' + seqs_outer_div_id+'" />';
 	checkbox_input += '</div>';
 
@@ -358,7 +378,8 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	    
 	    if (pi == 0) {
 		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-		html_item += checkbox_input;		    
+		html_item += checkbox_input;
+
 		html_item += delete_div;
 		
 		html_item += '<span style="font-style: italic;" name="' + id + '">';
@@ -792,31 +813,39 @@ function show_results(jsonData,newSearch,newResultPage)
 	}
     }
 
-    // Add change listeners to newly added items
+    // Add change listeners to newly added items	
     $('input.sr-input-item-pending').each(function() {
 	var $this_checkbox = $(this);
 	
 	$this_checkbox.on("change",function(event) {
-	    
-	    var $selected_item = $this_checkbox.closest("#search-results > div.ui-selectee");
 
-	    if ($this_checkbox.is(':checked')) {
-		console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked ON");
+	    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+		update_select_all_none_buttons();
+		console.log("*** in checkbox only mode => returning (having updated count)");
+		return;
+	    }
 		
-		if (!$selected_item.hasClass("ui-draggable")) {		    
-		    console.log("** making draggable, selected_item = " + $selected_item[0]);
-		    $selected_item.addClass("ui-selected");
-		    make_draggable($selected_item);
+	    var $my_selected_item = $this_checkbox.closest("#search-results > div.ui-selectee");
+	    
+	    if ($this_checkbox.is(':checked')) {
+		//console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked ON"); // ****
+		
+		if (!$my_selected_item.hasClass("ui-draggable")) {
+		    if (shoppingcart_debug) {
+			console.log("** making draggable, selected_item = " + $my_selected_item[0]); // ****
+		    }
+		    $my_selected_item.addClass("ui-selected");
+		    make_draggable($my_selected_item);
 		}
-
+		
 	    }
 	    else {
-		console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked OFF");
-		if ($selected_item.hasClass("ui-draggable")) {
+		//console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked OFF"); // ****
+		if ($my_selected_item.hasClass("ui-draggable")) {
 		    console.log("*** removing draggable");
-		    $selected_item.draggable("destroy");
-		    $selected_item.find(".ui-selected").removeClass("ui-selected"); // in case an inner element selected from a rubber-band drag
-		    $selected_item.removeClass("ui-selected");
+		    $my_selected_item.draggable("destroy");
+		    $my_selected_item.find(".ui-selected").removeClass("ui-selected"); // in case an inner element selected from a rubber-band drag
+		    $my_selected_item.removeClass("ui-selected");
 		}
 	    }
 	});

@@ -168,7 +168,22 @@
 			  <li class="dropdown">
 			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
 			    <ul class="dropdown-menu">
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop"
+				       checked="checked" />
+				<label for="pref-drag-and-drop">Drag-and-drop</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-checkboxes" id="pref-checkboxes" />
+				<label for="pref-checkboxes">Check-boxes</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid" />
+				<label for="pref-hybrid">Hybrid</label>
+			      </li>
+			      <li><hr /></li>
 			      <li><a onclick="solr_ef_logout()">Logout</a></li>
+			      
 			      <!--
 				  <li><a href="/logout">Logout</a></li>
 				  -->
@@ -584,7 +599,7 @@
 
       <div class="main">
 
-	<div id="droppable-targets">
+	<div id="droppable-targets" class="drag-and-drop-style">
 	  <div id="trashcan-drop" style="display: none; float: left">
 	  </div>
 	  <div id="shoppingcart-drop-wrapper" style="display: none; float: right; position: relative">
@@ -640,6 +655,16 @@
 	  <span class="progressbar-label">Loading more results: </span>
 	  <div id="search-lm-progressbar-bot"></div>	    
 	</div>
+
+	<div id="sr-add-delete-wrapper" class="checkbox-style">
+	  <form style="float: right; padding-bottom: 5px;">
+	    <button id="sr-delete-item" class="sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
+	    <button id="sr-add-item" class="sr-add-delete-item">Add <img src="assets/icons/shoppingcart-empty24.png" /></button>
+	    <button id="sr-goto-cart" class="sr-add-delete-item">Goto cart <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	  </form>
+	  <div style="clear:both;"</div>
+	  <hr />		  
+	</div>
 	
 	<div id="next-prev" style="display:none;">
 	  <div style="width:100%;">
@@ -650,7 +675,7 @@
 	    <div id="search-next" style="float: right;">
 	      <a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span></a>
 	    </div>
-	  </div>	  
+	  </div>
 	</div>
 	<div id="page-bar">	  
 	</div>
@@ -668,15 +693,16 @@
     <div class="container">
       <h4>Additional Resources</h4>
       <ul>
+	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB (docs not stored)</li>
 	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.1 billion pages)</a></li>
 	<!--
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
+	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
 	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
-	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB</li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
-	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>
+	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>	
       </ul>
     </div>
 
