@@ -407,7 +407,6 @@ $(document).ready(function() {
 
     var seq_num = null;
 
-    //$("#display-mode input").checkboxradio();
     $( "input[name='display-mode']").on( "change", function handleShape(event) {
 	console.log("Refreshing page display");
 	ef_page_viewer.display_ef_page_text(ef_page_viewer.getSeqNum());
@@ -514,7 +513,6 @@ $(document).ready(function() {
 		
 		iprogressbar.cancel();
 	    
-		//console.log(JSON.stringify(jsonData, null, 4)); // ****
 		var $metadata_table = ef_page_viewer.hashmap_to_html_table(jsonData.metadata);
 		$('#show-hide-metadata-block').html($metadata_table);
 		ef_page_viewer.show_hide_more_metadata();
