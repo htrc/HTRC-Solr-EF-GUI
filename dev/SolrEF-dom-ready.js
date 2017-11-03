@@ -564,7 +564,8 @@ $(document).ready(function(){
     });
 
     $('#pref-drag-and-drop').prop("checked",true);
-    store_interaction_style = InteractionStyleEnum.DragAndDrop;
+    //store_interaction_style = InteractionStyleEnum.DragAndDrop; // **** 
+    store_interaction_style = InteractionStyleEnum.Hybrid; // default
     $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
     $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
     

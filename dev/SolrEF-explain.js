@@ -84,7 +84,10 @@ function show_results_explain_html(query_level_mix,store_search_url)
     explain_html += '<div style="float:left;">\n';
     explain_html += '  <button id="show-hide-solr-q">Show full query ...</button>\n';
 
-    explain_html += '  <div class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + raw_query + '</div>\n';
+    explain_html += '  <div id="show-hide-solr-q-raw" class="show-hide-solr-q" style="display:none; padding: 5px; width: 650px;">' + raw_query + '</div>\n';
+    explain_html += '  <div class="show-hide-solr-q" style="display:none;">\n';
+    explain_html += '    <a id="show-hide-solr-q-paste">Paste as Advanced Query<span class="ui-icon ui-icon-arrowthick-1-e"></span></a>\n';
+    explain_html += '  </div>\n';
     explain_html += "</div>\n";
     explain_html += "</p>\n";
 

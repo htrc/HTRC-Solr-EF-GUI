@@ -191,7 +191,6 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	successXXXX: function(jsonData) { show_results(jsonData,newSearch,newResultPage); }, // ****
 	success: function(jsonData) { 
 	    if (group_by_vol_checked) {
 		// Possible merging of items in search results means
@@ -1237,115 +1236,163 @@ function submit_action(event) {
 
     var q_text = $('#q').val().trim();
     var vq_text = $('#vq').val().trim();
-        
-    group_by_vol_checked = $('#group-results-by-vol:checked').length;
-    
-    var search_all_langs_checked = $('#search-all-langs:checked').length;
-    var search_all_vfields_checked = $('#search-all-vfields:checked').length;
 
-    if (store_query_tab_selected == QueryTabEnum.Advanced) {
-	var advanced_q_text = $('#advanced-q').val().trim();
-	if (advanced_q_text === "") {
-	    $('.search-in-progress').css("cursor","auto");
-	    htrc_alert("No query term(s) entered");
-	    return;
-	}
-	arg_q = advanced_q_text;
+    var tokenize_mode = $("#tokenize-mode :radio:checked").attr('id');
 
 
-	if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
-	    doc_unit  = " page ";
-	    doc_units = " pages ";
+    var submit_action_tokenized_confirmed = function(json_data) {
+	vq_text = json_data.text_out
 
-	    if (arg_q.match(/volume[^_]+_txt:/)) {
-	    	explain_search.volume_level_desc  = "[Volume: Terms]";
-	    }
-	    if (arg_q.match(/htrctokentext:/)) {		
-		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
-	    }
-	    
-	    if (group_by_vol_checked) {
-		explain_search.group_by_vol = "Search results sorted by volume ID";
-	    }
-	    
-	    if (arg_q.match(/[^_]+_t:/)) {
-		doc_unit  = " page/volume mix ";
-		doc_units = " page/volume mix ";
-	    }
-	}
-	else {
-	    doc_unit  = " volume ";
-	    doc_units = " volumes ";
-	    explain_search.volume_level_desc  = "[Volume: TERMS]";	    
-	}
+	group_by_vol_checked = $('#group-results-by-vol:checked').length;
 	
-    }
-    else {
-	if ((q_text === "") && (vq_text === "")) {
-	    $('.search-in-progress').css("cursor","auto");
-	    htrc_alert("No query term(s) entered");
-	    return;
-	}
-   
-    
-	arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
-	
-	if (arg_q == "") {
-	    // Potentially only looking at volume level terms
-	    facet_filter.setFacetLevel(FacetLevelEnum.Volume);
-	}
-	else {
-	    facet_filter.setFacetLevel(FacetLevelEnum.Page);
-	}
+	var search_all_langs_checked = $('#search-all-langs:checked').length;
+	var search_all_vfields_checked = $('#search-all-vfields:checked').length;
 
-	var query_level = facet_filter.getFacetLevel();
-	var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
-	
-	if (arg_q == "") {
-	    if (arg_vq == "") {
-		// arg_vq was empty to start with, but attempt to expand non-empty arg_q
-		//   lead to an empty arg_q being returned
+	if (store_query_tab_selected == QueryTabEnum.Advanced) {
+	    var advanced_q_text = $('#advanced-q').val().trim();
+	    if (advanced_q_text === "") {
 		$('.search-in-progress').css("cursor","auto");
-		htrc_alert("No languages selected");
+		htrc_alert("No query term(s) entered");
 		return;
-	    } else {
-		arg_q = arg_vq;
-		doc_unit = " volume ";
-		doc_units = " volumes ";
-		explain_search.volume_level_desc  = "[Volume: Terms]";
+	    }
+	    arg_q = advanced_q_text;
+
+
+	    if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+		doc_unit  = " page ";
+		doc_units = " pages ";
+
+		if (arg_q.match(/volume[^_]+_txt:/)) {
+	    	    explain_search.volume_level_desc  = "[Volume: Terms]";
+		}
+		if (arg_q.match(/htrctokentext:/)) {		
+		    explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+		}
+		
 		if (group_by_vol_checked) {
 		    explain_search.group_by_vol = "Search results sorted by volume ID";
 		}
-	    }
-	}
-	else {
-	    if (arg_vq != "") {
-		// join the two with an AND
-		arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
 		
-		explain_search.volume_level_desc = "[Volume: Terms]";
-		explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+		if (arg_q.match(/[^_]+_t:/)) {
+		    doc_unit  = " page/volume mix ";
+		    doc_units = " page/volume mix ";
+		}
 	    }
 	    else {
-		explain_search.page_level_desc  = "[Page-level: POS-Terms]";
+		doc_unit  = " volume ";
+		doc_units = " volumes ";
+		explain_search.volume_level_desc  = "[Volume: TERMS]";	    
 	    }
-	    if (group_by_vol_checked) {
-		explain_search.group_by_vol = "Search results sorted by volume ID";
-	    }		    
 	    
-	    doc_unit  = " page ";
-	    doc_units = " pages ";
+	}
+	else {
+	    if ((q_text === "") && (vq_text === "")) {
+		$('.search-in-progress').css("cursor","auto");
+		htrc_alert("No query term(s) entered");
+		return;
+	    }
+	    
+	    
+	    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+	    
+	    if (arg_q == "") {
+		// Potentially only looking at volume level terms
+		facet_filter.setFacetLevel(FacetLevelEnum.Volume);
+	    }
+	    else {
+		facet_filter.setFacetLevel(FacetLevelEnum.Page);
+	    }
+
+	    var query_level = facet_filter.getFacetLevel();
+	    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
+	    
+	    if (arg_q == "") {
+		if (arg_vq == "") {
+		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
+		    //   lead to an empty arg_q being returned
+		    $('.search-in-progress').css("cursor","auto");
+		    htrc_alert("No languages selected");
+		    return;
+		} else {
+		    arg_q = arg_vq;
+		    doc_unit = " volume ";
+		    doc_units = " volumes ";
+		    explain_search.volume_level_desc  = "[Volume: Terms]";
+		    if (group_by_vol_checked) {
+			explain_search.group_by_vol = "Search results sorted by volume ID";
+		    }
+		}
+	    }
+	    else {
+		if (arg_vq != "") {
+		    // join the two with an AND
+		    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
+		    
+		    explain_search.volume_level_desc = "[Volume: Terms]";
+		    explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+		}
+		else {
+		    explain_search.page_level_desc  = "[Page-level: POS-Terms]";
+		}
+		if (group_by_vol_checked) {
+		    explain_search.group_by_vol = "Search results sorted by volume ID";
+		}		    
+		
+		doc_unit  = " page ";
+		doc_units = " pages ";
+	    }
+	}
+	
+	//console.log("*** NOW arg_q = " + arg_q);
+
+	// Example search on one of the htrc-full-ef fields is: 
+	//  q=en_NOUN_htrctokentext:farming
+	
+	var arg_start = $('#start').attr('value');
+	
+	initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
+    }
+
+    var submit_action_tokenized = function(json_data) {
+	
+	if (vq_text != json_data.text_out) {
+	    var mess = "Do you want to split this query into separate terms?<br /><hr />";
+
+	    mess += "Query input: " + vq_text + "<br>";
+	    mess += "Tokenized as: " + json_data.text_out.split(" ").join(", ");
+	    htrc_confirm(mess,
+			 function() {
+			     $(this).dialog("close");
+			     $('#vq').val(json_data.text_out);
+			     submit_action_tokenized_confirmed(json_data);
+			 },
+			 function() {
+			     $(this).dialog("close");
+			     submit_action_tokenized_confirmed({"text_out":vq_text});
+			 }
+			);
+	}
+	else {
+	    submit_action_tokenized_confirmed(json_data);
 	}
     }
-    
-    //console.log("*** NOW arg_q = " + arg_q);
 
-    // Example search on one of the htrc-full-ef fields is: 
-    //  q=en_NOUN_htrctokentext:farming
+    if (tokenize_mode == "tokenize-on") {
+	$.ajax({
+	    type: "POST",
+	    url: ef_download_url,
+	    data: { "action": "icu-tokenize",
+		    "text-in": vq_text },
+	    dataType: "json",
+	    success: submit_action_tokenized,
+	    error: ajax_error
+	});
+    }
+    else {
+	submit_action_tokenized({"text_out":vq_text});
+    }
     
-    var arg_start = $('#start').attr('value');
-    
-    initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
+
 }
 
 function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
@@ -1397,6 +1444,18 @@ function show_hide_solr_q() {
 	    $('.show-hide-solr-q').show("slide", { direction: "up" }, 500);
 	    $('#show-hide-solr-q').html("Hide full query ...");
 	}
+    });
+    
+    $("#show-hide-solr-q-paste").click(function (event) {
+	event.preventDefault();
+	var raw_q = $('#show-hide-solr-q-raw').html();
+	$('#advanced-q').val(raw_q);
+	$('#show-hide-solr-q').trigger("click");
+
+	var tabs = $('#tabs-search');
+	tabs.tabs({ active: QueryTabEnum.Advanced});
+	activate_tab_id(QueryTabEnum.Advanced);
+	
     });
 }
 

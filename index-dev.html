@@ -169,8 +169,7 @@
 			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
 			    <ul class="dropdown-menu">
 			      <li class="interaction-radio-style" >
-				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop"
-				       checked="checked" />
+				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop" />
 				<label for="pref-drag-and-drop">Drag-and-drop</label>
 			      </li>
 			      <li class="interaction-radio-style" >
@@ -178,7 +177,8 @@
 				<label for="pref-checkboxes">Check-boxes</label>
 			      </li>
 			      <li class="interaction-radio-style" >
-				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid" />
+				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid"
+				       checked="checked" />
 				<label for="pref-hybrid">Hybrid</label>
 			      </li>
 			      <li><hr /></li>
@@ -487,10 +487,23 @@
 
 		  <tr>
 		    <td></td>
-		    <td >
+		    <td>
 		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
+
+		      <fieldset id="tokenize-mode" style="float: right; padding-right: 10px;">
+			<span>Tokenize terms:</span>
+			<label for="tokenize-on">On</label>
+			<input type="radio" name="tokenize-mode" id="tokenize-on" checked="checked" />
+			<label for="tokenize-off">Off</label>
+			<input type="radio" name="tokenize-mode" id="tokenize-off" />
+		      </fieldset>
+
+
+		    </td>
+		    <td>
 		    </td>
 		  </tr>
+		  
 		</table>
 
 				
@@ -699,7 +712,7 @@
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
 	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
-	<li><a href="/solr/admin.html">HTRC-EF Solr Admin UI (log in)</a></li>
+	<li><a href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
 	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>	
