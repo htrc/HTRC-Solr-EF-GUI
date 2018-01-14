@@ -78,11 +78,28 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
 	buttons : {
 	    "Confirm" : confirm_callback,
 	    "Cancel" : cancel_callback
-	}
+	},
+	close: function() { $('.search-in-progress').css("cursor","auto"); }
     });
 
     $("#htrc-alert-dialog").dialog( "open" );
 }
+
+function htrc_continue(message,continue_callback,cancel_callback)
+{
+    $('#htrc-alert-body').html(message)
+    
+    $("#htrc-alert-dialog").dialog({
+	buttons : {
+	    "Continue" : continue_callback,
+	    "Cancel" : cancel_callback
+	},
+	close: function() { $('.search-in-progress').css("cursor","auto"); }
+    });
+
+    $("#htrc-alert-dialog").dialog( "open" );
+}
+
 
 function htrc_login(buttons)
 {

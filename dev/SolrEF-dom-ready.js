@@ -443,6 +443,9 @@ $(document).ready(function(){
 	//console.log("*** tabs shared len = " + $('#tabs-shared').length); // ****
     	//console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
 
+	$('#droppable-targets').hide();
+	$('#select-for-shoppingcart').hide();
+	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
 	load_solr_q(solr_q);
 	/* // ****
@@ -456,6 +459,8 @@ $(document).ready(function(){
 */
     }
 
+    if (solr_q == null) {
+	
     $('input[name="interactive-style"]:radio').on("click",function(event) {
 	var radio_id = $(this).attr("id");
 	console.log("radio id = " + radio_id);
@@ -562,13 +567,15 @@ $(document).ready(function(){
 	event.preventDefault();
 	open_shoppingcart();
     });
-
+    
     $('#pref-drag-and-drop').prop("checked",true);
     //store_interaction_style = InteractionStyleEnum.DragAndDrop; // **** 
     store_interaction_style = InteractionStyleEnum.Hybrid; // default
     $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
     $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
-    
+
+    } // if solr_q == null
+
     // 
     //Facet related page setup
     //

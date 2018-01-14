@@ -46,6 +46,7 @@
 	<script src="dev/SolrEF-facet-filter.js"></script>
 	<script src="dev/SolrEF-shoppingcart.js"></script>
 	<script src="dev/SolrEF.js"></script>
+	<script src="dev/SolrEF-result-set.js"></script>
 	<script src="dev/SolrEF-dom-ready.js"></script>
 	
   </head>
@@ -489,15 +490,15 @@
 		    <td></td>
 		    <td>
 		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
-
+<!--
 		      <fieldset id="tokenize-mode" style="float: right; padding-right: 10px;">
-			<span>Tokenize terms:</span>
-			<label for="tokenize-on">On</label>
+			<span>Tokenize check:</span>
 			<input type="radio" name="tokenize-mode" id="tokenize-on" checked="checked" />
-			<label for="tokenize-off">Off</label>
+			<label for="tokenize-on">On</label>
 			<input type="radio" name="tokenize-mode" id="tokenize-off" />
+			<label for="tokenize-off">Off</label>
 		      </fieldset>
-
+-->
 
 		    </td>
 		    <td>
@@ -560,7 +561,7 @@
 	</div>
 	<div style="position: relative;">
 	  <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
-            <h3 class="narrowexport">Export Results</h3>
+            <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
 	    <div>
 	      <a id="export-by-vol"  class="export-item" style="display: none"
 		 download="htrc-volume-export.json" target="_blank">
@@ -576,7 +577,7 @@
 	      </a>
 	      <a id="export-ef-to-registry" class="export-item" style="display: none"
 		 download>
-		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
 	      </a>
 	      
 	    </div>
@@ -595,7 +596,7 @@
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 	      </a>
 	      <a id="coverup-export-ef-to-registry" class="export-item">
-		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
 	      </a>	      
 	    </div>
 	  </div>	  
@@ -651,7 +652,7 @@
 	  <hr />
 	  <div id="search-showing" style="float:left;">
 	  </div>
-	  <div style="float:right;">
+	  <div id="select-for-shoppingcart" style="float:right;">
 	    <form>
 	      <button id="sr-select-all" class="sr-item-multisel">Select All</button>
 	      <button id="sr-deselect-all" class="sr-item-multisel" disabled="disabled">Deselect All</button>
@@ -675,7 +676,7 @@
 	    <button id="sr-add-item" class="sr-add-delete-item">Add <img src="assets/icons/shoppingcart-empty24.png" /></button>
 	    <button id="sr-goto-cart" class="sr-add-delete-item">Goto cart <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
 	  </form>
-	  <div style="clear:both;"</div>
+	  <div style="clear:both;"></div>
 	  <hr />		  
 	</div>
 	
@@ -711,6 +712,7 @@
 	<!--
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
+	<li><a href="solr-ef-query-api.txt">View details about searching directory using the SOLR API</a></li>
 	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
 	<li><a href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>

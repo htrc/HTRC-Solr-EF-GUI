@@ -6,6 +6,7 @@ var store_shoppingcart_ids_hash = {};
 var dragging_started = false;
 
 var shoppingcart_debug = false;
+//var shoppingcart_debug = true;
 
 function update_select_all_none_buttons()
 {
@@ -195,10 +196,18 @@ function make_clickable()
 	}
 
 	if ($(ev.target).hasClass("sr-input-item")) {
-	    // Don't want to respond to click here => let the 'change' listener for the checkbox do its thing later on!
+	    // Don't want to respond to click here
+	    // => let the 'change' listener for the checkbox do its thing later on!
 	    return;
 	}
 
+	if (ev.target.nodeName == "A") {
+	    // user has clicked on a hyperlink
+	    // => return to allow it to do its own thing (follow the link)
+	    //    and prevent element becoming select
+	    return;
+	}
+	    
 	var opt_selected_text = getSelectedText();
 	if (opt_selected_text != "") {
 	    // the user has selected some text within the item, allow this to
@@ -381,7 +390,8 @@ function make_selectable_and_draggable($search_results)
 	}
     });
 
-    $("#shoppingcart-drop").click(open_shoppingcart);
+    $("#shoppingcart-drop").off('click.shoppingcart');
+    $("#shoppingcart-drop").on('click.shoppingcart',open_shoppingcart);
 
     if (store_interaction_style != InteractionStyleEnum.Checkboxes) {
 

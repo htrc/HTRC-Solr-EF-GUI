@@ -8,8 +8,15 @@ var explain_search = { 'group_by_vol':       null,
 
 function add2any_html(store_search_url)
 {
+    console.log("*** store_search_url = " + store_search_url);
+    //var escaped_store_search_url = store_search_url.replace(/\"/g,'&amp;quot;');
+    var escaped_store_search_url = store_search_url.replace(/\"/g,'&quot;');
+    //var escaped_store_search_url = store_search_url.replace('"','\\"');
+    //var escaped_store_search_url = encodeURI(store_search_url);
+    console.log("*** escpd_search_url = " + escaped_store_search_url);
+    
     var data_a2a = "";
-    data_a2a += 'data-a2a-url="'+store_search_url+'"';
+    data_a2a += 'data-a2a-url="'+escaped_store_search_url+'"';
     data_a2a += ' data-a2a-title="HathiTrust Research Center (HTRC) Extracted Feature Search"';
     
     var a2a_html = "";
@@ -69,16 +76,16 @@ function show_results_explain_html(query_level_mix,store_search_url)
 
     explain_html += add2any_html(store_search_url);    
 
-    var raw_query = store_search_args.q;
+    var raw_query = '<span id="raw-q-base">' + store_search_args.q + '</span>';
     var fq_args = filter_fq_args(facet_filter.filters);
     if (fq_args.length>0) {
 	//raw_query += '<hr title="facet filters below" style="height: 5px; padding: 0px 50px 0px 50px;"/>';
 	raw_query += '<br /><span class="no-user-select">Facet filters:</span>';
-	raw_query += " AND (" + fq_args.join(" AND ") + ")";
+	raw_query += '<span id="raw-q-facets"> AND (' + fq_args.join(" AND ") + ')</span>';
     }
     if (store_search_not_ids.length>0) {
 	raw_query += '<br /><span class="no-user-select">Excluded IDs:</span>';
-	raw_query += store_search_not_ids.join(" ");
+	raw_query += '<span id="raw-q-exclude">' + store_search_not_ids.join(" ") + '</span>';
     }
     
     explain_html += '<div style="float:left;">\n';
