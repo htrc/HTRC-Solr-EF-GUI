@@ -183,8 +183,16 @@ function activate_tab_id(tab_id)
     }
 }
 
-$(document).ready(function(){
-    
+$(document).ready(function() {
+
+    var solr_col = getURLParameter("solr-col");
+    if (solr_col != null) {
+	solr_collection = solr_col;
+	solr_search_action = solr_prefix_url+solr_collection+"/select";
+	solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	$('#solr-col-name').html('<br/>(FictMeta 1055 Sample)');
+    }
+
     $('#search-form').attr("action",solr_search_action);
 
     //$('.volume-query-row').hide(); // ****
