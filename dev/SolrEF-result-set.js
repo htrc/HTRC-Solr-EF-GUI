@@ -550,11 +550,16 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#search-results-total').hide();	    
 	    
 	    $('#search-explain').html(explain_html);
+	    show_hide_solr_q();
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
 	    //$('#next-prev').hide();
 		//$('#page-bar').hide();
 	}		
+
+	// Now explain_html has been added into page, figure out the shortened URL that
+	// is needed for add2any, and add that into the marked <span> tag
+	explain_add2any_dom(store_search_url)
 
     }
     

@@ -386,7 +386,8 @@ function submit_action(event) {
 	    if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
 		doc_unit  = " page ";
 		doc_units = " pages ";
-
+		facet_filter.setFacetLevel(FacetLevelEnum.Page);
+		
 		if (arg_q.match(/volume[^_]+_txt:/)) {
 	    	    explain_search.volume_level_desc  = "[Volume: Terms]";
 		}
@@ -450,6 +451,11 @@ function submit_action(event) {
 	    }
 	    else {
 		if (arg_vq != "") {
+		    // Need to watch out for any XXXX_t fields in 'arg_vq', as these need to
+		    // be changed to volumeXXXX_txt fields when searching with page-level terms
+		    // _txt
+		    arg_vq = arg_vq.replace(/(\w+)_t:/g,"volume$1_txt:");
+		    
 		    // join the two with an AND
 		    arg_q = "(" + arg_vq + ")" + " AND " + "(" + arg_q + ")"; 
 		    

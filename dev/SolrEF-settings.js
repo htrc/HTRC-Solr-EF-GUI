@@ -12,9 +12,11 @@ var ef_download_url  = "https://solr1.ischool.illinois.edu/htrc-ef-access/get";
 
 var workset_base_url = "https://solr1.ischool.illinois.edu/dcWSfetch/";
 
-var num_found_vol_limit_str  = "100,000";
+//var num_found_vol_limit_str  = "100,000";
+var num_found_vol_limit_str  = "4,000,000";
 //var num_found_page_limit = 700000;
-var num_found_page_limit = 2500000;
+//var num_found_page_limit = 4000000;
+var num_found_page_limit = 40000000;
 var num_found_vol_limit  = num_found_vol_limit_str.replace(/,/g,"");
 
 var num_results_per_page = 15;
