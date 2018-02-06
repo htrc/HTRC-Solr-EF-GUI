@@ -468,7 +468,27 @@ $(document).ready(function() {
     }
 
     if (solr_q == null) {
+	var solr_key_q = getURLParameter("solr-key-q");
+	if (solr_key_q != null) {
+	    // ajax call to get query specified by key
 	
+	    $.ajax({
+	       type: "POST",
+	       url: ef_download_url, // change this global variable to something more sutiable???
+	       data: {
+		       'action': 'url-shortener',
+		       'key': encodeURI(solr_key_q)
+		     },
+	       dataType: "text",
+	       success: function(textData) {
+	           var text_q = textData;	    
+		   $('#tab-advanced').click();
+		   $('#advanced-q').val(text_q);
+		   $('#search-submit').click();
+	       }
+	  });
+	}
+
     $('input[name="interactive-style"]:radio').on("click",function(event) {
 	var radio_id = $(this).attr("id");
 	console.log("radio id = " + radio_id);
