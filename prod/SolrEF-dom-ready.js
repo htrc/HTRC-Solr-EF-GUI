@@ -1,6 +1,4 @@
 
-
-
 function lang_pos_toggle(event) {
 	var $this = $(this);
 	var checked_state = $this.prop("checked");
@@ -15,47 +13,6 @@ function lang_pos_toggle(event) {
 
 
 function generate_pos_langs() {
-	var pos_checkbox = [{
-		pos: "VERB",
-		label: "Verbs",
-		tooltip: "Verbs (all tenses and modes)"
-	}, {
-		pos: "NOUN",
-		label: "Nouns",
-		tooltip: "Nouns (common and proper)"
-	}, {
-		pos: "ADJ",
-		label: "Adjectives",
-		tooltip: null
-	}, {
-		pos: "ADV",
-		label: "Adverbs",
-		tooltip: null
-	}, {
-		pos: "ADP",
-		label: "Adpositions",
-		tooltip: "Adpositions (prepositions and postpositions)"
-	}, {
-		pos: "CONJ",
-		label: "Conjunctions",
-		tooltip: null
-	}, {
-		pos: "DET",
-		label: "Determiners",
-		tooltip: null
-	}, {
-		pos: "NUM",
-		label: "Numbers",
-		tooltip: "Cardinal numbers"
-	}, {
-		pos: "PRT",
-		label: "Particles",
-		tooltip: "Particles or other function words"
-	}, {
-		pos: "X",
-		label: "Other",
-		tooltip: "Other words, such as foreign words, typos, abbreviations"
-	}];
 
 	var $pos_fieldsets = $('#pos-fieldsets');
 
@@ -226,8 +183,16 @@ function activate_tab_id(tab_id)
     }
 }
 
-$(document).ready(function(){
-    
+$(document).ready(function() {
+
+    var solr_col = getURLParameter("solr-col");
+    if (solr_col != null) {
+	solr_collection = solr_col;
+	solr_search_action = solr_prefix_url+solr_collection+"/select";
+	solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	$('#solr-col-name').html('<br/>(FictMeta 1055 Sample)');
+    }
+
     $('#search-form').attr("action",solr_search_action);
 
     //$('.volume-query-row').hide(); // ****
@@ -294,7 +259,7 @@ $(document).ready(function(){
 	height: 620,
 	buttons: {
 	    "Sign In": function() {
-		$( this ).dialog( "close" );
+		$(this).dialog("close");
 	    }
 	},
 	hide: { effect: "fadeOut" },
@@ -313,10 +278,10 @@ $(document).ready(function(){
 	height: 620,
 	buttons: {
 	    "Publish": function() {
-		$( this ).dialog( "close" );
+		solr_ef_publish_workset($(this));
 	    },
 	    "Cancel": function() {
-		$( this ).dialog( "close" );
+		$(this).dialog("close");
 	    }
 	},
 	hide: { effect: "fadeOut" },
@@ -471,20 +436,157 @@ $(document).ready(function(){
     var workset_id = getURLParameter("workset-id");
     if (workset_id != null) {
 	// hide query input area
-	if ($('#tab-shared:visible').length) {
-	    $('#tab-shared').slideUp(1000, function() { load_worset_id(workset_id) } );
-	    $('#show-hide-query-tabs-turnstyle').html("+");
+	if ($('#tabs-shared:visible').length) {
+	    $('#tabs-shared').slideUp(1000, function() { load_workset_id(workset_id) } );
+	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
 	}
 	else {
 	    load_workset_id(workset_id);
 	}
     }
+
+    var solr_q = getURLParameter("solr-q");
+    if (solr_q != null) {
+	// hide query input area
+	//console.log("*** tabs shared len = " + $('#tabs-shared').length); // ****
+    	//console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
+
+	$('#droppable-targets').hide();
+	$('#select-for-shoppingcart').hide();
+	$('#sr-add-delete-wrapper').hide();
+	$('#tabs-search').hide();
+	load_solr_q(solr_q);
+	/* // ****
+	if ($('#tabs-shared:visible').length) {
+	    $('#tabs-shared').slideUp(1000, function() { load_solr_q(solr_q) } );
+	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
+	}
+	else {
+	    load_solr_q(solr_q);
+	}
+*/
+    }
+
+    if (solr_q == null) {
+	
+    $('input[name="interactive-style"]:radio').on("click",function(event) {
+	var radio_id = $(this).attr("id");
+	console.log("radio id = " + radio_id);
+	if (radio_id == "pref-drag-and-drop") {
+	    $('.drag-and-drop-style').removeClass("style-hidden");
+	    
+	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+	    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
+
+	    selectable_and_draggable_hard_reset();
+	    store_interaction_style = InteractionStyleEnum.DragAndDrop;
+	}
+	else if (radio_id == "pref-checkboxes") {
+	    $('.checkbox-style').removeClass("style-hidden");
+
+	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+	    $('.drag-and-drop-style').hide("slide", { direction: "up" }, 1000);
+
+	    make_unselectable();
+	    //selectable_and_draggable_hard_reset();
+	    //$('.drag-and-drop-style').addClass("style-hidden");
+	    store_interaction_style = InteractionStyleEnum.Checkboxes;
+	}
+	else if (radio_id == "pref-hybrid") {
+	    $('.drag-and-drop-style').removeClass("style-hidden");
+	    $('.checkbox-style').removeClass("style-hidden");
+	    
+	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+
+	    selectable_and_draggable_hard_reset();
+	    
+	    store_interaction_style = InteractionStyleEnum.Hybrid;
+	}
+	else {
+	    console.error("Error: unrecognized interaction style '" + radio_id + "'");
+	}
+    });
+	
+    $('#sr-select-all').on("click",function(event) {
+	event.preventDefault();
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    $('#search-results input.sr-input-item').prop("checked",true);
+	    update_select_all_none_buttons();
+	}
+	else {
+	    $('#search-results > div.ui-selectee').each(function() {
+		var $this = $(this);
+		$this.addClass("ui-selected");
+		make_draggable($this);
+	    });
+	}
+    });
     
-});
+    $('#sr-deselect-all').on("click",function(event) {
+	event.preventDefault();
+	selectable_and_draggable_hard_reset();
+    });
 
+    $('#sr-invert-selection').on("click",function(event) {
+	event.preventDefault();
+	if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	    var $my_checkboxes = $('#search-results input.sr-input-item');
+	    $my_checkboxes.each(function() {
+		var $this = $(this);
+		if ($this.prop("checked")) {
+		    $this.prop("checked",false);
+		}
+		else {
+		    $this.prop("checked",true);
+		}
+	    });
+	    update_select_all_none_buttons();
+	}
+	else {
+	    $('#search-results > div.ui-selectee').each(function() {
 
-$(function() {
+		var $this = $(this);	    
+		var $checkbox = $this.find('input.sr-input-item');	    
+		
+		if ($checkbox.prop("checked")) {
+		    make_undraggable($this);
+		}
+		else {
+		    $this.addClass("ui-selected");
+		    make_draggable($this);
+		}
+	    });
+	}
+
+    });
+
+    $('#sr-delete-item').on("click",function(event) {
+	event.preventDefault();
+	do_delete_drop_action();
+    });
+
+    $('#sr-add-item').on("click",function(event) {
+	event.preventDefault();
+	do_shoppingcart_drop_action();
+    });
+
+    $('#sr-goto-cart').on("click",function(event) {
+	event.preventDefault();
+	open_shoppingcart();
+    });
+    
+    $('#pref-drag-and-drop').prop("checked",true);
+    //store_interaction_style = InteractionStyleEnum.DragAndDrop; // **** 
+    store_interaction_style = InteractionStyleEnum.Hybrid; // default
+    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
+    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
+
+    } // if solr_q == null
+
+    // 
     //Facet related page setup
+    //
     
     $("#facetlist").on("click","a",function() {
      

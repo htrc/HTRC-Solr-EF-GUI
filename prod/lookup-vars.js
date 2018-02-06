@@ -1002,3 +1002,47 @@ var place_dic = {
     'pc': 'Pitcairn Island',
     'ru': 'Russia (Federation)'
 };
+
+var pos_checkbox = [{
+    pos: "VERB",
+    label: "Verbs",
+    tooltip: "Verbs (all tenses and modes)"
+}, {
+    pos: "NOUN",
+    label: "Nouns",
+    tooltip: "Nouns (common and proper)"
+}, {
+    pos: "ADJ",
+    label: "Adjectives",
+    tooltip: null
+}, {
+    pos: "ADV",
+    label: "Adverbs",
+    tooltip: null
+}, {
+    pos: "ADP",
+    label: "Adpositions",
+    tooltip: "Adpositions (prepositions and postpositions)"
+}, {
+    pos: "CONJ",
+    label: "Conjunctions",
+    tooltip: null
+}, {
+    pos: "DET",
+    label: "Determiners",
+    tooltip: null
+}, {
+    pos: "NUM",
+    label: "Numbers",
+    tooltip: "Cardinal numbers"
+}, {
+    pos: "PRT",
+    label: "Particles",
+    tooltip: "Particles or other function words"
+}, {
+    pos: "X",
+    label: "Other",
+    tooltip: "Other words, such as foreign words, typos, abbreviations"
+}];
+
+

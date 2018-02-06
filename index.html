@@ -44,7 +44,9 @@
 	<script src="prod/SolrEF-stream.js"></script>
 	<script src="prod/SolrEF-explain.js"></script>
 	<script src="prod/SolrEF-facet-filter.js"></script>
+	<script src="prod/SolrEF-shoppingcart.js"></script>
 	<script src="prod/SolrEF.js"></script>
+	<script src="prod/SolrEF-result-set.js"></script>
 	<script src="prod/SolrEF-dom-ready.js"></script>
 	
   </head>
@@ -167,7 +169,22 @@
 			  <li class="dropdown">
 			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
 			    <ul class="dropdown-menu">
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop" />
+				<label for="pref-drag-and-drop">Drag-and-drop</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-checkboxes" id="pref-checkboxes" />
+				<label for="pref-checkboxes">Check-boxes</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid"
+				       checked="checked" />
+				<label for="pref-hybrid">Hybrid</label>
+			      </li>
+			      <li><hr /></li>
 			      <li><a onclick="solr_ef_logout()">Logout</a></li>
+			      
 			      <!--
 				  <li><a href="/logout">Logout</a></li>
 				  -->
@@ -197,13 +214,15 @@
 
       <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
 
-	  
+	<!--
 	<p id="htrc-publish-body" style="color: red; font-size: 120%;">
 	  This feature of the Extracted Features Solr Search site is a placeholder.
 	  The form below is disable, as it is currently non-functional.
 	</p>
-	<div class="disabled-div">
 
+	<div class="disabled-div">
+	  -->
+	
 	<p id="htrc-publish-body">	 
 	  Publishing result set in HathiTrust Research Center
 	  Registry:
@@ -213,7 +232,7 @@
 	    <div>
 	      Workset Title:
 	    </div>
-	    <input type="text"/>
+	    <input id="publish-ws-title" type="text"/>
 	  </div>
 
 	  <div>
@@ -227,25 +246,30 @@
 	    <div>
 	      Abstract:
 	    </div>
-	    <textarea placeholder="Please enter an abstract of your workset"></textarea>
+	    <textarea id="publish-ws-abstract"
+		      placeholder="Please enter an abstract of your workset"></textarea>
 	  </div>
 
 	  <div>
 	    <div>
 	      Criteria:
 	    </div>
-	    <textarea placeholder="What was the criteria established for including items in this workset?"></textarea>
+	    <textarea id="publish-ws-criteria"
+		      placeholder="What was the criteria established for including items in this workset?"></textarea>
 	  </div>
 
 	  <div>
 	    <div>
 	      Research Motivation:
 	    </div>
-	    <textarea placeholder="What was the research motivation for forming this workset?"></textarea>
+	    <textarea id="publish-ws-motivation"
+		      placeholder="What was the research motivation for forming this workset?"></textarea>
 	  </div>
 
 	</form>
-	</div>
+      <!--
+      </div>
+      -->
       </div>
 
       
@@ -254,7 +278,10 @@
                 <img class="img-responsive" src="assets/hathi_medium.png" alt=" ">
             </div>
             <div class="col-md-10 col-sm-10 col-xs-12 col-lg-8" style="margin-left: 0;">
-                <h1 style="font-weight:bold;font-size:56px">HTRC Extracted Feature Solr Search</h1>
+              <h1 id="h1-header" style="font-weight:bold;font-size:46px">HTRC Extracted Feature<br/>
+		Solr Search
+		<span id="solr-col-name" style="font-size: 70%;"></span>
+	      </h1>
             </div>
         </div>
         <div class="row" style="padding-top : 25px; font-size : 17px; line-height : 27px;">
@@ -464,10 +491,23 @@
 
 		  <tr>
 		    <td></td>
-		    <td >
+		    <td>
 		      <button class="search-in-progress" id="search-submit" style="float: right;">Submit Query</button>
+<!--
+		      <fieldset id="tokenize-mode" style="float: right; padding-right: 10px;">
+			<span>Tokenize check:</span>
+			<input type="radio" name="tokenize-mode" id="tokenize-on" checked="checked" />
+			<label for="tokenize-on">On</label>
+			<input type="radio" name="tokenize-mode" id="tokenize-off" />
+			<label for="tokenize-off">Off</label>
+		      </fieldset>
+-->
+
+		    </td>
+		    <td>
 		    </td>
 		  </tr>
+		  
 		</table>
 
 				
@@ -524,7 +564,7 @@
 	</div>
 	<div style="position: relative;">
 	  <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
-            <h3 class="narrowexport">Export Results</h3>
+            <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
 	    <div>
 	      <a id="export-by-vol"  class="export-item" style="display: none"
 		 download="htrc-volume-export.json" target="_blank">
@@ -540,7 +580,7 @@
 	      </a>
 	      <a id="export-ef-to-registry" class="export-item" style="display: none"
 		 download>
-		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
 	      </a>
 	      
 	    </div>
@@ -559,12 +599,12 @@
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 	      </a>
 	      <a id="coverup-export-ef-to-registry" class="export-item">
-		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish Workset
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
 	      </a>	      
 	    </div>
-	  </div>
-	  
+	  </div>	  
 	</div>
+	
         <div class="narrow">
           <h3 class="narrowsearch" style="display: none">Refine Results
 	    <span id="facet-units" class="page-count"></span></h3>
@@ -575,6 +615,21 @@
       </div>
 
       <div class="main">
+
+	<div id="droppable-targets" class="drag-and-drop-style">
+	  <div id="trashcan-drop" style="display: none; float: left">
+	  </div>
+	  <div id="shoppingcart-drop-wrapper" style="display: none; float: right; position: relative">
+	    <div id="shoppingcart-drop" style="position: relative">
+	    </div>
+	    <div id="shoppingcart-label"
+		 style="position: absolute; bottom: -10px; left: 15px; font-style: italic; font-size: 90%">(0 items)</div>
+	  </div>
+	  <div style="clear:both"></div>	  
+	</div>
+
+	
+
 	<div id="search-results-total">
 	  <div style="float:left;">
 	    <span id="search-results-total-span"></span>
@@ -596,14 +651,36 @@
 	</div>
 	<div id="search-explain">
 	</div>
-	<div id="search-showing">
+	<div id="search-showing-wrapper">
+	  <hr />
+	  <div id="search-showing" style="float:left;">
+	  </div>
+	  <div id="select-for-shoppingcart" style="float:right;">
+	    <form>
+	      <button id="sr-select-all" class="sr-item-multisel">Select All</button>
+	      <button id="sr-deselect-all" class="sr-item-multisel" disabled="disabled">Deselect All</button>
+	      <button id="sr-invert-selection" class="sr-item-multisel" disabled="disabled">Invert Selection</button>
+	    </form>
+	  </div>
+	  <div style="clear:both; padding-bottom: 7px;"></div>
 	</div>
 
-      	<div id="search-results">
+      	<div id="search-results">	  
 	</div>
+	
       	<div class="search-loading-more" style="display:none;">
 	  <span class="progressbar-label">Loading more results: </span>
 	  <div id="search-lm-progressbar-bot"></div>	    
+	</div>
+
+	<div id="sr-add-delete-wrapper" class="checkbox-style">
+	  <form style="float: right; padding-bottom: 5px;">
+	    <button id="sr-delete-item" class="sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
+	    <button id="sr-add-item" class="sr-add-delete-item">Add <img src="assets/icons/shoppingcart-empty24.png" /></button>
+	    <button id="sr-goto-cart" class="sr-add-delete-item">Goto cart <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	  </form>
+	  <div style="clear:both;"></div>
+	  <hr />		  
 	</div>
 	
 	<div id="next-prev" style="display:none;">
@@ -615,7 +692,7 @@
 	    <div id="search-next" style="float: right;">
 	      <a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span></a>
 	    </div>
-	  </div>	  
+	  </div>
 	</div>
 	<div id="page-bar">	  
 	</div>
@@ -633,15 +710,18 @@
     <div class="container">
       <h4>Additional Resources</h4>
       <ul>
+	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB (docs not stored)</li>
 	<!--
 	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.1 billion pages)</a></li>
 	-->
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
+	<li><a href="solr-ef-query-api.txt">View details about searching directory using the SOLR API</a></li>
+	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
 	<li><a href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
-	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB</li>
 	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
 	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
-	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>
+	<li><a href="?solr-col=faceted-htrc-fictsample-ef20">Switch to Ted's <i>FictMeta</i> 1055 samples collection</a></li>
+	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>	
       </ul>
     </div>
 
