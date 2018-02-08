@@ -65,6 +65,25 @@ function explain_add2any_dom(store_value)
 	success: function(textData) {
 	    var key = textData;	    
 
+	    // Update browser's URL so key is stored there
+	    // https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
+	    var update_search = location.search;
+
+	    if (update_search == "") {
+		update_search = "?solr-key-q=" + key;
+	    }
+	    else if (location.search.match(/solr-key-q=/)) {
+		update_search = update_search.replace(/solr-key-q=.*?(&|$)/,"solr-key-q="+key+"$1");
+	    }
+	    else {
+		// solr-key-q not in URL, but other arguments are present
+		update_search += "&solr-key-q=" + key;
+	    }
+	    var updated_url = location.pathname + update_search + location.hash;
+
+	    window.history.pushState({key: key},"Search by Solr Key",updated_url);
+
+
 	    var retrieve_store_search_url = location.protocol + "//" + location.host + location.pathname;
 	    retrieve_store_search_url += "?solr-key-q="+key;
 	    /*
