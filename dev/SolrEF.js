@@ -776,8 +776,8 @@ function show_hide_solr_q() {
 	event.preventDefault();
 	//var raw_q = $('#show-hide-solr-q-raw').html(); // ****
 	var raw_q = $('#raw-q-base').text();
-	raw_q += $('#raw-q-facets').text();
-	raw_q += $('#raw-q-exclude').text();
+	raw_q += " " + $('#raw-q-facets').text();
+	raw_q += " " + $('#raw-q-exclude').text();
 	
 	$('#advanced-q').val(raw_q);
 	$('#show-hide-solr-q').trigger("click");

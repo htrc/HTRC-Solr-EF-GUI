@@ -559,7 +559,12 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	// Now explain_html has been added into page, figure out the shortened URL that
 	// is needed for add2any, and add that into the marked <span> tag
-	explain_add2any_dom(store_search_url)
+	var raw_q = $('#raw-q-base').text();
+	raw_q += " " + $('#raw-q-facets').text();
+	raw_q += " " + $('#raw-q-exclude').text();
+
+	explain_add2any_dom(raw_q);
+	//explain_add2any_dom(store_search_url);
 
     }
     

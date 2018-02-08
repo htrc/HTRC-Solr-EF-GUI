@@ -45,10 +45,15 @@ function add2any_html(store_search_url)
 */
 
 
-function explain_add2any_dom(store_search_url)
+//function explain_add2any_dom(store_search_url) // ****
+function explain_add2any_dom(store_value)
 {
-    var value = "https:" + store_search_url;
-    
+    var value = store_value;
+    //if (!value.match(/^https?:/)) {
+    if (value.match(/^\/\//)) {
+	value = "https:" + value;
+    }
+
     $.ajax({
 	type: "POST",
 	url: ef_download_url, // change this global variable to something more sutiable???
@@ -59,11 +64,34 @@ function explain_add2any_dom(store_search_url)
 	dataType: "text",
 	success: function(textData) {
 	    var key = textData;	    
-	    
+
+	    // Update browser's URL so key is stored there
+	    // https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
+	    var update_search = location.search;
+
+	    if (update_search == "") {
+		update_search = "?solr-key-q=" + key;
+	    }
+	    else if (location.search.match(/solr-key-q=/)) {
+		update_search = update_search.replace(/solr-key-q=.*?(&|$)/,"solr-key-q="+key+"$1");
+	    }
+	    else {
+		// solr-key-q not in URL, but other arguments are present
+		update_search += "&solr-key-q=" + key;
+	    }
+	    var updated_url = location.pathname + update_search + location.hash;
+
+	    window.history.pushState({key: key},"Search by Solr Key",updated_url);
+
+
+	    var retrieve_store_search_url = location.protocol + "//" + location.host + location.pathname;
+	    retrieve_store_search_url += "?solr-key-q="+key;
+	    /*
 	    var retrieve_store_search_url = ef_download_url
 		+ '?action=url-shortener'
 		+ '&key='+key;
 		// + '&redirect=true'; // ****
+		*/
 
 	    //var email_mess = "Generate the query directly in JSON format:\n  " + retrieve_store_search_url;
 	    var email_mess = retrieve_store_search_url;
