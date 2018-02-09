@@ -11,12 +11,17 @@
     border: 0;
 }
 
+#search-indeterminate-cancel {
+    padding-bottom: 5px;
+}
+
 .progressbar-cancel {
     position: relative;
     display: inline-block;
     float: right;
     height: 18px;
     margin-left: 0;
+    cursor: default;
 }
 
 											
