@@ -850,10 +850,10 @@ function result_set_delete_item(line_num) {
 		var seq_str = $(this).text();
 		var seq = seq_str.replace(/^seq\s+/,"");
 		// sprintf("%06d")
-		var page_str = "" + (seq-1);
+		var page_str = "" + (seq-1); // solr page numbers in ID start at 0!!
 		var pad = "000000";
 		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
-		store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad);		
+		    store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad); // solr ID
 	    });
 	}
 	else {

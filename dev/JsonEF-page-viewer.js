@@ -48,6 +48,15 @@ JsonEFPageViewer.prototype.getSeqNum = function()
     return this.store_seq_num;
 }
 
+JsonEFPageViewer.prototype.getPaddedSeqNum = function()
+{
+    // sprintf("%06d")
+    var seq_num_str = "" + this.store_seq_num;
+    var pad = "000000";
+    var seq_pad = pad.substring(0, pad.length - seq_num_str.length) + this.store_seq_num;
+    return seq_pad;
+}
+
 JsonEFPageViewer.prototype.setHTID = function(htid)
 {
     this.store_htid = htid;
@@ -435,7 +444,7 @@ $(document).ready(function() {
 	    seq_num = parseInt(seq_num);
 	    unit_type = "page";
 	}
-	
+
 	ef_page_viewer.display_view_and_download(seq_num,unit_type);
     }
 
@@ -526,11 +535,16 @@ $(document).ready(function() {
 		}
 		$vol_info.append('<span>Showing page <span id="seq-num">' + seq_num + '</span> of '
 				 + ef_page_viewer.getPageCount() + ' pages</span>');
-		
+
+		ef_page_viewer.display_ef_page_text(seq_num);
+
 		var download_ef_href = ef_download_url+'?download-id='+ef_page_viewer.getHTID();
 		$('#download-json-ef').attr('href',download_ef_href);
-		
-		ef_page_viewer.display_ef_page_text(seq_num);
+
+		download_ef_href += "-seq-" + ef_page_viewer.getPaddedSeqNum();
+		$('#download-json-ef-page').attr('href',download_ef_href);
+
+		//ef_page_viewer.display_ef_page_text(seq_num); // ****
 		
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
