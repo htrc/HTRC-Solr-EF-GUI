@@ -474,6 +474,7 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-by-page").show();
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
+			$("#export-ef-metadata").show();
 			$("#export-ef-zip").show();
 			$("#export-ef-to-registry").show();
 		    }
@@ -491,6 +492,7 @@ function show_results(jsonData,newSearch,newResultPage)
 		    if (num_found < num_found_vol_limit) {
 			$("#export-by-vol").show();
 			$("#export-by-page").hide();
+			$("#export-ef-metadata").show();
 			$("#export-ef-zip").show();
 			$("#export-ef-to-registry").show();
 

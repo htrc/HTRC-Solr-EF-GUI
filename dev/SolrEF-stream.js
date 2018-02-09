@@ -121,15 +121,18 @@ function stream_export(jsonData)
     download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
 }
 
-function stream_export_ef(jsonData)
+function stream_export_ef(jsonData,output_format,only_metadata)
 {
     var ids = stream_get_ids(jsonData);
     var ids_head = ids.length>export_ef_limit ? ids.splice(0,export_ef_limit) : ids;
     
-    
+    if (only_metadata) {
+	ids_head = ids_head.map(function(v) { return v+"-metadata" });
+    }
+
     var ids_str = ids_head.join(",");
 
-    var url = ef_download_url + '?download-ids='+ids_str;
+    var url = ef_download_url + '?action=download-ids&ids='+ids_str + "&output="+output_format;;
     //console.log("*** download url = " + url); // ****
 
     $('.export-item').css("cursor","auto");
@@ -142,7 +145,17 @@ function stream_export_ef(jsonData)
 	htrc_alert(alert_mess);
     }
 
-    //$('#srt-ef-export').attr('href',url); // **** is this still used
+    //$('#srt-ef-export').attr('href',url); // **** is this still used???
     $('#export-ef-zip').attr('href',url);
     window.location.href = url;    
+}
+
+function stream_export_ef_zip(jsonData)
+{
+    stream_export_ef(jsonData,"zip");
+}
+
+function stream_export_ef_metadata_json(jsonData)
+{
+    stream_export_ef(jsonData,"json",true); // only_metadata = true
 }
