@@ -444,11 +444,12 @@
 				ellipseTpl: "...",
 				toolbar: false,
 				hash: false,
-				pageSizeList: [5, 10, 15, 20, 40, 80]
+			    pageSizeList: [5, 10, 15, 20, 40, 80, 100]
 			}, settings);
 			this.target = $(this.settings.target);
 			this.container = $('<div id="' + this.id + '" class="ui-paging-container"/>');
-			this.target.append(this.container);
+			//this.target.append(this.container); // ****
+		        this.target.html(this.container);
 			this.render(this.settings);
 			this.format();
 			this.bindEvent();
