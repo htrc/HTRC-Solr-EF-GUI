@@ -27,7 +27,9 @@ var num_found=0;
 var arg_indent = "on";
 var arg_wt     = "json";
 
-var SolrEFSettings = {
+var export_ef_limit = 1000;
     
+
+var SolrEFSettings = {
     iprogressbar_delay_threshold: 5000 // 5 secs
 }

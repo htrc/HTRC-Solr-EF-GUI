@@ -123,8 +123,6 @@ function stream_export(jsonData)
 
 function stream_export_ef(jsonData)
 {
-    var export_ef_limit = 5;
-    
     var ids = stream_get_ids(jsonData);
     var ids_head = ids.length>export_ef_limit ? ids.splice(0,export_ef_limit) : ids;
     
