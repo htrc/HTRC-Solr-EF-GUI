@@ -575,15 +575,15 @@
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
 	      </a>
 	      <div id="export-ef-metadata" class="export-item" style="display: none">
-		<span class="ui-icon ui-icon-circle-arrow-s" ></span>
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
 		   Volume Metadata:
-		   <a class="export-item" style="padding-left: 20px;"
+		   <a id="export-ef-metadata-json" class="export-item" style="display: inline;"
 		      download="htrc-metadata-export.json" target="_blank">
-		     <span class="ui-icon ui-icon-circle-arrow-s"></span>JSON
+		     JSON
 		   </a>
-		   <a class="export-item" style="padding-left: 20px;"
+		   <a id="export-ef-metadata-tsv" class="export-item" style="display: inline;"
 		      download="htrc-metadata-export.tsv" target="_blank">
-		     <span class="ui-icon ui-icon-circle-arrow-s"></span>TSV
+		     TSV
 		   </a>
 	      </div>
 	      <a id="export-ef-zip" class="export-item" style="display: none"
@@ -607,12 +607,17 @@
 	      <a id="coverup-export-by-page" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
 	      </a>
-	      <div>
+	      <div id="coverup-export-ef-metadata" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span>
-		Volume Metadata:
-		<a id="coverup-export-ef-metadata" class="export-item">
-		  JSON
-		</a>
+		   Volume Metadata:
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.json" target="_blank">
+		     JSON
+		   </a>
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.tsv" target="_blank">
+		     TSV
+		   </a>
 	      </div>
 	      <a id="coverup-export-ef-zip" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes

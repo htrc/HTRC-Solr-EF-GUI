@@ -393,7 +393,7 @@ $(document).ready(function() {
 	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
     });
 
-    $('#export-ef-metadata').click(function (event) {
+    $('#export-ef-metadata-json').click(function (event) {
 	event.preventDefault();	
 	$('.export-item').css("cursor","wait");
 	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
@@ -401,6 +401,17 @@ $(document).ready(function() {
 	}
 	else {
 	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_json); // doRollup=false
+	}
+    });
+
+    $('#export-ef-metadata-tsv').click(function (event) {
+	event.preventDefault();	
+	$('.export-item').css("cursor","wait");
+	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_tsv); // doRollup=true
+	}
+	else {
+	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_tsv); // doRollup=false
 	}
     });
 
