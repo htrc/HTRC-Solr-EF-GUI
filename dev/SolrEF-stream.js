@@ -152,13 +152,14 @@ function stream_export_ef(jsonData,output_format,only_metadata)
     var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
     href_id += output_format;
 
-    //$('#export-ef-zip').attr('href',url);
-    //window.location.href = url;    
 
     $(href_id).attr('href',url);
-    $(href_id).off("click");
-    $(href_id).trigger("click");
+    // Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
+    //   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
+    //$(href_id).trigger("click");
+    $(href_id)[0].click();
 
+    //window.location.href = url;// **** (more basic alternative)
 }
 
 function stream_export_ef_zip(jsonData)
