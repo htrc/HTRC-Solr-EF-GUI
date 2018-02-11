@@ -197,7 +197,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	download_text += " (complete volume)";
     }
     var download_span = '<div title="'+id+'" style="color: #924a0b;">';
-    download_span +=      '<a download="'+id+'.json" href="'+ef_download_url+'?download-id='+id+'">';
+    download_span +=      '<a download="'+id+'.json" href="'+ef_download_url+'?action=download-ids&id='+id+'&output=json">';
     download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
     download_span +=         download_text;
     download_span +=      '</a>';

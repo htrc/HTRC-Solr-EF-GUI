@@ -149,8 +149,16 @@ function stream_export_ef(jsonData,output_format,only_metadata)
     }
 
     //$('#srt-ef-export').attr('href',url); // **** is this still used???
-    $('#export-ef-zip').attr('href',url);
-    window.location.href = url;    
+    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
+    href_id += output_format;
+
+    //$('#export-ef-zip').attr('href',url);
+    //window.location.href = url;    
+
+    $(href_id).attr('href',url);
+    $(href_id).off("click");
+    $(href_id).trigger("click");
+
 }
 
 function stream_export_ef_zip(jsonData)

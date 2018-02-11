@@ -394,24 +394,31 @@ $(document).ready(function() {
     });
 
     $('#export-ef-metadata-json').click(function (event) {
-	event.preventDefault();	
-	$('.export-item').css("cursor","wait");
-	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
-	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_json); // doRollup=true
-	}
-	else {
-	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_json); // doRollup=false
+	if (!$('#export-ef-metadata-json').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_json); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_json); // doRollup=false
+	    }
 	}
     });
 
     $('#export-ef-metadata-tsv').click(function (event) {
-	event.preventDefault();	
-	$('.export-item').css("cursor","wait");
-	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
-	    ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_tsv); // doRollup=true
-	}
-	else {
-	    ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_tsv); // doRollup=false
+	if (!$('#export-ef-metadata-tsv').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_tsv); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_tsv); // doRollup=false
+	    }
 	}
     });
 
