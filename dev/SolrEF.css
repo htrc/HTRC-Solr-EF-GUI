@@ -140,6 +140,24 @@ div.oddevenline:nth-child(even):hover {
 }
 */
 
+
+div.tightoddevenline:nth-child(odd) {
+    background-color: #eee;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div.tightoddevenline:nth-child(even) {
+    background-color: #fff;    
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
 button.htrc-delete {
     margin-left: 3px;
 }

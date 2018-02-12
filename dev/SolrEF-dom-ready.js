@@ -407,6 +407,21 @@ $(document).ready(function() {
 	}
     });
 
+    $('#export-ef-metadata-csv').click(function (event) {
+	if (!$('#export-ef-metadata-csv').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_csv); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_csv); // doRollup=false
+	    }
+	}
+    });
+
     $('#export-ef-metadata-tsv').click(function (event) {
 	if (!$('#export-ef-metadata-tsv').attr('href')) {
 	    // lazy evaluation, workout out what href should be, and then trigger click once more

@@ -172,6 +172,11 @@ function stream_export_ef_metadata_json(jsonData)
     stream_export_ef(jsonData,"json",true); // only_metadata = true
 }
 
+function stream_export_ef_metadata_csv(jsonData)
+{
+    stream_export_ef(jsonData,"csv",true); // only_metadata = true
+}
+
 function stream_export_ef_metadata_tsv(jsonData)
 {
     stream_export_ef(jsonData,"tsv",true); // only_metadata = true

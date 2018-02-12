@@ -39,6 +39,8 @@ function ajax_solr_text_search(newSearch,newResultPage)
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
+    // Clear out any export-item download links generated previously
+    $('a.export-item').attr('href',null);
 
     store_search_xhr = new window.XMLHttpRequest();
     

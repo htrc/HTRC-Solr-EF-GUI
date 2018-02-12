@@ -564,41 +564,143 @@
  
           </ul>
 	</div>
+
 	<div style="position: relative;">
 	  <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
             <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
 	    <div>
-	      <a id="export-by-vol"  class="export-item" style="display: none"
-		 download="htrc-volume-export.json" target="_blank">
+	      <div class="tightoddevenline">
+		<a id="export-by-vol"  class="export-item" style="display: none"
+		   download="htrc-volume-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="export-by-page" class="export-item" style="display: none"
+		   download="htrc-page-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+		</a>
+	      </div>
+	      <div id="export-ef-metadata" class="export-item tightoddevenline" style="display: none">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		Volume Metadata:
+		<div style="margin-top: -2px; padding-bottom: 2px;">
+		  <a id="export-ef-metadata-json" class="export-item" style="display: inline; padding-left: 20px;"
+		     download="htrc-metadata-export.json">
+		    JSON
+		  </a>, 
+		  <a id="export-ef-metadata-csv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.csv">
+		    CSV
+		  </a>,
+		  <a id="export-ef-metadata-tsv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.tsv">
+		    TSV
+		  </a>
+		</div>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="export-ef-zip" class="export-item" style="display: none"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> JSON Extracted Features (ZIP) 
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="export-ef-to-registry" class="export-item" style="display: none"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		</a>
+	      </div>
+	    </div>
+          </div>
+
+	  <div id="coverup-export-by"
+	       style="position: relative; z-index: 1; visibility: hidden;">
+            <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
+	    <div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-by-vol"  class="export-item"
+		   download="htrc-volume-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-by-page" class="export-item"
+		   download="htrc-page-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+		</a>
+	      </div>
+	      <div id="coverup-export-ef-metadata" class="export-item tightoddevenline">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		Volume Metadata:
+		<div style="margin-top: -2px; padding-bottom: 2px;">
+		  <a id="coverup-export-ef-metadata-json" class="export-item" style="display: inline; padding-left: 20px;"
+		     download="htrc-metadata-export.json">
+		    JSON
+		  </a>, 
+		  <a id="coverup-export-ef-metadata-csv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.csv">
+		    CSV
+		  </a>,
+		  <a id="coverup-export-ef-metadata-tsv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.tsv">
+		    TSV
+		  </a>
+		</div>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-ef-zip" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> JSON Extracted Features (ZIP) 
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-ef-to-registry" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		</a>
+	      </div>
+	    </div>
+
+<!--
+
+
+	    <h3 class="narrowexport">Export Results</h3>
+	    <div>
+	      <a id="coverup-export-by-vol"  class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
 	      </a>
-	      <a id="export-by-page" class="export-item" style="display: none"
-		 download="htrc-page-export.json" target="_blank">
+	      <a id="coverup-export-by-page" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
 	      </a>
-	      <div id="export-ef-metadata" class="export-item" style="display: none">
+	      <div id="coverup-export-ef-metadata" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span>
 		   Volume Metadata:
-		   <a id="export-ef-metadata-json" class="export-item" style="display: inline;"
-		      download="htrc-metadata-export.json">
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.json" target="_blank">
 		     json
-		   </a>
-		   <a id="export-ef-metadata-tsv" class="export-item" style="display: inline;"
-		      download="htrc-metadata-export.tsv">
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.csv">
+		     csv
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.tsv" target="_blank">
 		     tsv
 		   </a>
 	      </div>
-	      <a id="export-ef-zip" class="export-item" style="display: none"
-		 download>
-		<span class="ui-icon ui-icon-circle-arrow-s"></span> JSON Extracted Features (zip) 
+	      <a id="coverup-export-ef-zip" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 	      </a>
-	      <a id="export-ef-to-registry" class="export-item" style="display: none"
-		 download>
+	      <a id="coverup-export-ef-to-registry" class="export-item">
 		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
-	      </a>
-	      
+	      </a>	      
 	    </div>
-          </div>
+-->
+	  </div>	  
+
+
+<!--
 	  <div id="coverup-export-by"
 	       style="position: relative; z-index: 1; visibility: hidden;">
 	    <h3 class="narrowexport">Export Results</h3>
@@ -614,11 +716,15 @@
 		   Volume Metadata:
 		   <a class="export-item" style="display: inline;"
 		      download="htrc-metadata-export.json" target="_blank">
-		     JSON
-		   </a>
+		     json
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.csv">
+		     csv
+		   </a>,
 		   <a class="export-item" style="display: inline;"
 		      download="htrc-metadata-export.tsv" target="_blank">
-		     TSV
+		     tsv
 		   </a>
 	      </div>
 	      <a id="coverup-export-ef-zip" class="export-item">
@@ -629,8 +735,9 @@
 	      </a>	      
 	    </div>
 	  </div>	  
+	-->
 	</div>
-	
+
         <div class="narrow">
           <h3 class="narrowsearch" style="display: none">Refine Results
 	    <span id="facet-units" class="page-count"></span></h3>
