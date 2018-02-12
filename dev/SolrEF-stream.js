@@ -5,10 +5,7 @@ function get_solr_stream_search_clause(arg_q)
     //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
     //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200")
 
-    //console.error("******* get_solr_stream_search_clause()");
     var escaped_arg_q = arg_q.replace(/,/g,"\\,").replace(/\'/g,"\\'");
-    //var escaped_arg_q = arg_q.replace(/,/g,"\\,").replace(/'/g,"\\'");
-
     //var escaped_arg_q = escape_solr_query(arg_q);
     
     var vol_count_args = {
@@ -135,31 +132,48 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 
     var ids_str = ids_head.join(",");
 
-    var url = ef_download_url + '?action=download-ids&ids='+ids_str + "&output="+output_format;;
-    //console.log("*** download url = " + url); // ****
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'url-shortener',
+	    'value': encodeURI(ids_str)
+	},
+	dataType: "text",
+	success: function(textData) {
+	    var key = textData;	    
 
-    $('.export-item').css("cursor","auto");
+	    //var url = ef_download_url + '?action=download-ids&ids='+ids_str + "&output="+output_format;;
+	    var url = ef_download_url + '?action=download-ids&key='+key + "&output="+output_format;;
 
-    if (ids.length>export_ef_limit) {
-	var alert_mess = "Exporting Extracted Features is currently in development.<br />";
-	alert_mess += "Currently only the first "
-	    + export_ef_limit + " JSON files in the search list are exported";
-	
-	htrc_alert(alert_mess);
-    }
+	    if (solref_verbosity >= 2) {
+		console.log("SolrEF-Stream::stream_export_ef(): download url = " + url);
+	    }
+	    
+	    $('.export-item').css("cursor","auto");
+	    
+	    if (ids.length>export_ef_limit) {
+		var alert_mess = "Exporting Extracted Features is currently in development.<br />";
+		alert_mess += "Currently only the first "
+		    + export_ef_limit + " JSON files in the search list are exported";
+		
+		htrc_alert(alert_mess);
+	    }
+	    
+	    //$('#srt-ef-export').attr('href',url); // **** is this still used???
+	    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
+	    href_id += output_format;
 
-    //$('#srt-ef-export').attr('href',url); // **** is this still used???
-    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
-    href_id += output_format;
 
+	    $(href_id).attr('href',url);
+	    // Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
+	    //   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
+	    //$(href_id).trigger("click");
+	    $(href_id)[0].click();
 
-    $(href_id).attr('href',url);
-    // Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
-    //   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
-    //$(href_id).trigger("click");
-    $(href_id)[0].click();
-
-    //window.location.href = url;// **** (more basic alternative)
+	    //window.location.href = url;// **** (more basic alternative)
+	    }
+	});
 }
 
 function stream_export_ef_zip(jsonData)
