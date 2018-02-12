@@ -929,6 +929,8 @@ function result_set_delete_item(line_num) {
 	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
 	$('#search-explain').html(explain_html);
 	show_hide_solr_q(); 
+	// Clear out any export-item download links generated previously
+	$('a.export-item').attr('href',null);
 
     });
 }

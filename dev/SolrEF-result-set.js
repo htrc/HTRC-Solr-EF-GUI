@@ -470,13 +470,13 @@ function show_results(jsonData,newSearch,newResultPage)
 			$('#srt-vol-count').html("");
 			$('#srt-vol-count-span').show();
 			
-			$("#export-by-vol").show();
-			$("#export-by-page").show();
+			$("#export-by-vol-div").show();
+			$("#export-by-page-div").show();
 			
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
-			$("#export-ef-metadata").show();
-			$("#export-ef-zip").show();
-			$("#export-ef-to-registry").show();
+			$("#export-ef-metadata-div").show();
+			$("#export-ef-zip-div").show();
+			$("#export-ef-to-registry-div").show();
 		    }
 		    else {
 			$('#srt-vol-count-computing').hide();
@@ -490,11 +490,11 @@ function show_results(jsonData,newSearch,newResultPage)
 		else {
 		    // volume level
 		    if (num_found < num_found_vol_limit) {
-			$("#export-by-vol").show();
-			$("#export-by-page").hide();
-			$("#export-ef-metadata").show();
-			$("#export-ef-zip").show();
-			$("#export-ef-to-registry").show();
+			$("#export-by-vol-div").show();
+			$("#export-by-page-div").hide();
+			$("#export-ef-metadata-div").show();
+			$("#export-ef-zip-div").show();
+			$("#export-ef-to-registry-div").show();
 
 			//$("#srt-ef-export").show(); // ***** does this even exist anymore?
 			$("#export-by").fadeIn(1500);
@@ -516,7 +516,9 @@ function show_results(jsonData,newSearch,newResultPage)
 	    
 		$('#search-explain').html(explain_html);
 		show_hide_solr_q();
-		
+		// Clear out any export-item download links generated previously
+		$('a.export-item').attr('href',null);
+
 		//$('#next-prev').show();
 		//$('#page-bar').show();
 			
@@ -553,6 +555,8 @@ function show_results(jsonData,newSearch,newResultPage)
 	    
 	    $('#search-explain').html(explain_html);
 	    show_hide_solr_q();
+	    // Clear out any export-item download links generated previously
+	    $('a.export-item').attr('href',null);
 	    $('#search-showing').html("<p>No pages matched your query</p>");
 	    
 	    //$('#next-prev').hide();
