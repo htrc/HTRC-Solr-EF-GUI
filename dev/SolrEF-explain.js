@@ -44,6 +44,17 @@ function add2any_html(store_search_url)
 }
 */
 
+/*
+window.onpopstate = function(e) {
+    console.log("**** OnPopState() called");
+    
+    if ((e.state) && (e.state.key)) {
+	console.log("*** Browser back operation on key injected state");
+	// go back two steps
+	window.history.go(-1);
+    }
+};
+*/
 
 //function explain_add2any_dom(store_search_url) // ****
 function explain_add2any_dom(store_value)
@@ -81,7 +92,7 @@ function explain_add2any_dom(store_value)
 	    }
 	    var updated_url = location.pathname + update_search + location.hash;
 
-	    window.history.pushState({key: key},"Search by Solr Key",updated_url);
+	    window.history.replaceState({key: key},"Search by Query Key "+key,updated_url);
 
 
 	    var retrieve_store_search_url = location.protocol + "//" + location.host + location.pathname;
