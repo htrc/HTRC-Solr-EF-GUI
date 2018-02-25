@@ -28,7 +28,10 @@ var num_found=0;
 var arg_indent = "on";
 var arg_wt     = "json";
 
-var export_ef_limit = 1000;
+//var export_ef_limit = 1000;
+// The following used to be 5000, but this triggered 'Form too large: 210024 > 200000' in Jetty
+// Limit can be increased, but seems to be a Jetty specific way
+var export_ef_limit = 4000; 
     
 
 var SolrEFSettings = {
