@@ -65,6 +65,8 @@ function explain_add2any_dom(store_value)
 	value = "https:" + value;
     }
 
+    if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+
     $.ajax({
 	type: "POST",
 	url: ef_download_url, // change this global variable to something more sutiable???
@@ -150,7 +152,7 @@ function explain_add2any_dom(store_value)
 	}
     });
 	
-	
+    }	
 }
 
 function filter_fq_args(filters)

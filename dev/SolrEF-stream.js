@@ -4,7 +4,6 @@ function get_solr_stream_search_clause(arg_q)
 {
     //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
     //	       indent="on",wt="json",sort="id asc",fl="volumeid_s,id",start="0",rows="200")
-
     var escaped_arg_q = arg_q.replace(/,/g,"\\,").replace(/\'/g,"\\'");
     //var escaped_arg_q = escape_solr_query(arg_q);
     
@@ -129,6 +128,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
     if (only_metadata) {
 	ids_head = ids_head.map(function(v) { return v+"-metadata" });
     }
+
 
     var ids_str = ids_head.join(",");
 

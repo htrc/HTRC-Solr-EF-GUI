@@ -422,8 +422,11 @@ function show_results(jsonData,newSearch,newResultPage)
 	if (newSearch) {
 	    // The very beginning of the search results
 	    iprogressbar.cancel();
-	    
+
+	    retrieve_shoppingcart();
+
 	    $('#export-by').hide(); // hide until volume count is in
+
 	}
 	
 	facet_filter.display(jsonData.facet_counts)
@@ -809,6 +812,8 @@ function show_results(jsonData,newSearch,newResultPage)
 	    ajax_solr_text_search(false,false); // newSearch=false, newResultPage=false
 	}
 	else {
+	    // if not done set_shoppingcart_icons() do it now // ******
+	    update_shoppingcart_count();
 	    progressbar_top.progressbar( "value",0);
 	    progressbar_bot.progressbar( "value",0);
 	    $('.search-loading-more').hide("slide", { direction: "up" }, 1000);
@@ -817,6 +822,10 @@ function show_results(jsonData,newSearch,newResultPage)
     else {
 	// reached end of results before hitting num_results_per_page
 	// => hide progressbars
+
+	// if not done set_shoppingcart_icons() do it now // ******
+	update_shoppingcart_count();
+
 	progressbar_top.progressbar( "value",0);
 	progressbar_bot.progressbar( "value",0);
 	$('.search-loading-more').hide("slide", { direction: "up" }, 1000);
@@ -896,8 +905,5 @@ function show_results(jsonData,newSearch,newResultPage)
 	dataType: "json",
 	success: add_titles_and_authors_solr,
 	error: ajax_error
-    });
-    
-    
-    
+    });    
 }

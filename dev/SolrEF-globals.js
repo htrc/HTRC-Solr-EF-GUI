@@ -7,7 +7,15 @@ var QueryTabEnum = {
     Advanced: 3
 };
 
+var QueryDisplayModeEnum = {
+    GeneralQuery: 0,
+    ShoppingCart: 1
+};
+
+
 var solref_verbosity = 1;
+
+var store_query_display_mode = null;
 
 var store_query_tab_selected = null;
 var store_interaction_style = null;

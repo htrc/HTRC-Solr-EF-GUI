@@ -488,6 +488,21 @@ $(document).ready(function() {
 	}
     }
 
+    var shoppingcart_q = getURLParameter("shoppingcart-q");
+    if (shoppingcart_q != null) {
+	store_query_display_mode = QueryDisplayModeEnum.ShoppingCart;
+
+	// hide query input area
+	$('#droppable-targets').hide();
+	$('#select-for-shoppingcart').hide();
+	$('#sr-add-delete-wrapper').hide();
+	$('#tabs-search').hide();
+	load_solr_q(shoppingcart_q);
+    }
+    else {
+	store_query_display_mode = QueryDisplayModeEnum.GeneralQuery;
+    }
+
     var solr_q = getURLParameter("solr-q");
     if (solr_q != null) {
 	// hide query input area
@@ -510,25 +525,30 @@ $(document).ready(function() {
 */
     }
 
-    if (solr_q == null) {
+    if ((shoppingcart_q == null) && (solr_q == null)) { // **** also need to check workset_q ??/
+	// see if there is a solr-key-q
 	var solr_key_q = getURLParameter("solr-key-q");
 	if (solr_key_q != null) {
 	    // ajax call to get query specified by key
 	
 	    $.ajax({
-	       type: "POST",
-	       url: ef_download_url, // change this global variable to something more sutiable???
-	       data: {
-		       'action': 'url-shortener',
-		       'key': encodeURI(solr_key_q)
-		     },
-	       dataType: "text",
-	       success: function(textData) {
-	           var text_q = textData;	    
-		   $('#tab-advanced').click();
-		   $('#advanced-q').val(text_q);
-		   $('#search-submit').click();
-	       }
+		type: "POST",
+		url: ef_download_url, // change this global variable to something more sutiable???
+		data: {
+		    'action': 'url-shortener',
+		    'key': encodeURI(solr_key_q)
+		},
+		dataType: "text",
+		success: function(textData) {
+	            var text_q = textData;	    
+		    $('#tab-advanced').click();
+		    $('#advanced-q').val(text_q);
+		    $('#search-submit').click();
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+		    console.error("Failed to retrieve expanded form of key: '" + solr_key_q + "'");
+		    ajax_error(jqXHR, textStatus, errorThrown)
+		}		
 	  });
 	}
 
