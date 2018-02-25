@@ -9,7 +9,7 @@ var InteractionStyleEnum = {
 // add_titles_ht() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
 
-function add_titles_ht(json_data)
+function add_titles_ht_DEPRECATED(json_data)
 {
     var itemURLs = [];
     
@@ -44,7 +44,7 @@ function add_titles_ht(json_data)
 
 // The following works with the JSON data returned by a Solr search
 
-function add_titles_solr(jsonData) {
+function add_titles_and_authors_solr(jsonData) {
     var itemURLs = [];
     //console.log("jsonData = " + jsonData);
     
@@ -56,12 +56,18 @@ function add_titles_solr(jsonData) {
 	var htid = doc_val.id;
 	
 	var title = doc_val.title_s;
+	var title_tidied = title.replace(/\.\s*$/,""); // remove any trailing fullstop, in anticipation of "by ..." author(s)
+	var title_and_authors = title_tidied;
 	
 	var details = [];
+	details.push("Title: " + title_tidied);
+
+	
 	if (doc_val.names_ss) {
 	    var names = doc_val.names_ss.map(strtrim).join(", ");
 	    if (!names.match(/^\s*$/)) {
 		details.push("Author(s): " + names);
+		title_and_authors += " by " + names;
 	    }
 	}
 	if (doc_val.genre_ss) {
@@ -86,12 +92,12 @@ function add_titles_solr(jsonData) {
 	}
 
 	var details_str = details.map(strtrim).join(";\n");	    
-	var $tooltip_title = $('<span />').attr('title',details_str).html(title);
+	var $tooltip_tanda = $('<span />').attr('title',details_str).html(title_and_authors);
 	
 	$("[name='" + htid + "']").each(function () {
-	    var $tooltip_title_clone = $tooltip_title.clone();
-	    $tooltip_title_clone.tooltip();
-	    $(this).html($tooltip_title_clone)
+	    var $tooltip_tanda_clone = $tooltip_tanda.clone();
+	    $tooltip_tanda_clone.tooltip();
+	    $(this).html($tooltip_tanda_clone)
 	});
 	console.log(htid + ", title = " + title);
 
@@ -142,7 +148,7 @@ function add_titles_solr(jsonData) {
 
 function show_volume_count(jsonData)
 {
-    $('#srt-vol-count').css("cursor","auto");
+    $('.exp-vol-count').css("cursor","auto");
     
     var response = jsonData["result-set"];
     var docs = response.docs;
@@ -154,10 +160,17 @@ function show_volume_count(jsonData)
 	.attr('id','srt-vol-count-num')
 	.data('raw-num',num_docs)
 	.append(num_docs.toLocaleString());
+    var $num_docs_span_sidebar = $('<span>')
+	.attr('id','exp-vol-count-num-sidebar')
+	.data('raw-num',num_docs)
+	.append(num_docs.toLocaleString());
 
+    
     var vol_label = (num_docs==1) ? " volume" : " volumes";
-    $('#srt-vol-count-computing').hide();
+    $('.exp-vol-count-computing').hide();
     $('#srt-vol-count').html(" in ").append($num_docs_span).append(vol_label);
+    //$('#exp-vol-count-sidebar').html(" in ").append($num_docs_span_sidebar).append(vol_label); // ******
+    $('#exp-vol-count-sidebar').hide();
     $('#srt-vol-count').show();
     
     if (num_docs < num_found_vol_limit) {
@@ -168,9 +181,9 @@ function show_volume_count(jsonData)
     else {
 	$('#export-by').hide("slide", { direction: "up" }, 1000);
 
-	$('#srt-vol-count').append(' <span style="color:#BB0000;">'
-				   +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
-				   + num_found_vol_limit.toLocaleString() + ']</span>');
+	$('#exp-vol-count-sidebar').append(' <span style="color:#BB0000;">'
+				   +'Exporting disabled for this search. Volume count exceeds limit of '
+				   + num_found_vol_limit.toLocaleString() + '</span>');
     }
 
 }
@@ -264,11 +277,11 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 		html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 		
 		if (page > 0) {
-		    html_item += id + ': ';
+		    html_item += id + ' page sequence: ';
 
 		    //var head_seqs_label = "head-seqs-"+line_num; // ****
 		    //seq_item += '<span id="'+head_seq_label'"></span>';
-		    seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+		    seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">' + seqnum + '</a> ';
 		}
 		else {
 		    // skip linking to the 'phony' page 0
@@ -288,7 +301,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 		    seq_item += ' <a><span id="'+sid_label+'">Show more pages ...</span></a><div id="'+sid_block+'" style="display: none;">';
 		    show_more = true;
 		}
-		seq_item += ' <nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a> ';
+		seq_item += ' <nobr><a class="seq" target="_blank" href="' + babel_url + '">' + seqnum + '</a> ';
 	    }
 
 	    if ((merge_with_previous) && ((prev_seq_count + pi + 1) == 3)) {
@@ -325,11 +338,11 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	    html_item += '<span style="cursor: progress;">Loading ...</span></span><br />';
 	    
 	    if (page > 0) {
-		html_item += '<span>'+id + ':</span> ';
-		seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">seq&nbsp;' + seqnum + '</a>';
+		html_item += '<span>'+id + ' page sequence:</span> ';
+		seq_item += '<nobr><a class="seq" target="_blank" href="' + babel_url + '">' + seqnum + '</a>';
 	    } else {
 		// dealing with 'phony' page => show 'all pages'
-		html_item += '<span>'+id + ':</span> ';
+		html_item += '<span>'+id + ' page sequence:</span> ';
 		seq_item += '<nobr><a class="seqall" target="_blank" href="' + babel_url + '">all pages</a>';
 	    }
 
@@ -466,9 +479,9 @@ function show_results(jsonData,newSearch,newResultPage)
 
 		if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
-			$('#srt-vol-count-computing').show();
-			$('#srt-vol-count').html("");
-			$('#srt-vol-count-span').show();
+			$('.exp-vol-count-computing').show();
+			$('.exp-vol-count').html("");
+			$('.exp-vol-count-span').show();
 			
 			$("#export-by-vol-div").show();
 			$("#export-by-page-div").show();
@@ -479,12 +492,13 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-ef-to-registry-div").show();
 		    }
 		    else {
-			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">'
-						 +'[Note: Exporting disabled for this search. Page count exceeds limit of '
-						 + num_found_page_limit.toLocaleString() + ']</span>');
-			$('#srt-vol-count').show();
-			$('#srt-vol-count-span').show();
+			$('.exp-vol-count-computing').hide();
+			$('#exp-vol-count-sidebar').html('<span style="color:#BB0000;">'
+						 +'Exporting disabled for this search. Page count exceeds limit of '
+						 + num_found_page_limit.toLocaleString() + '</span>');
+			$('#exp-vol-count-sidebar').show();
+			$('#srt-vol-count').hide();
+			$('.exp-vol-count-span').show();
 		    }
 		}		
 		else {
@@ -496,21 +510,21 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-ef-zip-div").show();
 			$("#export-ef-to-registry-div").show();
 
-			//$("#srt-ef-export").show(); // ***** does this even exist anymore?
 			$("#export-by").fadeIn(1500);
 			
 			// restore vol-count display back to default text, ready for next vol count computation
-			$('#srt-vol-count-computing').show();
-			$('#srt-vol-count').hide();
-			$('#srt-vol-count-span').hide();
+			$('.exp-vol-count-computing').show();
+			$('.exp-vol-count').hide();
+			$('.exp-vol-count-span').hide();
 		    }
 		    else {
-			$('#srt-vol-count-computing').hide();
-			$('#srt-vol-count').html('<span style="color:#BB0000;">'
-						 +'[Note: Exporting disabled for this search. Volume count exceeds limit of '
-						 + num_found_vol_limit.toLocaleString() + ']</span>');
-			$('#srt-vol-count').show();
-			$('#srt-vol-count-span').show();
+			$('.exp-vol-count-computing').hide();
+			$('#exp-vol-count-sidebar').html('<span style="color:#BB0000;">'
+						 +'Exporting disabled for this search. Volume count exceeds limit of '
+						 + num_found_vol_limit.toLocaleString() + '</span>');
+			$('#exp-vol-count-sidebar').show();
+			$('#srt-vol-count').hide();
+			$('.exp-vol-count-span').show();
 		    }		
 		}
 	    
@@ -548,9 +562,9 @@ function show_results(jsonData,newSearch,newResultPage)
 	else {
 	    // num_docs == 0
 	    // restore back to default text, ready for next vol count computation
-	    $('#srt-vol-count-computing').show();
-	    $('#srt-vol-count').hide();
-	    $('#srt-vol-count-span').hide();
+	    $('.exp-vol-count-computing').show();
+	    $('.exp-vol-count').hide();
+	    $('.exp-vol-count-span').hide();
 	    $('#search-results-total').hide();	    
 	    
 	    $('#search-explain').html(explain_html);
@@ -880,7 +894,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	url: solr_search_action,
 	data: url_args,
 	dataType: "json",
-	success: add_titles_solr,
+	success: add_titles_and_authors_solr,
 	error: ajax_error
     });
     

@@ -28,7 +28,7 @@ function generate_pos_langs() {
 		var legend = "";
 		legend += '    <legend style="margin-bottom: 5px; padding-top: 15px;">\n';
 		legend += '      <input type="checkbox" name="' + l + '-enabled" id="' + l + '-enabled" ' + opt_enabled + '/>\n';
-		legend += '      <span ' + opt_title + '>' + lang_full + ':</span>\n';
+		legend += '      <span ' + opt_title + '>' + lang_full + '</span>\n';
 		legend += '    </legend>\n';
 
 
@@ -562,14 +562,15 @@ $(document).ready(function() {
 	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
 	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
 
-	    selectable_and_draggable_hard_reset();
-	    
+	    selectable_and_draggable_hard_reset();	    
 	    store_interaction_style = InteractionStyleEnum.Hybrid;
 	}
 	else {
 	    console.error("Error: unrecognized interaction style '" + radio_id + "'");
 	}
     });
+    $('#pref-hybrid').trigger("click"); // ******
+	
 	
     $('#sr-select-all').on("click",function(event) {
 	event.preventDefault();
@@ -624,27 +625,34 @@ $(document).ready(function() {
 
     });
 
-    $('#sr-delete-item').on("click",function(event) {
+	/*
+    $('#trashcan-drop').tooltip();
+	*/
+	
+    $('.adi-delete').on("click",function(event) {
 	event.preventDefault();
 	do_delete_drop_action();
     });
 
-    $('#sr-add-item').on("click",function(event) {
+    $('.adi-add').on("click",function(event) {
 	event.preventDefault();
 	do_shoppingcart_drop_action();
     });
 
-    $('#sr-goto-cart').on("click",function(event) {
+    $('.adi-goto').on("click",function(event) {
 	event.preventDefault();
 	open_shoppingcart();
     });
-    
-    $('#pref-drag-and-drop').prop("checked",true);
+
+/*
+    //$('#pref-drag-and-drop').prop("checked",true);
+    $('#pref-hybrid').prop("checked",true);
     //store_interaction_style = InteractionStyleEnum.DragAndDrop; // **** 
     store_interaction_style = InteractionStyleEnum.Hybrid; // default
     $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
-    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
-
+    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+*/
+	
     } // if solr_q == null
 
     // 

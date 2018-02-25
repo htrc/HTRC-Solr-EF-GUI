@@ -305,7 +305,7 @@ a.export-item {
     display: block;
 }
 
-#srt-vol-count-computing {
+.exp-vol-count-computing {
     cursor: wait;
 }
 
@@ -353,21 +353,21 @@ a.export-item {
 
 .sr-add-delete-item {
     font-weight: bold;
-    padding: 5px;    
-    margin: 5px;
-    width: 120px;
+    padding: 3px;    
+    margin: 3px;
+    width: 100px;
     min-height: 38px;
 }
 
-#sr-delete-item {
+.adi-delete {
     background-color: rgb(230,0,0);
 }
 
-#sr-add-item {
+.adi-add {
     background-color: #fbd850;	
 }
 
-#sr-goto-cart {
+.adi-goto {
     background-color: rgb(0,230,0);
 }
 

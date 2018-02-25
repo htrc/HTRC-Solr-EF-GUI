@@ -1,5 +1,6 @@
 "use strict";
 
+/*
 var QueryTabEnum = {
     Page: 0,
     Volume: 1,
@@ -16,7 +17,7 @@ var store_search_xhr = null;
 var group_by_vol_checked = 0;
 var doc_unit  = "";
 var doc_units = "";
-
+*/
 
 
 function ajax_solr_text_search(newSearch,newResultPage)
@@ -794,7 +795,9 @@ function show_hide_solr_q() {
 function show_hide_more_seqs(line_num) {
     var sid_label = "#show-hide-more-seqs-"+line_num;
     var sid_block = sid_label + "-block";
-    
+
+    $(sid_label).addClass("show-hide-seqs");
+	
     $(sid_label).click(function (event) {
 	event.preventDefault();
 	if ($(sid_block+':visible').length) {

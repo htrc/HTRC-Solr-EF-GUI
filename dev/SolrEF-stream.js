@@ -141,9 +141,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	},
 	dataType: "text",
 	success: function(textData) {
-	    var key = textData;	    
-
-	    //var url = ef_download_url + '?action=download-ids&ids='+ids_str + "&output="+output_format;;
+	    var key = textData;
 	    var url = ef_download_url + '?action=download-ids&key='+key + "&output="+output_format;;
 
 	    if (solref_verbosity >= 2) {
@@ -160,7 +158,6 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 		htrc_alert(alert_mess);
 	    }
 	    
-	    //$('#srt-ef-export').attr('href',url); // **** is this still used???
 	    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
 	    href_id += output_format;
 

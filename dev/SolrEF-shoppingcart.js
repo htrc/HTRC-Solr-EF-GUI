@@ -5,8 +5,8 @@ var store_shoppingcart_ids_hash = {};
 
 var dragging_started = false;
 
-var shoppingcart_debug = false;
-//var shoppingcart_debug = true;
+//var shoppingcart_debug = false;
+var shoppingcart_debug = true;
 
 function update_select_all_none_buttons()
 {
@@ -69,6 +69,14 @@ function make_draggable($elem)
 		console.log("draggable start()");
 	    }
 	    dragging_started = true;
+/*
+	    var trashcan_title = $('#trashcan-drop').attr('title')
+	    if (trashcan_title != "") {
+		$('#trashcan-drop').attr('disabled-title',trashcan_title);
+		$('#trashcan-drop').tooltip('disable');
+		$('#trashcan-drop').removeAttr('title');
+	    }
+*/
 	},
 		
 	//drag: function(ev, ui) { // ****
@@ -80,6 +88,14 @@ function make_draggable($elem)
 		console.log("draggable stop()");
 	    }
 	    dragging_started = false;
+/*
+	    var trashcan_title = $('#trashcan-drop').attr('disabled-title')
+	    if (trashcan_title != "") {
+		$('#trashcan-drop').attr('title',trashcan_title)
+		$('#trashcan-drop').removeAttr('disabled-title')
+		$('#trashcan-drop').tooltip('enable');
+	    }
+*/
 	},	
     });
 
@@ -201,7 +217,7 @@ function make_clickable()
 	    return;
 	}
 
-	if (ev.target.nodeName == "A") {
+	if ((ev.target.nodeName == "A") || ($(ev.target).hasClass("show-hide-seqs"))) {
 	    // user has clicked on a hyperlink
 	    // => return to allow it to do its own thing (follow the link)
 	    //    and prevent element becoming select
@@ -454,6 +470,15 @@ function selectable_and_draggable_hard_reset()
 
     $('#sr-deselect-all').prop('disabled',true);
     $('#sr-invert-selection').prop('disabled',true);
+/*
+    var trashcan_title = $('#trashcan-drop').attr('disabled-title')
+    if (trashcan_title != "") {
+	$('#trashcan-drop').attr('title',trashcan_title)
+	$('#trashcan-drop').removeAttr('disabled-title')
+	$('#trashcan-drop').tooltip();
+	$('#trashcan-drop').tooltip('enable');
+    }
+*/
 }
 
 $(document).ready(function() {
