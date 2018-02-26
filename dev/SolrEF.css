@@ -337,7 +337,8 @@ a.export-item {
     width: 60px; height: 60px;
     padding: 1.5em;
     margin: 10px; 
-    background: #ffffff url("../assets/icons/shoppingcart-empty60.png") no-repeat right top;
+/*    background: #ffffff url("../assets/icons/shoppingcart-empty60.png") no-repeat right top;*/
+    background: #ffffff url("../assets/icons/basket-empty60.png") no-repeat right top;
 }
 
 #shoppingcart-drop.ui-state-highlight {
@@ -348,7 +349,8 @@ a.export-item {
     width: 30px; height: 24px;
     padding: 0px;
     margin: 0px; 
-    background: rgba(255,255,255,0.0) url("../assets/icons/shoppingcart-empty24.png") no-repeat right top;
+/*    background: rgba(255,255,255,0.0) url("../assets/icons/shoppingcart-empty24.png") no-repeat right top; */
+    background: rgba(255,255,255,0.0) url("../assets/icons/basket-empty24.png") no-repeat right top;
 }
 
 .sr-add-delete-item {
