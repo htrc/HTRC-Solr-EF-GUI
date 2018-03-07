@@ -5,8 +5,8 @@ var store_shoppingcart_ids_hash = {};
 
 var dragging_started = false;
 
-//var shoppingcart_debug = false;
-var shoppingcart_debug = true;
+var shoppingcart_debug = false;
+//var shoppingcart_debug = true;
 
 function retrieve_shoppingcart()
 {
@@ -504,20 +504,6 @@ function open_shoppingcart()
 	// => Browser has blocked it
 	alert('New window/tab request blocked by browser.\nPlease enable popups for this website');
     }
-}
-
-function load_solr_q(solr_q)
-{
-    initialize_new_solr_search();
-
-    doc_unit  = " volume ";
-    doc_units = " volumes ";
-
-    
-    var arg_start = 0;
-    var group_by_vol_checked = false;
-
-    initiate_new_solr_search(solr_q,arg_start,group_by_vol_checked);
 }
 
 function selectable_and_draggable_hard_reset()
