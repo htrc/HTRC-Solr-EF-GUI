@@ -1,25 +1,5 @@
 "use strict";
 
-/*
-var QueryTabEnum = {
-    Page: 0,
-    Volume: 1,
-    Combined: 2,
-    Advanced: 3
-};
-
-
-var store_query_tab_selected = null;
-var store_interaction_style = null;
-
-var store_search_xhr = null;
-
-var group_by_vol_checked = 0;
-var doc_unit  = "";
-var doc_units = "";
-*/
-
-
 function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
@@ -129,40 +109,50 @@ var store_search_not_ids = null;
 var store_query_level_mix = null;
 
 
+// **** Should the following not be moved to globals, or lookup-vars?
+var volume_metadata_fields_common =
+    ["accessProfile_t", "genre_t", "imprint_t", "isbn_t", "issn_t",
+     "issuance_t", "language_t", "lccn_t", "names_t", "oclc_t",
+     "pubPlace_t", "pubDate_t", "rightsAttributes_t", "title_t", "typeOfResource_t"
+    ];
+
 function expand_vfield(q_term, all_vfields, query_level) {
     var vfields = [];
-    // **** Should the following not be reconciled (and be the same as) the global version ???
-    var metadata_fields = ["accessProfile_t", "genre_t", "imprint_t", "isbn_t", "issn_t",
-			   "issuance_t", "language_t", "lccn_t", "names_t", "oclc_t",
-			   "pubPlace_t", "pubDate_t", "rightsAttributes_t", "title_t", "typeOfResource_t"
-			  ];
     
-	if (all_vfields) {
-		for (var fi = 0; fi < metadata_fields.length; fi++) {
-		        var vfield = metadata_fields[fi];
-		        if (query_level == FacetLevelEnum.Page) {
-		            vfield = "volume"+ vfield + "xt";
-			}
-			vfields.push(vfield + ":" + q_term);
-		}
-	} else {
-		if (q_term.match(/:/)) {
-			vfields.push(q_term);
-		} else {
-		        // make searching by title the default
-		        var vfield = "title_t";
-		        if (query_level == FacetLevelEnum.Page) {
-		            vfield = "volume"+ vfield + "xt";
-			}
-
-			vfields.push(vfield + ":" + q_term);
-		}
+    if (all_vfields) {
+	if (q_term.match(/:/)) {
+	    vfields.push(q_term);
 	}
+	else {
+	    for (var fi = 0; fi < volume_metadata_fields_common.length; fi++) {
+	    
+		var vfield = volume_metadata_fields_common[fi];
+		if (query_level == FacetLevelEnum.Page) {
+		    vfield = "volume"+ vfield + "xt";
+		}
+		vfields.push(vfield + ":" + q_term);
+	    }
+	}
+    }
+    else {
+	if (q_term.match(/:/)) {
+	    vfields.push(q_term);
+	}
+	else {
+	    // make searching by title the default
+	    var vfield = "title_t";
+	    if (query_level == FacetLevelEnum.Page) {
+		vfield = "volume"+ vfield + "xt";
+	    }
+	    
+	    vfields.push(vfield + ":" + q_term);
+	}
+    }
 
 
-	var vfields_str = vfields.join(" OR ");
-
-	return vfields_str;
+    var vfields_str = vfields.join(" OR ");
+    
+    return vfields_str;
 }
 
 function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
@@ -193,6 +183,7 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
     
     for (var i = 0; i < query_terms_len; i++) {
 	var term = query_terms[i];
+	
 	if (term.match(/^and$/i)) {
 	    prev_bool = term.toUpperCase();
 	    and_count++;
@@ -351,6 +342,21 @@ function initialize_new_solr_search()
 		       'volume_level_terms': 'metadata-term', 'volume_level_desc': null,
 		       'page_level_terms': 'POS-term OR ...', 'page_level_desc': null };
 
+}
+
+
+function load_solr_q(solr_q)
+{
+    initialize_new_solr_search();
+
+    doc_unit  = " volume ";
+    doc_units = " volumes ";
+
+    
+    var arg_start = 0;
+    var group_by_vol_checked = false;
+
+    initiate_new_solr_search(solr_q,arg_start,group_by_vol_checked);
 }
 
 function submit_action(event) {
@@ -850,7 +856,7 @@ function result_set_delete_item(line_num) {
 
 	if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 	    
-	    var $a_seqs = $wrapper_line_div.find('a[class="seq"]');
+	    var $a_seqs = $wrapper_line_div.find('a[class^="seq"]');
 	    $a_seqs.each(function() {
 		var seq_str = $(this).text();
 		var seq = seq_str.replace(/^seq\s+/,"");
@@ -858,7 +864,7 @@ function result_set_delete_item(line_num) {
 		var page_str = "" + (seq-1); // solr page numbers in ID start at 0!!
 		var pad = "000000";
 		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
-		    store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad); // solr ID
+		store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad); // solr ID
 	    });
 	}
 	else {
