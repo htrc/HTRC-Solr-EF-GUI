@@ -119,10 +119,15 @@ function add_titles_and_authors_solr(jsonData) {
 		if (seq_str == "all pages") {
 		    href += "&seq=1";
 		}
-		else if (seq_str.match(/^seq\s+/)) {
+	        else if (seq_str.match(/^seq\s+/)) {
+		    // The following was written for when page sequence numbers were in the form 'seq <n>'
 		    var seq_num = seq_str.replace(/^seq\s+/,"");
 		    href += "&seq=" + seq_num;
 		}
+	        else {
+		    var seq_num = seq_str.replace(/^\s+/,"");
+		    href += "&seq=" + seq_num;
+		 }
 		href += "&rights=" + rights;
 		href += "&title=" + title;
 		
