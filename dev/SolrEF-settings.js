@@ -12,7 +12,9 @@ var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 var ef_download_url  = "https://solr1.ischool.illinois.edu/htrc-ef-access/get";
 //var ef_download_url  = "http://localhost:8080/htrc-access-ef/get";
 
-var workset_base_url = "https://solr1.ischool.illinois.edu/dcWSfetch/";
+var workset_base_url    = "https://solr1.ischool.illinois.edu/dcWSfetch/";
+var publish_workset_url = "https://worksets.hathitrust.org/fetchCollection";
+    
 
 //var num_found_vol_limit_str  = "100,000";
 var num_found_vol_limit_str  = "4,000,000";
