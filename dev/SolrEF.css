@@ -357,20 +357,20 @@ a.export-item {
     font-weight: bold;
     padding: 3px;    
     margin: 3px;
-    width: 100px;
+    width: 115px;
     min-height: 38px;
 }
 
 .adi-delete {
-    background-color: rgb(230,0,0);
+    background-color: rgb(230,80,80); /* used to be: 230,0,0 */
 }
 
 .adi-add {
-    background-color: #fbd850;	
+    background-color: rgb(251,216,120); /* used to be #fbd850 => 251,216,80 */
 }
 
 .adi-goto {
-    background-color: rgb(0,230,0);
+    background-color: rgb(100,230,100); /* used to be: 0,230,0 */
 }
 
 #search-results .ui-selecting {

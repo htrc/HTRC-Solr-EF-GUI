@@ -27,6 +27,7 @@
         <script src="assets/bootstrap.js"></script>
         <script src="assets/bowser.js"></script>
 	<script src="assets/download.min.js"></script>
+	<script src="assets/lucene-query-parser.js"></script>
 	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
         <script type="text/javascript" src="assets/htrcwarnings.js"></script>
         <script type="text/javascript" src="assets/uploadws.js"></script>
@@ -48,6 +49,7 @@
 	<script src="dev/SolrEF-explain.js"></script>
 	<script src="dev/SolrEF-facet-filter.js"></script>
 	<script src="dev/SolrEF-shoppingcart.js"></script>
+	<script src="dev/SolrEF-query-breakdown.js"></script>
 	<script src="dev/SolrEF.js"></script>
 	<script src="dev/SolrEF-result-set.js"></script>
 	<script src="dev/SolrEF-dom-ready.js"></script>
@@ -775,10 +777,10 @@
 	  </div>
 
 	  <div id="tr-add-delete-wrapper" class="checkbox-style">
-	    <form style="float: right; padding-bottom: 5px;">
+	    <form style="float: right; padding-top: 20px;">
 	      <button id="tr-delete-item" class="adi-delete sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
-	      <button id="tr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/shoppingcart-empty24.png" /></button>
-	      <button id="tr-goto-cart"   class="adi-goto   sr-add-delete-item">Goto cart <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	      <button id="tr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/basket-empty24.png" /></button>
+	      <button id="tr-goto-cart"   class="adi-goto   sr-add-delete-item">View basket<span class="ui-icon ui-icon-arrowthick-1-e"/></button>
 	    </form>
 	    <!--
 	    <div style="clear:both;"></div>
@@ -838,8 +840,8 @@
 	<div id="sr-add-delete-wrapper" class="checkbox-style">
 	  <form style="float: right; padding-bottom: 5px;">
 	    <button id="sr-delete-item" class="adi-delete sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
-	    <button id="sr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/shoppingcart-empty24.png" /></button>
-	    <button id="sr-goto-cart"   class="adi-goto   sr-add-delete-item">Goto cart <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	    <button id="sr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/basket-empty24.png" /></button>
+	    <button id="sr-goto-cart"   class="adi-goto   sr-add-delete-item">View basket <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
 	  </form>
 	  <div style="clear:both;"></div>
 	  <hr />		  
