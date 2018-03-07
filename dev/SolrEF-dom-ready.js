@@ -447,7 +447,7 @@ $(document).ready(function() {
 		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_zip); // doRollup=true
 	    }
 	    else {
-		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_zp); // doRollup=false
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_zip); // doRollup=false
 	    }
 	}
     });
@@ -506,26 +506,14 @@ $(document).ready(function() {
     var solr_q = getURLParameter("solr-q");
     if (solr_q != null) {
 	// hide query input area
-	//console.log("*** tabs shared len = " + $('#tabs-shared').length); // ****
-    	//console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
-
 	$('#droppable-targets').hide();
 	$('#select-for-shoppingcart').hide();
 	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
 	load_solr_q(solr_q);
-	/* // ****
-	if ($('#tabs-shared:visible').length) {
-	    $('#tabs-shared').slideUp(1000, function() { load_solr_q(solr_q) } );
-	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
-	}
-	else {
-	    load_solr_q(solr_q);
-	}
-*/
     }
 
-    if ((shoppingcart_q == null) && (solr_q == null)) { // **** also need to check workset_q ??/
+    if ((shoppingcart_q == null) && (solr_q == null)) { // **** also need to check workset_id ??/
 	// see if there is a solr-key-q
 	var solr_key_q = getURLParameter("solr-key-q");
 	if (solr_key_q != null) {
@@ -540,10 +528,10 @@ $(document).ready(function() {
 		},
 		dataType: "text",
 		success: function(textData) {
-	            var text_q = textData;	    
-		    $('#tab-advanced').click();
-		    $('#advanced-q').val(text_q);
+		    var text_q = textData;
+		    select_optimal_query_tab(text_q);
 		    $('#search-submit').click();
+
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 		    console.error("Failed to retrieve expanded form of key: '" + solr_key_q + "'");
@@ -554,7 +542,6 @@ $(document).ready(function() {
 
     $('input[name="interactive-style"]:radio').on("click",function(event) {
 	var radio_id = $(this).attr("id");
-	console.log("radio id = " + radio_id);
 	if (radio_id == "pref-drag-and-drop") {
 	    $('.drag-and-drop-style').removeClass("style-hidden");
 	    
