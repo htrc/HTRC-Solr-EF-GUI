@@ -148,8 +148,6 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
     
     console.log("*** source data = " + JSON.stringify(source_data));
     
-    var publish_workset_url = "https://worksets.hathitrust.org/fetchCollection";
-    
     var url_args = {
 	source_data: JSON.stringify(source_data),
 	//source_url: source_url,
