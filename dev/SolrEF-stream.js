@@ -81,7 +81,7 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
     //console.log("***## data str = " + data_str);
     
     $.ajax({
-	type: "GET",
+	type: "POST",
 	url: solr_stream_action,
 	data: data_str,
 	dataType: "json",
