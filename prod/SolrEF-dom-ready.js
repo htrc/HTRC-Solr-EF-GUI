@@ -28,7 +28,7 @@ function generate_pos_langs() {
 		var legend = "";
 		legend += '    <legend style="margin-bottom: 5px; padding-top: 15px;">\n';
 		legend += '      <input type="checkbox" name="' + l + '-enabled" id="' + l + '-enabled" ' + opt_enabled + '/>\n';
-		legend += '      <span ' + opt_title + '>' + lang_full + ':</span>\n';
+		legend += '      <span ' + opt_title + '>' + lang_full + '</span>\n';
 		legend += '    </legend>\n';
 
 
@@ -393,6 +393,49 @@ $(document).ready(function() {
 	ajax_solr_stream_volume_count(store_search_args.q,false,stream_export); // doRollup=false
     });
 
+    $('#export-ef-metadata-json').click(function (event) {
+	if (!$('#export-ef-metadata-json').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_json); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_json); // doRollup=false
+	    }
+	}
+    });
+
+    $('#export-ef-metadata-csv').click(function (event) {
+	if (!$('#export-ef-metadata-csv').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_csv); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_csv); // doRollup=false
+	    }
+	}
+    });
+
+    $('#export-ef-metadata-tsv').click(function (event) {
+	if (!$('#export-ef-metadata-tsv').attr('href')) {
+	    // lazy evaluation, workout out what href should be, and then trigger click once more
+
+	    event.preventDefault();	
+	    $('.export-item').css("cursor","wait");
+	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_metadata_tsv); // doRollup=true
+	    }
+	    else {
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_metadata_tsv); // doRollup=false
+	    }
+	}
+    });
 
     $('#export-ef-zip').click(function (event) {
 	//console.log("**** ef export link clicked: href = " + $('#export-ef-zip').attr('href'));
@@ -401,10 +444,10 @@ $(document).ready(function() {
 	    event.preventDefault();
 	    $('.export-item').css("cursor","wait");
 	    if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
-		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef); // doRollup=true
+		ajax_solr_stream_volume_count(store_search_args.q,true,stream_export_ef_zip); // doRollup=true
 	    }
 	    else {
-		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef); // doRollup=false
+		ajax_solr_stream_volume_count(store_search_args.q,false,stream_export_ef_zip); // doRollup=false
 	    }
 	}
     });
@@ -445,33 +488,60 @@ $(document).ready(function() {
 	}
     }
 
+    var shoppingcart_q = getURLParameter("shoppingcart-q");
+    if (shoppingcart_q != null) {
+	store_query_display_mode = QueryDisplayModeEnum.ShoppingCart;
+
+	// hide query input area
+	$('#droppable-targets').hide();
+	$('#select-for-shoppingcart').hide();
+	$('#sr-add-delete-wrapper').hide();
+	$('#tabs-search').hide();
+	load_solr_q(shoppingcart_q);
+    }
+    else {
+	store_query_display_mode = QueryDisplayModeEnum.GeneralQuery;
+    }
+
     var solr_q = getURLParameter("solr-q");
     if (solr_q != null) {
 	// hide query input area
-	//console.log("*** tabs shared len = " + $('#tabs-shared').length); // ****
-    	//console.log("*** tabs shared visible len = " + $('#tabs-shared:visible').length);
-
 	$('#droppable-targets').hide();
 	$('#select-for-shoppingcart').hide();
 	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
 	load_solr_q(solr_q);
-	/* // ****
-	if ($('#tabs-shared:visible').length) {
-	    $('#tabs-shared').slideUp(1000, function() { load_solr_q(solr_q) } );
-	    $('#show-hide-query-tabs-turnstyle').html('<span class="ui-icon ui-icon-triangle-1-e"></span>');
-	}
-	else {
-	    load_solr_q(solr_q);
-	}
-*/
     }
 
-    if (solr_q == null) {
+    if ((shoppingcart_q == null) && (solr_q == null)) { // **** also need to check workset_id ??/
+	// see if there is a solr-key-q
+	var solr_key_q = getURLParameter("solr-key-q");
+	if (solr_key_q != null) {
+	    // ajax call to get query specified by key
 	
+	    $.ajax({
+		type: "POST",
+		url: ef_download_url, // change this global variable to something more sutiable???
+		data: {
+		    'action': 'url-shortener',
+		    'key': encodeURI(solr_key_q)
+		},
+		dataType: "text",
+		success: function(textData) {
+		    var text_q = textData;
+		    select_optimal_query_tab(text_q);
+		    $('#search-submit').click();
+
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+		    console.error("Failed to retrieve expanded form of key: '" + solr_key_q + "'");
+		    ajax_error(jqXHR, textStatus, errorThrown)
+		}		
+	  });
+	}
+
     $('input[name="interactive-style"]:radio').on("click",function(event) {
 	var radio_id = $(this).attr("id");
-	console.log("radio id = " + radio_id);
 	if (radio_id == "pref-drag-and-drop") {
 	    $('.drag-and-drop-style').removeClass("style-hidden");
 	    
@@ -499,14 +569,15 @@ $(document).ready(function() {
 	    $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
 	    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
 
-	    selectable_and_draggable_hard_reset();
-	    
+	    selectable_and_draggable_hard_reset();	    
 	    store_interaction_style = InteractionStyleEnum.Hybrid;
 	}
 	else {
 	    console.error("Error: unrecognized interaction style '" + radio_id + "'");
 	}
     });
+    $('#pref-hybrid').trigger("click"); // ******
+	
 	
     $('#sr-select-all').on("click",function(event) {
 	event.preventDefault();
@@ -561,27 +632,34 @@ $(document).ready(function() {
 
     });
 
-    $('#sr-delete-item').on("click",function(event) {
+	/*
+    $('#trashcan-drop').tooltip();
+	*/
+	
+    $('.adi-delete').on("click",function(event) {
 	event.preventDefault();
 	do_delete_drop_action();
     });
 
-    $('#sr-add-item').on("click",function(event) {
+    $('.adi-add').on("click",function(event) {
 	event.preventDefault();
 	do_shoppingcart_drop_action();
     });
 
-    $('#sr-goto-cart').on("click",function(event) {
+    $('.adi-goto').on("click",function(event) {
 	event.preventDefault();
 	open_shoppingcart();
     });
-    
-    $('#pref-drag-and-drop').prop("checked",true);
+
+/*
+    //$('#pref-drag-and-drop').prop("checked",true);
+    $('#pref-hybrid').prop("checked",true);
     //store_interaction_style = InteractionStyleEnum.DragAndDrop; // **** 
     store_interaction_style = InteractionStyleEnum.Hybrid; // default
     $('.drag-and-drop-style').show("slide", { direction: "up" }, 1000);
-    $('.checkbox-style').hide("slide", { direction: "up" }, 1000);
-
+    $('.checkbox-style').show("slide", { direction: "up" }, 1000);
+*/
+	
     } // if solr_q == null
 
     // 

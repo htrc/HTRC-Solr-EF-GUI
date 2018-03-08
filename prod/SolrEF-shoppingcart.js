@@ -8,6 +8,39 @@ var dragging_started = false;
 var shoppingcart_debug = false;
 //var shoppingcart_debug = true;
 
+function retrieve_shoppingcart()
+{
+    // Fire off Ajax call to Retrieve shopping cart 
+    var shoppingcart_key = getShoppingcartId();
+
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'shoppingcart',
+	    'mode': 'get',
+	    'key': shoppingcart_key
+	},
+	dataType: "text",
+	success: function(textData) {
+	    console.log("Retrieved shopping cart '" + shoppingcart_key + "': " + textData);
+	    if (textData != "") {
+		var cart = JSON.parse(textData);
+		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ******
+		update_shoppingcart_count();
+	    }
+	    //console.log("Shopping cart: " + add_shoppingcart_ids.length + "item(s) successfully added");
+
+	    // if search results finished, set_shoppingcart_icons(); // ******
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+}
+
+
 function update_select_all_none_buttons()
 {
     var num_selected_items;
@@ -69,6 +102,14 @@ function make_draggable($elem)
 		console.log("draggable start()");
 	    }
 	    dragging_started = true;
+/*
+	    var trashcan_title = $('#trashcan-drop').attr('title')
+	    if (trashcan_title != "") {
+		$('#trashcan-drop').attr('disabled-title',trashcan_title);
+		$('#trashcan-drop').tooltip('disable');
+		$('#trashcan-drop').removeAttr('title');
+	    }
+*/
 	},
 		
 	//drag: function(ev, ui) { // ****
@@ -80,6 +121,14 @@ function make_draggable($elem)
 		console.log("draggable stop()");
 	    }
 	    dragging_started = false;
+/*
+	    var trashcan_title = $('#trashcan-drop').attr('disabled-title')
+	    if (trashcan_title != "") {
+		$('#trashcan-drop').attr('title',trashcan_title)
+		$('#trashcan-drop').removeAttr('disabled-title')
+		$('#trashcan-drop').tooltip('enable');
+	    }
+*/
 	},	
     });
 
@@ -201,7 +250,7 @@ function make_clickable()
 	    return;
 	}
 
-	if (ev.target.nodeName == "A") {
+	if ((ev.target.nodeName == "A") || ($(ev.target).hasClass("show-hide-seqs"))) {
 	    // user has clicked on a hyperlink
 	    // => return to allow it to do its own thing (follow the link)
 	    //    and prevent element becoming select
@@ -312,39 +361,9 @@ function do_delete_drop_action()
     selectable_and_draggable_hard_reset();
 }
 
-function do_shoppingcart_drop_action()
+function update_shoppingcart_count()
 {
-    var $my_selected_items = $("#search-results .ui-draggable");
-    if (shoppingcart_debug) {
-	console.log("*** XSession ID = " + getXSessionId());
-    }
-
-    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
-	var $my_checkboxes = $('#search-results input.sr-input-item:checked');
-
-	$my_checkboxes.each(function() {
-	    var item_id = $(this).parent().parent().find('span[name]').attr("name");
-	    store_shoppingcart_ids.push(item_id);
-	    store_shoppingcart_ids_hash[item_id] = item_id;
-	});
-
-    }
-    else {
-	$my_selected_items.each(function() {
-	    var $this = $(this);
-	    
-	    var item_id = $this.find('span[name]').attr("name");
-	    store_shoppingcart_ids.push(item_id);
-	    store_shoppingcart_ids_hash[item_id] = item_id;
-	    
-	    // Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
-	    var $close_button = $this.find(".htrc-delete");
-	    
-	    convert_close_to_shoppingcart_action($close_button);
-	    
-	    make_undraggable($this);
-	});
-    }
+    console.log("**** update_shoppingcart_count()");
     
     var shoppingcart_len = store_shoppingcart_ids.length;
     if (shoppingcart_len == 1) {
@@ -360,6 +379,71 @@ function do_shoppingcart_drop_action()
 	    $('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
 	}
     }
+}
+
+function do_shoppingcart_drop_action()
+{
+    var $my_selected_items = $("#search-results .ui-draggable");
+    var shoppingcart_key = getShoppingcartId();
+
+    console.log("*** Shopping cart key = " + shoppingcart_key);
+	
+    var add_shoppingcart_ids = [];
+
+    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
+	var $my_checkboxes = $('#search-results input.sr-input-item:checked');
+
+	$my_checkboxes.each(function() {
+	    var item_id = $(this).parent().parent().find('span[name]').attr("name");
+	    store_shoppingcart_ids.push(item_id);
+	    store_shoppingcart_ids_hash[item_id] = item_id;
+	    add_shoppingcart_ids.push(item_id);
+	});
+
+    }
+    else {
+	$my_selected_items.each(function() {
+	    var $this = $(this);
+	    
+	    var item_id = $this.find('span[name]').attr("name");
+	    store_shoppingcart_ids.push(item_id);
+	    store_shoppingcart_ids_hash[item_id] = item_id;
+	    add_shoppingcart_ids.push(item_id);
+
+	    // Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
+	    var $close_button = $this.find(".htrc-delete");
+	    
+	    convert_close_to_shoppingcart_action($close_button);
+	    
+	    make_undraggable($this);
+	});
+    }
+
+    //console.log("**** add the followig items to the shopping cart" + add_shoppingcart_ids.join(","));
+
+
+    // Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'shoppingcart',
+	    'mode': 'add-ids',
+	    'key': shoppingcart_key,
+	    'ids': add_shoppingcart_ids.join(",")
+	},
+	dataType: "text",
+	success: function(textData) {
+		console.log("Saving Shopping:" + textData);
+		console.log("Shopping cart: " + add_shoppingcart_ids.length + " item(s) successfully added");
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+
+    update_shoppingcart_count();
     
     selectable_and_draggable_hard_reset();
 }
@@ -410,7 +494,7 @@ function open_shoppingcart()
     var ids_escaped = store_shoppingcart_ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});	
     var ids_or_str = ids_escaped.join(" OR ");	
     
-    var load_shoppingcart_url = window.location.pathname + "?solr-q=" + ids_or_str;
+    var load_shoppingcart_url = window.location.pathname + "?shoppingcart-q=" + ids_or_str;
     var win = window.open(load_shoppingcart_url, '_blank');
     if (win) {
 	// => Browser has allowed it to be opened
@@ -420,20 +504,6 @@ function open_shoppingcart()
 	// => Browser has blocked it
 	alert('New window/tab request blocked by browser.\nPlease enable popups for this website');
     }
-}
-
-function load_solr_q(solr_q)
-{
-    initialize_new_solr_search();
-
-    doc_unit  = " volume ";
-    doc_units = " volumes ";
-
-    
-    var arg_start = 0;
-    var group_by_vol_checked = false;
-
-    initiate_new_solr_search(solr_q,arg_start,group_by_vol_checked);
 }
 
 function selectable_and_draggable_hard_reset()
@@ -454,6 +524,15 @@ function selectable_and_draggable_hard_reset()
 
     $('#sr-deselect-all').prop('disabled',true);
     $('#sr-invert-selection').prop('disabled',true);
+/*
+    var trashcan_title = $('#trashcan-drop').attr('disabled-title')
+    if (trashcan_title != "") {
+	$('#trashcan-drop').attr('title',trashcan_title)
+	$('#trashcan-drop').removeAttr('disabled-title')
+	$('#trashcan-drop').tooltip();
+	$('#trashcan-drop').tooltip('enable');
+    }
+*/
 }
 
 $(document).ready(function() {

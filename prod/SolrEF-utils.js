@@ -1,6 +1,7 @@
 // Utils functions
 
-String.prototype.capitalize = function() {
+String.prototype.capitalize = function()
+{
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
@@ -25,18 +26,62 @@ function getURLParameter(sParam)
     return null;
 }
 
-function getXSessionId()
+// From: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+function uuidv4()
 {
-    var xsId = document.cookie.match(/XSESSIONID=[^;]+/);
-
-    if (xsId != null) {
-	if (xsId instanceof Array)
-	    xsId = xsId[0].substring(11);
-	else
-	    xsId = xsId.substring(11);
-    }
-    return xsId;
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
+
+function getShoppingcartId()
+{
+    // First look to see if there is a logged in username that can be used
+    var shoppingcart_id = null;
+
+    if (typeof(Storage) !== "undefined") {
+
+	shoppingcart_id = sessionStorage.getItem("shoppingcart-id");
+	var username = sessionStorage.getItem("htrc-username");
+
+	if ((shoppingcart_id != null) && (username != null) && (!shoppingcart_id.match(/^shoppingcart-username-/))) {
+	    // Trigger upgrade  // ******
+	    shoppingcart_id = shoppingcart_id.replace(/^shoppingcart-([^-]+)-(.*)$/,"shoppingcart-username-"+username);
+	}
+	
+	if (shoppingcart_id == null) {
+	    // See if it can be based around a logged in username
+	    if (username != null) {
+		shoppingcart_id = "shoppingcart-username-"+username;
+	    }
+	}
+    }
+
+    if (shoppingcart_id == null) {
+	var xsid = document.cookie.match(/XSESSIONID=[^;]+/);
+
+	if (xsid != null) {
+	    if (xsid instanceof Array) {
+		xsid = xsid[0].substring(11);
+	    }
+	    else {
+		xsid = xsid.substring(11);
+	    }
+	    shoppingcart_id = "shoppingcart-xsid-" + xsid;
+	}
+	else {
+	    shoppingcart_id = "shoppingcart-rnd-"+uuidv4(); // probably running local server spawned from Eclipse
+	}
+    }
+
+    if (typeof(Storage) !== "undefined") {	
+	sessionStorage.setItem("shoppingcart-id",shoppingcart_id);
+    }
+    
+    return shoppingcart_id;
+}
+
 
 function getSelectedText()
 {
