@@ -9,8 +9,8 @@ var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
 //var ef_download_url  = "http://solr1.ischool.illinois.edu:8080/get";
-//var ef_download_url  = "https://solr1.ischool.illinois.edu/htrc-ef-access/get";
-var ef_download_url  = "http://localhost:8080/htrc-access-ef/get";
+var ef_download_url  = "https://solr1.ischool.illinois.edu/htrc-ef-access/get"; // ****
+//var ef_download_url  = "http://localhost:8080/htrc-access-ef/get";
 
 var workset_base_url    = "https://solr1.ischool.illinois.edu/dcWSfetch/";
 var publish_workset_url = "https://worksets.hathitrust.org/fetchCollection";
