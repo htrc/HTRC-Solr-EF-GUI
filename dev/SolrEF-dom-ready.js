@@ -183,6 +183,132 @@ function activate_tab_id(tab_id)
     }
 }
 
+
+function mnemonic_help_text(dic,div_id,num_cols)
+{
+    var mnemonic_keys = Object.keys(dic).sort();
+    
+    var mnemonic_keys_str = "<table width=\"100%\"><tr>";
+    var pos = 0;
+    $.each(mnemonic_keys, function(index,key) {
+	var val = dic[key]
+	mnemonic_keys_str += "<td><i><nobr>"+key + "</nobr></i>:</td><td> " + val + "</td>";
+	pos++;
+	if ((pos % num_cols) == 0) {
+	    mnemonic_keys_str += '</tr><tr>';
+	}
+    });
+    mnemonic_keys_str += "</tr></table>";
+    
+    $('#'+div_id).html(mnemonic_keys_str);
+}
+
+function fields_help_text(arr,div_id,num_cols)
+{
+    var fields_keys = arr.sort();
+    
+    var fields_keys_str = "<table width=\"100%\"><tr>";
+    var pos = 0;
+    $.each(fields_keys, function(index,val) {
+	fields_keys_str += "<td>" + val + "</td>";
+	pos++;
+	if ((pos % num_cols) == 0) {
+	    fields_keys_str += '</tr><tr>';
+	}
+    });
+    fields_keys_str += "</tr></table>";
+    
+    $('#'+div_id).html(fields_keys_str);
+}
+
+function domready_help_dialogs()
+{
+    $("#volume-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	height: 600,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+/*
+    var vol_md_keys = [];
+    for (var key in volume_metadata_fields) {
+	vol_md_keys.push(key);
+    }
+    var vol_md_keys_str = vol_md_keys.sort().join(", ");
+    $('#volume-help-fields').html(vol_md_keys_str);
+*/
+    //fields_help_text(Object.keys(volume_metadata_fields),'volume-help-fields',4);
+    mnemonic_help_text(volume_metadata_dic,'volume-help-fields',1);
+    
+    mnemonic_help_text(format_dic,'volume-help-format',4);
+    mnemonic_help_text(place_dic,'volume-help-pubplace',4);
+    mnemonic_help_text(language_dic,'volume-help-language',4);
+    mnemonic_help_text(rights_dic,'volume-help-rights',3);
+    
+
+    $("#volume-help").click(function () {
+	$("#volume-help-dialog").dialog( "open" );
+    });
+
+    
+    $("#page-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#page-help").click(function () {
+	$("#page-help-dialog").dialog( "open" );
+    });
+
+    $("#advanced-query-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    
+    $("#advanced-query-help").click(function () {
+	$("#advanced-query-help-dialog").dialog( "open" );
+    });
+}
+
 $(document).ready(function() {
 
     var solr_col = getURLParameter("solr-col");
@@ -297,81 +423,7 @@ $(document).ready(function() {
     });
 
     
-    $("#volume-help-dialog").dialog({
-	autoOpen: false,
-	resizable: true,
-	width: 790,
-	modal: true,
-	buttons: {
-	    "OK": function () {
-		$(this).dialog("close");
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-
-    var vol_md_keys = [];
-    for (var key in volume_metadata_fields) {
-	vol_md_keys.push(key);
-    }
-    var vol_md_keys_str = vol_md_keys.sort().join(", ");
-    $('#volume-help-fields').html(vol_md_keys_str);
-    
-
-    $("#volume-help").click(function () {
-	$("#volume-help-dialog").dialog( "open" );
-    });
-
-    
-    $("#page-help-dialog").dialog({
-	autoOpen: false,
-	resizable: true,
-	width: 790,
-	modal: true,
-	buttons: {
-	    "OK": function () {
-		$(this).dialog("close");
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-    
-    $("#page-help").click(function () {
-	$("#page-help-dialog").dialog( "open" );
-    });
-
-    $("#advanced-query-help-dialog").dialog({
-	autoOpen: false,
-	resizable: true,
-	width: 790,
-	modal: true,
-	buttons: {
-	    "OK": function () {
-		$(this).dialog("close");
-	    }
-	},
-	hide: { effect: "fadeOut" },
-	show: { effect: "fadeIn" }
-    }).keypress(function (e) {
-	if (e.keycode == $.ui.keyCode.ENTER) {
-	    $(this).dialog("close");
-	}
-    });
-    
-    $("#advanced-query-help").click(function () {
-	$("#advanced-query-help-dialog").dialog( "open" );
-    });
-
+    domready_help_dialogs();
     
     $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
     $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
@@ -763,6 +815,14 @@ $(document).ready(function() {
 	show_updated_results();
     });
 
-
+    var volume_available_keys = Object.keys(volume_metadata_fields).sort();
+    var volume_available_tags = [];
+    $.each(volume_available_keys,function(index,key) {
+	volume_available_tags.push({'key':key, 'label': volume_metadata_dic[key]});
+    });
+    
+    
+    domready_volume_autocomplete('vq',volume_available_tags);
+    
 });
 

@@ -37,56 +37,118 @@ var volume_metadata_fields = {
     "volumeIdentifier_t": null
 };
 
+var volume_metadata_dic = {
+    "accessProfile_t": "The original source of a volume.",
+    "bibliographicFormat_t": "The format of a volume's bibliography.",
+    "classification_dcc_t": "The DCC call number supplied by the originating library.",
+    "classification_lcc_t": "The LCC call number supplied by the originating library.",
+    "dateCreated_t": "The time this metadata object was processed.",
+    "genre_t": "The genre of the volume.",
+    "handleUrl_t": "The persistent identifier for the given volume.",
+    "hathitrustRecordNumber_t": "The unique record number for the volume in the HathiTrust Digital Library.",
+    "htBibUrl_t": "The HathiTrust Bibliographic API call for the volume.",
+    "imprint_t": "The place of publication, publisher, and publication date of the given volume.",
+    "isbn_t": "The International Standard Book Number for a volume.",
+    "issn_t": "The International Standard Serial Number for a volume.",
+    "issuance_t": "The bibliographic level of a volume",
+    "language_t": "The primary language of the volume.",
+    "lastUpdateDate_t": "The date this page was last updated.",
+    "lccn_t": "The Library of Congress Call Number for a volume.",
+    "names_t": "The personal and corporate names associated with a volume.",
+    "oclc_t": "The array of OCLC number(s).",
+    "pubDate_t": "The publication year.",
+    "pubPlace_t": "The publication location.",
+    "rightsAttributes_t": "The rights attributes for a volume.",
+    "schemaVersion_t": "A version identifier for the format and structure of this metadata object.",
+    "sourceInstitution_t": "The original institution who contributed the volume.",
+    "sourceInstitutionRecordNumber_t": "The unique record number for the volume from its original institution.",
+    "title_t": "Title of the volume.",
+    "typeOfResource_t": "The format type of a volume.",
+    "volumeIdentifier_t": "A unique identifier for the current volume. This is the same identifier used in the HathiTrust and HathiTrust Research Center corpora."
+};
+
+/*
+volumeIdentifier: 
+schemaVersion: 
+dateCreated: 
+title: 
+pubDate: 
+pubPlace: 
+language: 
+genre: 
+issuance: 
+typeOfResource: 
+names: 
+imprint: 
+
+enumerationChronology: The page numbers of a specific section of a volume.
+
+governmentDocument: Denotes if a volume is a government document.
+
+rightsAttributes: 
+hathitrustRecordNumber: 
+htBibUrl: 
+handleUrl: 
+sourceInstitution: 
+sourceInsitutionRecordNumber: 
+oclc: 
+isbn: 
+issn: 
+lccn: 
+classification: 
+bibliographicFormat: 
+lastUpdatePage: 
+*/
 
 var rights_dic = {
     'pd': 'Public domain',
     'ic': 'In-copyright',
     'op': 'Out-of-print',
-    'op-desc': 'Out-of-print (implies in-copyright)',
+    //'op-desc': 'Out-of-print (implies in-copyright)',
     'orph': 'Copyright-orphaned',
-    'orph-desc': 'Copyright-orphaned (implies in-copyright)',
+    //'orph-desc': 'Copyright-orphaned (implies in-copyright)',
     'und': 'Undetermined',
-    'und-desc': 'Undetermined copyright status',
+    //'und-desc': 'Undetermined copyright status',
     'ic-world': 'In-copyright (world viewable)',
-    'ic-world-desc': 'In-copyright and permitted as world viewable by the copyright holder',
+    //'ic-world-desc': 'In-copyright and permitted as world viewable by the copyright holder',
     'nobody': 'Blocked',
-    'nobody-desc': 'Available to nobody; blocked for all users',
+    //'nobody-desc': 'Available to nobody; blocked for all users',
     'pdus': 'US Public domain',
-    'pdus-desc': 'Public domain only when viewed in the US',
+    //'pdus-desc': 'Public domain only when viewed in the US',
     'cc-by-3.0': 'CC BY 3.0',
-    'cc-by-3.0-desc': 'Creative Commons Attribution license, 3.0 Unported',
+    //'cc-by-3.0-desc': 'Creative Commons Attribution license, 3.0 Unported',
     'cc-by-nd-3.0': 'CC BY-ND 3.0',
-    'cc-by-nd-3.0-desc': 'Creative Commons Attribution-NoDerivatives license, 3.0 Unported',
+    //'cc-by-nd-3.0-desc': 'Creative Commons Attribution-NoDerivatives license, 3.0 Unported',
     'cc-by-nc-nd-3.0': 'CC BY-NC-ND 3.0',
-    'cc-by-nc-nd-3.0-desc': 'Creative Commons Attribution-NonCommercial-NoDerivatives license, 3.0 Unported',
+    //'cc-by-nc-nd-3.0-desc': 'Creative Commons Attribution-NonCommercial-NoDerivatives license, 3.0 Unported',
     'cc-by-nc-3.0': 'CC BY-NC 3.0',
-    'cc-by-nc-3.0-desc': 'Creative Commons Attribution-NonCommercial license, 3.0 Unported',
+    //'cc-by-nc-3.0-desc': 'Creative Commons Attribution-NonCommercial license, 3.0 Unported',
     'cc-by-nc-sa-3.0': 'CC BY-NC-SA 3.0',
-    'cc-by-nc-sa-3.0-desc': 'Creative Commons Attribution-NonCommercial-ShareAlike license, 3.0 Unported',
+    //'cc-by-nc-sa-3.0-desc': 'Creative Commons Attribution-NonCommercial-ShareAlike license, 3.0 Unported',
     'cc-by-sa-3.0': 'CC BY-SA 3.0',
-    'cc-by-sa-3.0-desc': 'Creative Commons Attribution-ShareAlike license, 3.0 Unported',
+    //'cc-by-sa-3.0-desc': 'Creative Commons Attribution-ShareAlike license, 3.0 Unported',
     'orphcand': 'Orphan',
-    'orphcand-desc': 'Orphan candidate - in 90-day holding period (implies in-copyright)',
+    //'orphcand-desc': 'Orphan candidate - in 90-day holding period (implies in-copyright)',
     'cc-zero': 'CC Zero',
-    'cc-zero-desc': 'Creative Commons Zero license (implies Public Domain)',
+    //'cc-zero-desc': 'Creative Commons Zero license (implies Public Domain)',
     'und-world': 'Undetermined',
-    'und-world-desc': 'Undetermined copyright status and permitted as world viewable by the depositor',
+    //'und-world-desc': 'Undetermined copyright status and permitted as world viewable by the depositor',
     'icus': 'US copyright',
-    'icus-desc': 'In copyright in the US',
+    //'icus-desc': 'In copyright in the US',
     'cc-by-4.0': 'CC BY 4.0',
-    'cc-by-4.0-desc': 'Creative Commons Attribution 4.0 International license',
+    //'cc-by-4.0-desc': 'Creative Commons Attribution 4.0 International license',
     'cc-by-nd-4.0': 'CC BY-ND 4.0',
-    'cc-by-nd-4.0-desc': 'Creative Commons Attribution-NoDerivatives 4.0 International license',
+    //'cc-by-nd-4.0-desc': 'Creative Commons Attribution-NoDerivatives 4.0 International license',
     'cc-by-nc-nd-4.0': 'CC BY-NC-ND 4.0',
-    'cc-by-nc-nd-4.0-desc': 'Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license',
+    //'cc-by-nc-nd-4.0-desc': 'Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license',
     'cc-by-nc-4.0': 'CC BY-NC 4.0',
-    'cc-by-nc-4.0-desc': 'Commons Attribution-NonCommercial 4.0 International license',
+    //'cc-by-nc-4.0-desc': 'Commons Attribution-NonCommercial 4.0 International license',
     'cc-by-nc-sa-4.0': 'CC BY-NC-SA 4.0',
-    'cc-by-nc-sa-4.0-desc': 'Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license',
+    //'cc-by-nc-sa-4.0-desc': 'Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license',
     'cc-by-sa-4.0': 'CC BY-SA 4.0 ',
-    'cc-by-sa-4.0-desc': 'Commons Attribution-ShareAlike 4.0 International license',
+    //'cc-by-sa-4.0-desc': 'Commons Attribution-ShareAlike 4.0 International license',
     'pd-pvt': 'Access limited',
-    'pd-pvt-desc': 'Public domain but access limited due to privacy concerns',
+    //'pd-pvt-desc': 'Public domain but access limited due to privacy concerns',
     'supp': 'Suppressed from view'
     //'supp': 'Suppressed from view; see note for details'
 };

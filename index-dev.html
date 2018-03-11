@@ -52,6 +52,7 @@
 	<script src="dev/SolrEF-query-breakdown.js"></script>
 	<script src="dev/SolrEF.js"></script>
 	<script src="dev/SolrEF-result-set.js"></script>
+	<script src="dev/SolrEF-autocomplete.js"></script>
 	<script src="dev/SolrEF-dom-ready.js"></script>
 	
   </head>
@@ -368,18 +369,62 @@
 			    <i>names_t:&quot;Austen, Jane&quot;</i>
 			    for a phrase-based search.
 			  </p>
-			  <p>
-			    In alphabetical order, the indexed fields are:
-			  </p>
+			  
 			  <p>
 			    Wildcard matching includes using '?' for a single
 			    character and '*' for multiple characters.  For
 			    example 'canad?' and '*land'.
 			  </p>
 
-			  <div id="volume-help-fields" style="padding-left: 10px;">
+						  
+			  <p>
+			    In alphabetical order, the indexed fields are:
+			  </p>
+
+			  <div id="volume-help-fields" class="help-dialog-inset">
 			  </div>
+
+			  <p>
+			    A similar situation exists for the volume format field <i>format_t</i>.
+			    The mnemonics used for this are:			    
+ 			  </p>
 			  
+			  <div id="volume-help-format" class="help-dialog-inset">
+			  </div>
+
+			  
+			  <p>
+			    The field <i>pubPlace_t</i> is mnemonically coded, for
+			    example using <i>nyu</i> to represent <i>New York (State)</i>.
+			    So, to search for volumes published in this state, you
+			    would enter the term <i>pubPlace_t:nyu</i>.
+			  </p>
+			  
+			  <p>
+			    The full set of mnemonics used are:			    
+ 			  </p>
+			  
+			  <div id="volume-help-pubplace" class="help-dialog-inset" style="font-size: 80%;">
+			  </div>
+
+
+			  <p>
+			    A similar situation exists for the language field <i>language_t</i>.
+			    The mnemonics used for this are:			    
+ 			  </p>
+			  
+			  <div id="volume-help-language" class="help-dialog-inset" style="font-size: 80%;">
+			  </div>
+
+			  <p>
+			    A similar situation exists for the copyright field <i>rights_t</i>.
+			    The mnemonics used for this are:			    
+ 			  </p>
+			  
+			  <div id="volume-help-rights" class="help-dialog-inset" style="font-size: 80%;">
+			  </div>
+
+
 			</div>
 		      </div>		      
 		    </td>
