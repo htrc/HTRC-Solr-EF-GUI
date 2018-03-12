@@ -22,8 +22,16 @@ $.fn.getCursorPosition = function() {
 
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
+    var dynamic_fields_dic = {  'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
+    var dynamic_fields     = Object.keys(dynamic_fields_dic);
+    
+    var dynamic_fields_re_str = "^("+dynamic_fields.join("|")+")";
+    var dynamic_fields_simple_re   = new RegExp(dynamic_fields_re_str + "$");
+    var dynamic_fields_compound_re = new RegExp(dynamic_fields_re_str + ":.+$");
+
+    
     function term_split( val ) {
-	var query_terms = val.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g);
+	var query_terms = val.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g); // ******
 	return query_terms;
     }
 
@@ -39,6 +47,8 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 
     function expand_autocomplete_field(dynamic_field,label_dic)
     {
+	console.log("*** dynamic_field = " + dynamic_field);
+	
 	var expanded_fields_already_present = false;
 	var expanded_field_re = new RegExp("^"+dynamic_field+":.+$");
 
@@ -60,8 +70,23 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	}
 
     }
-    
+/*
+    function expand_autocomplete_fields(typed_text)
+    {
+	var last_term = extract_last_term(typed_text);
 
+	for (var i=0; i<dynamic_fields.length; i++) {
+	    var dynamic_field = dynamic_fields[i];
+	    var dynamic_field_dic = dynamic_fields_dic[i];
+
+	    if (last_term == dynamic_field) {
+		expand_autocomplete_field(dynamic_field,dynamic_field_dic);
+		break;
+	    }
+	}
+    }
+*/
+    
     function contract_autocomplete_field(dynamic_field,label_dic)
     {
 	var contracted_field_already_present = false;
@@ -78,186 +103,214 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    available_tags.push({'key': dynamic_field, 'label': label_dic[dynamic_field]});
 	}
     }
-    
-    function dynamically_adjust_autocomplete(terms,typed_text)
-    {
-	var adjusted_tags = false;
 
-	var dynamic_fields     = [ "pubPlace_t", "language_t", "format_t" ];
-	var dynamic_fields_dic = [ place_dic,    language_dic, format_dic ];
+    /*
+    function contract_autocomplete_fields(typed_text)
+    {
+	var last_term = extract_last_term(typed_text);
 
 	for (var i=0; i<dynamic_fields.length; i++) {
-	    var field = dynamic_fields[i];
-	    var field_dic = dynamic_fields_dic[i];
-	    var field_re = new RegExp("^"+field+":.+$");
-					       
-	    if (typed_text == field) {
-		terms.push( typed_text + ":" ); // add the selected item
-		
-		available_tags = jQuery.grep(available_tags, function(val, index) {
-		    return (val != field);
-		});
-		
-		// Add in all the mnemonic pubPlace names
-		$.each(field_dic, function(key,val) {
-		    available_tags.push(field+":"+key);
-		});
+	    var dynamic_field = dynamic_fields[i];
+	    var dynamic_field_re = new RegExp("^"+dynamic_field+":.+$");
 
-		adjusted_tags = true;
-		break;
-	    }
-	    else if (typed_text.match(field_re)) {
+	    if (typed_text.match(field_re)) {
 		terms.push( typed_text + " "); // add the selected item
-		
-		available_tags = jQuery.grep(available_tags, function(val, index) {
-		    return (!val.key.match(field_re));
-		});
-		available_tags.push(field);
-		adjusted_tags = true;
+
+		contract_autocomplete_field(dynamic_field,volume_metadata_dic);
 		break;
 	    }
 	}
-	    
-	if (!adjusted_tags) {
-	    terms.push(typed_text + ":"); // add the selected item
+    }
+    */
+
+    function autocomplete_keydown(event)
+    {
+	if ( event.keyCode === $.ui.keyCode.TAB &&  $(this).autocomplete("instance").menu.active ) {
+	    // don't navigate away from the field on tab when selecting an item
+	    event.preventDefault();
 	}
 	
-    }
+	var typed_text = $(this).val();
+	var typed_text_len = typed_text.length;
+	
+	//typed_text = $('#'+textbox_id).val(); // ****
+	var position = $(this).getCursorPosition();
+	var pos_start = position[0];
+	var pos_end   = position[1];
 
-    $('#'+textbox_id )
-	.on( "keydown", function( event ) {
-	    if ( event.keyCode === $.ui.keyCode.TAB &&  $(this).autocomplete("instance").menu.active ) {
-		// don't navigate away from the field on tab when selecting an item
-		event.preventDefault();
-	    }
-
-	    var typed_text = $(this).val();
-	    var typed_text_len = typed_text.length;
+	console.log("autocomplete_keydown(): text cursor/selected range = [" + pos_start + "," + pos_end +"]");
+	console.log("autocomplete_keydown(): number of available_tags = " + available_tags.length );
+	
+	if (pos_start == typed_text_len) {
+	    // cursor is at the end of the line => 
+	    // => append
 	    
-	    //typed_text = $('#'+textbox_id).val(); // ****
-	    var position = $(this).getCursorPosition();
-	    var pos_start = position[0];
-	    var pos_end   = position[1];
-
-	    if (pos_start == typed_text_len) {
-		// cursor is at the end of the line => 
-		// => append
-		
-		if (event.key == ':') {
-		    console.log("Pressed ':' =>  typed text = " + typed_text);
-		    var last_term = extract_last_term(typed_text);
-		    if (last_term == "pubPlace_t") {
-			expand_autocomplete_field("pubPlace_t",place_dic);
+	    if (event.key == ':') {
+		console.log("Pressed ':' =>  typed text = " + typed_text);
+		var last_term = extract_last_term(typed_text);
+		if (!last_term.match(/_t$/)) {
+		    // auto-correct to include it
+		    if (last_term.match(/_$/)) {
+			last_term += "t"; // ******
+			$(this).val(typed_text + "t");
 		    }
-
-		}
-		else if (event.key == ' ') {
-		    console.log("Pressed ' ' typed_text = " + typed_text);		    
-		    // consider removing if not within double-quotes // ******
-		    var last_term = extract_last_term(typed_text);
-		    if (last_term.match(/^pubPlace_t:.+$/)) {
-			// => filter out the extended pubPlace_t:xxx entries, and add in the simpler 'pubPlace_t'
-			contract_autocomplete_field("pubPlace_t",volume_metadata_dic);			
+		    else {
+			last_term += "_t"; // ******
+			$(this).val(typed_text + "_t");
 		    }
 		}
-		else if ((event.keyCode == $.ui.keyCode.DELETE) || (event.keyCode == $.ui.keyCode.BACKSPACE)) {
-		    console.log("Delete/Backspace=" + event.keyCode + ", typed_text = " + typed_text);
-
-		    var last_term = extract_last_term(typed_text); // Note trailing colon stripped off, as term incomplete
-
-		    if (typed_text.match(/:$/) && (last_term.match(/^pubPlace_t$/))) {
-			console.log("contract field");
-			contract_autocomplete_field("pubPlace_t",volume_metadata_dic);
-		    }
-		}
-
-	    }
-	    else {
-		// support insert mid-way??? (hard!)
-		// By leaving blank, user left to their own devices when inserting partway through already entered text
-	    }
-		
-	})
-	.autocomplete({
-	    minLength: 0,
-	    source: function( request, response ) {
-		// delegate back to autocomplete, but extract the last term
-		var last_term = extract_last_term(request.term);
-		if (last_term != null) {
-
-		    var filtered_available_tags = [];
-		    var last_term_re = new RegExp(last_term,'i');
-
-		    var last_term_field_split_pos = last_term.indexOf(':');
-		    var last_label_re = null;
-		    var last_term_field_re = null;
 		    
-		    if (last_term_field_split_pos>0) {
-			var last_label = last_term.substring(last_term_field_split_pos+1);
-			if (last_label != "") {
-			    last_label_re = new RegExp(last_label,'i');
-			    var last_term_field = last_term.substring(0,last_term_field_split_pos);
-			    last_term_field_re = new RegExp("^"+last_term_field,'i');
-			    
-			    console.log("*** last term field = " + last_term_field);
-			    console.log("*** last label = " + last_label);
-			}
+		var simple_match = dynamic_fields_simple_re.exec(last_term);
+		//if (last_term == "pubPlace_t") {
+		if (simple_match) {	   
+		    var dynamic_field = simple_match[1];
+		    var dynamic_field_dic = dynamic_fields_dic[dynamic_field];
+		    expand_autocomplete_field(dynamic_field,dynamic_field_dic);
+		}
+
+	    }
+	    else if (event.key == ' ') {
+		console.log("Pressed ' ' typed_text = " + typed_text);		    
+		// consider removing if not within double-quotes // ******
+		var last_term = extract_last_term(typed_text);
+
+		//if (last_term.match(/^pubPlace_t:.+$/)) {
+		var compound_match = dynamic_fields_compound_re.exec(last_term);
+		if (compound_match) {	   	    
+		    var dynamic_field = compound_match[1];
+		    // => filter out the extended entries, e.g., pubPlace_t:xxx, and add in the simpler 'pubPlace_t'
+		    contract_autocomplete_field(dynamic_field,volume_metadata_dic);			
+		}
+	    }
+//	    else if ((event.keyCode == $.ui.keyCode.DELETE) || (event.keyCode == $.ui.keyCode.BACKSPACE)) { / ****
+	    else if (event.keyCode == $.ui.keyCode.BACKSPACE) {
+		// Consider handling $.ui.keyCode.DELETE ???
+		
+		console.log("Delete/Backspace=" + event.keyCode + ", typed_text = " + typed_text);
+		
+		var last_term = extract_last_term(typed_text); // Note trailing colon stripped off, as term incomplete
+
+		//if (typed_text.match(/:$/) && (last_term.match(/^pubPlace_t$/))) {
+
+		
+		if (typed_text.match(/:$/)) {
+
+		    //if (typed_text.match(/:$/) && (last_term.match(/^pubPlace_t$/))) {
+		    var simple_match = dynamic_fields_simple_re.exec(last_term);
+		    if (simple_match) {
+			var dynamic_field = simple_match[1];
+			console.log("contract field");
+			contract_autocomplete_field(dynamic_field,volume_metadata_dic);
 		    }
-				    
-		    $(available_tags).each(function(index,elem) {
-			if (elem.key.match(last_term_re)) {
-			    filtered_available_tags.push(elem);
-			}
-			else if (elem.label) {
-			    if  (elem.label.match(last_term_re)) { // && last_term.length>=2 ??
+		}
+	    }
+	    
+	}
+	else {
+	    // support insert mid-way??? (hard!)
+	    // By leaving blank, user left to their own devices when inserting partway through already entered text
+	}	
+    }
+    
+    function autocomplete_source(request,response)
+    {
+	// delegate back to autocomplete, but extract the last term
+	var last_term = extract_last_term(request.term);
+	if (last_term != null) {
+	    
+	    var filtered_available_tags = [];
+	    var last_term_re = new RegExp(last_term,'i');
+	    
+	    var last_term_field_split_pos = last_term.indexOf(':');
+	    var last_label_re = null;
+	    var last_term_field_re = null;
+	    
+	    if (last_term_field_split_pos>0) {
+		var last_label = last_term.substring(last_term_field_split_pos+1);
+		if (last_label != "") {
+		    last_label_re = new RegExp(last_label,'i');
+		    var last_term_field = last_term.substring(0,last_term_field_split_pos);
+		    last_term_field_re = new RegExp("^"+last_term_field,'i');
+		    
+		    console.log("*** last term field = " + last_term_field);
+		    console.log("*** last label = " + last_label);
+		}
+	    }
+	    
+	    $(available_tags).each(function(index,elem) {
+		if (elem.key.match(last_term_re)) {
+		    filtered_available_tags.push(elem);
+		}
+		else if (elem.label) {
+		    if  (elem.label.match(last_term_re)) { // && last_term.length>=2 ??
+			filtered_available_tags.push(elem);
+		    }			    
+		    else {
+			if (last_label_re != null) {
+			    if  (elem.key.match(last_term_field_re) && elem.label.match(last_label_re)) {
 				filtered_available_tags.push(elem);
-			    }			    
-			    else {
-				if (last_label_re != null) {
-				    if  (elem.key.match(last_term_field_re) && elem.label.match(last_label_re)) {
-					filtered_available_tags.push(elem);
-				    }
-				}
 			    }
 			}
-		    });
+		    }
+		}
+	    });
 
-		    response(filtered_available_tags);
-		}
-		else {
-		    console.log("returning empty string");
-		    response("");
-		}
-	    },
+	    console.log("autocomplete_source(): number of filtered tags   = " + filtered_available_tags.length);
+	    response(filtered_available_tags);
+	}
+	else {
+	    console.log("returning empty string");
+	    response("");
+	}
+    }
+
+    function autocomplete_select(event,ui)
+    {
+	var terms = term_split(this.value);		
+	terms.pop();                       // remove the current input	
+
+	//if (ui.item.key.match(dynamic_fields_simple_re)) {
+	var simple_match = dynamic_fields_simple_re.exec(ui.item.key);
+	if (simple_match) {	   
+	    var dynamic_field = simple_match[1];
+	    var dynamic_field_dic = dynamic_fields_dic[dynamic_field];
+	    
+	    terms.push( ui.item.key + ":" ); // add the selected item
+	    
+	    expand_autocomplete_field(dynamic_field,dynamic_field_dic);
+	}
+	else {
+	    //if (ui.item.key.match(dynamic_fields_compound_re)) {
+	    var compound_match = dynamic_fields_compound_re.exec(ui.item.key);
+	    if (compound_match) {	   	    
+		var dynamic_field = compound_match[1];
+		
+		terms.push( ui.item.key + " "); // add the selected item
+		contract_autocomplete_field(dynamic_field,volume_metadata_dic);
+	    }	
+	    else {
+		terms.push( ui.item.key + ":" ); // add the selected item
+	    }
+	}
+	
+	//// add placeholder to get the comma-and-space at the end
+	//terms.push( "" );
+	this.value = terms.join(" ");
+	return false;
+    }
+    
+    $('#'+textbox_id )
+	.on( "keydown", autocomplete_keydown)
+	.autocomplete({
+	    minLength: 0,
+	    source: autocomplete_source,
 	    focus: function() {
 		// prevent value inserted on focus
 		return false;
 	    },
-	    select: function( event, ui ) {
-		var terms = term_split(this.value);		
-		terms.pop();                       // remove the current input	
-
-		if (ui.item.key == "pubPlace_t") {
-		    terms.push( ui.item.key + ":" ); // add the selected item
-
-		    expand_autocomplete_field("pubPlace_t",place_dic);
-		}
-		else if (ui.item.key.match(/^pubPlace_t:.+$/)) {
-		    terms.push( ui.item.key + " "); // add the selected item
-
-		    contract_autocomplete_field("pubPlace_t",volume_metadata_dic);
-		}
-		else {
-		    terms.push( ui.item.key + ":" ); // add the selected item
-		}
-		
-		//// add placeholder to get the comma-and-space at the end
-		//terms.push( "" );
-		this.value = terms.join(" ");
-		return false;
-	    }
+	    select: autocomplete_select
 	})
-	.autocomplete( "instance" )._renderItem = function( ul, item ) {
+	.autocomplete("instance")._renderItem = function( ul, item ) {
 
 	    var key = item.key;
 	    var lab = item.label;
