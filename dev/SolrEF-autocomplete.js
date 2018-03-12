@@ -47,8 +47,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 
     function expand_autocomplete_field(dynamic_field,label_dic)
     {
-	console.log("*** dynamic_field = " + dynamic_field);
-	
 	var expanded_fields_already_present = false;
 	var expanded_field_re = new RegExp("^"+dynamic_field+":.+$");
 
@@ -70,22 +68,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	}
 
     }
-/*
-    function expand_autocomplete_fields(typed_text)
-    {
-	var last_term = extract_last_term(typed_text);
-
-	for (var i=0; i<dynamic_fields.length; i++) {
-	    var dynamic_field = dynamic_fields[i];
-	    var dynamic_field_dic = dynamic_fields_dic[i];
-
-	    if (last_term == dynamic_field) {
-		expand_autocomplete_field(dynamic_field,dynamic_field_dic);
-		break;
-	    }
-	}
-    }
-*/
     
     function contract_autocomplete_field(dynamic_field,label_dic)
     {
@@ -104,25 +86,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	}
     }
 
-    /*
-    function contract_autocomplete_fields(typed_text)
-    {
-	var last_term = extract_last_term(typed_text);
-
-	for (var i=0; i<dynamic_fields.length; i++) {
-	    var dynamic_field = dynamic_fields[i];
-	    var dynamic_field_re = new RegExp("^"+dynamic_field+":.+$");
-
-	    if (typed_text.match(field_re)) {
-		terms.push( typed_text + " "); // add the selected item
-
-		contract_autocomplete_field(dynamic_field,volume_metadata_dic);
-		break;
-	    }
-	}
-    }
-    */
-
     function autocomplete_keydown(event)
     {
 	if ( event.keyCode === $.ui.keyCode.TAB &&  $(this).autocomplete("instance").menu.active ) {
@@ -133,7 +96,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	var typed_text = $(this).val();
 	var typed_text_len = typed_text.length;
 	
-	//typed_text = $('#'+textbox_id).val(); // ****
 	var position = $(this).getCursorPosition();
 	var pos_start = position[0];
 	var pos_end   = position[1];
@@ -161,7 +123,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		}
 		    
 		var simple_match = dynamic_fields_simple_re.exec(last_term);
-		//if (last_term == "pubPlace_t") {
 		if (simple_match) {	   
 		    var dynamic_field = simple_match[1];
 		    var dynamic_field_dic = dynamic_fields_dic[dynamic_field];
@@ -174,7 +135,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		// consider removing if not within double-quotes // ******
 		var last_term = extract_last_term(typed_text);
 
-		//if (last_term.match(/^pubPlace_t:.+$/)) {
 		var compound_match = dynamic_fields_compound_re.exec(last_term);
 		if (compound_match) {	   	    
 		    var dynamic_field = compound_match[1];
@@ -182,20 +142,15 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		    contract_autocomplete_field(dynamic_field,volume_metadata_dic);			
 		}
 	    }
-//	    else if ((event.keyCode == $.ui.keyCode.DELETE) || (event.keyCode == $.ui.keyCode.BACKSPACE)) { / ****
 	    else if (event.keyCode == $.ui.keyCode.BACKSPACE) {
 		// Consider handling $.ui.keyCode.DELETE ???
 		
 		console.log("Delete/Backspace=" + event.keyCode + ", typed_text = " + typed_text);
 		
 		var last_term = extract_last_term(typed_text); // Note trailing colon stripped off, as term incomplete
-
-		//if (typed_text.match(/:$/) && (last_term.match(/^pubPlace_t$/))) {
-
 		
 		if (typed_text.match(/:$/)) {
 
-		    //if (typed_text.match(/:$/) && (last_term.match(/^pubPlace_t$/))) {
 		    var simple_match = dynamic_fields_simple_re.exec(last_term);
 		    if (simple_match) {
 			var dynamic_field = simple_match[1];
@@ -232,8 +187,8 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		    var last_term_field = last_term.substring(0,last_term_field_split_pos);
 		    last_term_field_re = new RegExp("^"+last_term_field,'i');
 		    
-		    console.log("*** last term field = " + last_term_field);
-		    console.log("*** last label = " + last_label);
+		    //console.log("*** last term field = " + last_term_field);
+		    //console.log("*** last label = " + last_label);
 		}
 	    }
 	    
@@ -269,7 +224,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	var terms = term_split(this.value);		
 	terms.pop();                       // remove the current input	
 
-	//if (ui.item.key.match(dynamic_fields_simple_re)) {
 	var simple_match = dynamic_fields_simple_re.exec(ui.item.key);
 	if (simple_match) {	   
 	    var dynamic_field = simple_match[1];
@@ -280,7 +234,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    expand_autocomplete_field(dynamic_field,dynamic_field_dic);
 	}
 	else {
-	    //if (ui.item.key.match(dynamic_fields_compound_re)) {
 	    var compound_match = dynamic_fields_compound_re.exec(ui.item.key);
 	    if (compound_match) {	   	    
 		var dynamic_field = compound_match[1];
@@ -293,8 +246,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    }
 	}
 	
-	//// add placeholder to get the comma-and-space at the end
-	//terms.push( "" );
 	this.value = terms.join(" ");
 	return false;
     }
