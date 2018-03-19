@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <title>HTRC Page-Level Extracted Feature Solr Search</title>
+
+        <link rel="shortcut icon" href="https://analytics.hathitrust.org/assets/images/favicon.ico">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Bootstrap -->
+        <link href="assets/bootstrap.css" rel="stylesheet" media="screen">
+        <link href="assets/main.css" rel="stylesheet" media="screen">
+        <link href="assets/flat.css" rel="stylesheet" media="screen">
+        <link href="assets/font-awesome.css" rel="stylesheet">
+        <link href="assets/tomorrow.css" rel="stylesheet">
+	<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
+	<link href="assets/paging.css" rel="stylesheet">
+	
+        <link href="dev/SolrEF.css" rel="stylesheet">
+        <link href="dev/SolrEF-progressbar.css" rel="stylesheet">
+	
+        <script src="assets/jquery.js"></script>
+        <script src="assets/highlight.js"></script>
+        <script src="assets/stupidtable.js"></script>
+        <script src="assets/bootstrap.js"></script>
+        <script src="assets/bowser.js"></script>
+	<script src="assets/download.min.js"></script>
+	<script src="assets/lucene-query-parser.js"></script>
+	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="assets/htrcwarnings.js"></script>
+        <script type="text/javascript" src="assets/uploadws.js"></script>
+<!--
+        <script type="text/javascript" src="assets/ga-download-tracking.js"></script>
+-->
+	<script type="text/javascript" src="assets/paging.js"></script>
+	
+	<script src="dev/iso-639-1.js"></script> <!-- defines var 'isoLangs' -->
+	<script src="dev/lookup-vars.js"></script>
+
+	<script src="dev/SolrEF-globals.js"></script>
+	<script src="dev/SolrEF-settings.js"></script>
+	<script src="dev/SolrEF-utils.js"></script>
+	<script src="dev/SolrEF-authentication.js"></script>
+	<script src="dev/SolrEF-iprogressbar.js"></script>
+	<script src="dev/SolrEF-worksets.js"></script>
+	<script src="dev/SolrEF-stream.js"></script>
+	<script src="dev/SolrEF-explain.js"></script>
+	<script src="dev/SolrEF-facet-filter.js"></script>
+	<script src="dev/SolrEF-shoppingcart.js"></script>
+	<script src="dev/SolrEF-query-breakdown.js"></script>
+	<script src="dev/SolrEF.js"></script>
+	<script src="dev/SolrEF-result-set.js"></script>
+	<script src="dev/SolrEF-autocomplete.js"></script>
+	<script src="dev/SolrEF-dom-ready.js"></script>
+	
+  </head>
+  <body>
+        <nav class="navbar navbar-default navbar-fixed-top navbar-htrc" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="https://analytics.hathitrust.org/"><img src="assets/hathi_small.png" style="padding-right : 5 px ; margin-top : - 1 px ;" alt=" " height="32" width="36">
+                        HTRC Portal
+                    </a>
+                </div>
+
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="https://analytics.hathitrust.org/">Home</a></li>
+                        
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Worksets <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/listuserworksets')">View my worksets</a></li>
+                                
+                                <li class="divider"></li>
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/listallworksets')">View all worksets</a></li>
+                                
+                                <li class="divider"></li>
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/uploadworkset')">Upload workset</a></li>
+                                
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="#" onclick="blacklightLoggingWarning ( '      https://analytics.hathitrust.org/blacklight ')">
+                                        Create workset</a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                            <li><a href="#" onclick="loggingRequiredWarning('/listalgorithms')">Algorithms</a></li>
+                        
+                        
+                            <li><a href="#" onclick="loggingRequiredWarning('/listjobs')">Results</a></li>
+                        
+                        
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    Capsule<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+Data+Capsule">
+                                        Documentation</a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    
+                                        <li><a href="#" onclick="loggingRequiredWarning('/listvms')">
+                                            Show Capsules</a></li>
+                                    
+                                    <li class="divider"></li>
+                                    
+                                        <li><a href="#" onclick="loggingRequiredWarning('/createvms')">
+                                            Create Capsule</a></li>
+                                    
+                                </ul>
+                            </li>
+                        
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Data<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://analytics.hathitrust.org/features">
+                                    Extracted Features Dataset</a>
+                                </li>
+                                <li><a href="https://analytics.hathitrust.org/genre">
+                                    Word Frequencies in English-Language Literature, 1700-1922</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Help<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+User+Getting+Started+FAQ">
+                                    Knowledge Base</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li><a href="mailto:htrc-help@hathitrust.org?Subject=Contact">
+                                    Contact</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="https://analytics.hathitrust.org/about">About</a>
+                    </li></ul>
+                    
+                        <ul class="nav pull-right navbar-nav" id="navbar-login">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    Sign In<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                  <li><a onclick="solr_ef_login()">Sign In</a></li>
+<!--				  
+				  <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
+-->
+                                  <li class="divider"></li>
+                                  <li><a href="https://analytics.hathitrust.org/passwordresetmail">
+                                        Forgot Password?</a></li>
+                                </ul>
+                            </li>
+
+                            <li><a href="https://analytics.hathitrust.org/signup"><span>Sign Up</span></a></li>
+                        </ul>
+
+			<ul class="nav pull-right" id="navbar-logout" style="display: none">
+			  <li class="dropdown">
+			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
+			    <ul class="dropdown-menu">
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop" />
+				<label for="pref-drag-and-drop">Drag-and-drop</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-checkboxes" id="pref-checkboxes" />
+				<label for="pref-checkboxes">Check-boxes</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid"
+				       checked="checked" />
+				<label for="pref-hybrid">Hybrid</label>
+			      </li>
+			      <li><hr /></li>
+			      <li><a onclick="solr_ef_logout()">Logout</a></li>
+			      
+			      <!--
+				  <li><a href="/logout">Logout</a></li>
+				  -->
+			    </ul>
+			  </li>
+			</ul>
+
+                    
+                </div>
+                    <!--/.nav-collapse -->
+            </div>
+        </nav>
+        
+        
