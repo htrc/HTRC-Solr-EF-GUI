@@ -20,6 +20,78 @@ $.fn.getCursorPosition = function() {
     return [pos, posEnd];
 };
 
+
+    
+    function term_split_OLD(val) {
+	var query_terms = val.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g); // ******
+	//console.log("*** query_terms = " + query_terms.join(","));
+	return query_terms;
+    }
+
+function term_split(val,strip_quotes) {
+    var raw_terms = val.split(/\s+/);
+    var processed_terms = [];
+    
+    var partial_term = null;
+    var current_term = raw_terms.shift();
+    
+    while (current_term != null) {
+	if (partial_term == null) {
+	    partial_term = current_term;
+	}
+	else {		
+	    if (partial_term.indexOf("\"")>=0) {
+		// open quote => keep adding unless 'current_term' shows sign of being a new field:term
+		if (current_term.indexOf(":")>0) {
+		    processed_terms.push(partial_term + "\""); // need for force close of double-quote
+		    partial_term = current_term;
+		}
+		else {
+		    partial_term += " " + current_term;
+		}
+		
+		// if partial term now ends in a quote => push onto processed_terms
+		if (partial_term.match(/\"$/)) {
+		    processed_terms.push(partial_term);
+		    partial_term = null;
+		}
+	    }
+	    else {
+		processed_terms.push(partial_term);
+		partial_term = current_term;
+		
+		if (partial_term.match(/\"$/)) {
+		    processed_terms.push(partial_term);
+		    partial_term = null;
+		}
+	    }
+	}
+	
+	current_term = raw_terms.shift();
+    }
+    
+    if (partial_term != null) {
+	processed_terms.push(partial_term);
+    }
+    
+    if ((strip_quotes) && (strip_quotes===true)) {
+	//processed_terms = processed_terms.map(function(elem) { return elem.replace(/\"(.*)\"/g,"$1"); });
+	processed_terms = processed_terms.map(function(elem) { return elem.replace(/\"/g,""); });
+    }
+    
+    return processed_terms;
+}
+
+    function extract_last_term(term) {
+	var terms = term_split(term,true);
+	if (terms != null) {
+	    return terms.pop();
+	}
+	else {
+	    return null;
+	}
+    }
+
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
     var dynamic_fields_dic = {  'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
@@ -28,22 +100,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
     var dynamic_fields_re_str = "^("+dynamic_fields.join("|")+")";
     var dynamic_fields_simple_re   = new RegExp(dynamic_fields_re_str + "$");
     var dynamic_fields_compound_re = new RegExp(dynamic_fields_re_str + ":.+$");
-
-    
-    function term_split( val ) {
-	var query_terms = val.match(/[^"\s:]+(?::(?:[^"\s:]+|"[^"]+"))?|(?:"[^"]+")/g); // ******
-	return query_terms;
-    }
-
-    function extract_last_term(term) {
-	var terms = term_split(term);
-	if (terms != null) {
-	    return terms.pop();
-	}
-	else {
-	    return null;
-	}
-    }
 
     function expand_autocomplete_field(dynamic_field,label_dic)
     {
@@ -131,10 +187,11 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 
 	    }
 	    else if (event.key == ' ') {
-		console.log("Pressed ' ' typed_text = " + typed_text);		    
+		console.log("Pressed ' ' typed_text = " + typed_text);
 		// consider removing if not within double-quotes // ******
 		var last_term = extract_last_term(typed_text);
-
+		console.log("  last_term = " + last_term);
+		
 		var compound_match = dynamic_fields_compound_re.exec(last_term);
 		if (compound_match) {	   	    
 		    var dynamic_field = compound_match[1];
