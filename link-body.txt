@@ -1,0 +1,9 @@
+assets/flat.css
+assets/font-awesome.css
+assets/tomorrow.css
+
+assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css
+
+assets/paging.css
+dev/SolrEF.css
+dev/SolrEF-progressbar.css
