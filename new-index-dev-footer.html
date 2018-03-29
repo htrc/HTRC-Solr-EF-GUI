@@ -1,0 +1,58 @@
+        <div class="container">
+        <p style="text-align: center; font-size: small; margin-top: 10px;">HTRC Portal (<a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+Service+Release+v3.1+for+Uncamp+2015" target="_blank">v3.2.x</a>)
+        </p>
+        </div>
+
+        
+        <div id="push"></div>
+        
+        
+        <div class="modal fade" id="create-collection-modal" aria-hidden="true" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Create Workset</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>You are being redirected to the Workset 
+Builder.
+                            If this is the first time accessing it 
+during this browser session,
+                            you will need to select "Login" from the 
+top-right menu bar before creating or modifying a workset.
+                            We are aware this is inconvenient and we're 
+working on a technical solution to eliminate this requirement.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <span class="pull-left" style="padding-top : 5 px ;"><input id="dont-show" style="margin : - 3 px 0 0 ;" type="checkbox">
+                            Don't Show This Again.</span>
+                        <a href="#" class="btn btn-link btn-sm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                        <a id="modal-wb-url" href="" class="btn btn-sm btn-primary" onclick="goToCreateCollection ( )">
+                            Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="login-required-modal" aria-hidden="true" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Please Sign in</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>You need to sign in to access this functionality.</p>
+                    </div>
+                    <div class="modal-footer">
+                        
+                        
+                        <a href="#" class="btn btn-link btn-sm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                        <a id="modal-target-url" href="" data-toggle="modal" class="btn btn-sm btn-primary">
+                            Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+</body></html>
