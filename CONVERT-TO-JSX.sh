@@ -15,10 +15,8 @@ xmllint --format /tmp/fixed-class.xml | ./css-to-jsx.pl | sed 's/ANDNBSP/&nbsp;/
 #cat /tmp/fixed-class.xml | ./css-to-jsx.pl | sed 's/ANDNBSP/&nbsp;/g' > index-dev-body.jsx
 
 
-egrep "script|link" index-dev-header.html \
- | sed 's/assets\//assets\/HTRC-Solr-EF-GUI\/assets\//g' \
- | sed 's/dev\//assets\/HTRC-Solr-EF-GUI\/dev\//g' \
- > link-script.jsx
-
-
+#egrep "script|link" index-dev-header.html \
+# | sed 's/assets\//assets\/HTRC-Solr-EF-GUI\/assets\//g' \
+# | sed 's/dev\//assets\/HTRC-Solr-EF-GUI\/dev\//g' \
+# > link-script.jsx
 
