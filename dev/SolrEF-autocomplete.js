@@ -94,6 +94,8 @@ function term_split(val,strip_quotes) {
 
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
+    console.log("*** domready_volume_autocomplete() called");
+
     var dynamic_fields_dic = {  'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
     var dynamic_fields     = Object.keys(dynamic_fields_dic);
     
@@ -332,6 +334,6 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    return $( "<li>" )
 	        .append( "<div>" + key + "&nbsp;<i>" + lab + "</i></div>" )
 	        .appendTo( ul );
-	};
+	}; // ******
     
 }

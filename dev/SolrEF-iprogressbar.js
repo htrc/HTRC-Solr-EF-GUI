@@ -49,12 +49,16 @@ var iprogressbar = new IndeterminateProgressbar('search-indeterminate-div',
 						'search-indeterminate-progressbar',
 						'search-indeterminate-cancel' );
 
-$(document).ready(function() {
-
+function solref_iprogressbar_dom_ready() {
     $('#'+iprogressbar.progressbar_id).progressbar({ value: false });
 
     $('#'+iprogressbar.cancel_id).click(function(event) {
 	event.preventDefault();
 	iprogressbar.abort();
     });
+}
+
+$(document).ready(function() {
+
+    solref_iprogressbar_dom_ready();
 });

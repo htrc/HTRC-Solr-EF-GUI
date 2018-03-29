@@ -309,7 +309,7 @@ function domready_help_dialogs()
     });
 }
 
-$(document).ready(function() {
+function solref_dom_ready() {
 
     var solr_col = getURLParameter("solr-col");
     if (solr_col != null) {
@@ -824,5 +824,10 @@ $(document).ready(function() {
     
     domready_volume_autocomplete('vq',volume_available_tags);
     
+}
+
+$(document).ready(function() {
+    console.log("*** Away to call solref_dom_ready()");
+    solref_dom_ready();
 });
 
