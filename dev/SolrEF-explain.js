@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 var explain_search = { 'group_by_vol':       null,
 		       'volume_level_terms': null,

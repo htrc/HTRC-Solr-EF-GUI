@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 function get_solr_stream_search_clause(arg_q)
 {

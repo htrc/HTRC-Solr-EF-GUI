@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 /*
 var getUrlParameter = function getUrlParameter(sParam) {

@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 var store_search_xhr = null; // used in iprogressbar.cancel()
 
