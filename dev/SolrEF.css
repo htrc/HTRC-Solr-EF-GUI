@@ -335,6 +335,34 @@ a.export-item {
     font-style: italic;
 }
 
+.custom-ui-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -.25em;
+    position: relative;
+    text-indent: -99999px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+
+.removeFacetIcon {
+    width: 16px; height: 16px;
+    background-image: url("../assets/jquery-ui-lightness-1.12.1/images/cancel.png");
+}
+
+.trashcan-empty24 {
+    width: 24px; height: 24px;
+    background-image: url("../assets/icons/trashcan-black-empty24.png");
+}
+
+
+.basket-empty24 {
+    width: 24px; height: 24px;
+    background-image: url("../assets/icons/basket-empty24.png");
+}
+
+
+
 /* shoppingcart selectable draggable */
 #trashcan-drop {
     width: 60px; height: 60px;
