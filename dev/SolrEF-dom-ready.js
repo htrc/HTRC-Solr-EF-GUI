@@ -712,6 +712,10 @@ function solref_dom_ready() {
     $('.checkbox-style').show("slide", { direction: "up" }, 1000);
 */
 	
+    if (store_interaction_style == null) {
+	store_interaction_style = InteractionStyleEnum.Hybrid; // default
+    }
+
     } // if solr_q == null
 
     // 
