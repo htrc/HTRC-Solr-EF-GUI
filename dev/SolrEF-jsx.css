@@ -1,0 +1,44 @@
+label {
+    font-size: 1.0rem;
+}
+
+.con {
+  padding: 0.75rem;
+}
+
+.con .main {
+  font-size: 0.9rem;
+  padding-left: 1.5rem;
+  padding-right: 0.75rem;
+  width: 77%;
+}
+
+.con .sidebar {
+  font-size: 0.85rem;
+  padding-right: 0.5rem;
+}
+
+.con .sidebar h3 {
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.narrowsearch dd {
+  bottom-margin: 0.0rem;
+}
+
+dd.showfacet {
+  margin-bottom: 0.0rem; 
+  font-size: 0.9rem;
+}
+
+a:not([href]):not([tabindex]) {
+  color: #d87600;
+  text-decoration: underline;
+}
+
+a:not([href]):not([tabindex]):hover {
+  color: #ff9a00;
+}
+
+
