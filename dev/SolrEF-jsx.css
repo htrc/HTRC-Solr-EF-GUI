@@ -24,10 +24,10 @@ label {
 }
 
 .narrowsearch dd {
-  bottom-margin: 0.0rem;
+  margin-bottom: 0.0rem;
 }
 
-dd.showfacet {
+dd.showfacet, dd.hidefacet {
   margin-bottom: 0.0rem; 
   font-size: 0.9rem;
 }
