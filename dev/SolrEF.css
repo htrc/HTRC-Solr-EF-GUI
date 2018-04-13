@@ -396,7 +396,7 @@ a.export-item {
 }
 
 .sr-add-delete-item {
-    font-weight: bold;
+    font-weight: normal;
     padding: 3px;    
     margin: 3px;
     width: 115px;
