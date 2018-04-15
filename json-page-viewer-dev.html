@@ -10,33 +10,10 @@
 
     <link href="assets/bootstrap.css" rel="stylesheet" />
     <link href="assets/main.css" rel="stylesheet" />
-
-<!--
-        <link href="/assets/solr-ef/assets/bootstrap.css" rel="stylesheet" media="screen"/>
-        <link href="/assets/solr-ef/assets/main.css" rel="stylesheet" media="screen"/>
-        <link href="/assets/solr-ef/assets/flat.css" rel="stylesheet" media="screen"/>
-        <link href="/assets/solr-ef/assets/font-awesome.css" rel="stylesheet"/>
-        <link href="/assets/solr-ef/assets/tomorrow.css" rel="stylesheet"/>
-	<link href="/assets/solr-ef/assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet"/>
-	<link href="/assets/solr-ef/assets/paging.css" rel="stylesheet"/>
--->	
 	
-	<script type="text/javascript" src="assets/jquery.js"></script>
-        <script type="text/javascript" src="assets/bootstrap.js"></script>
-	<script type="text/javascript" src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
-
-<!--
-        <script type="text/javascript" src="/assets/solr-ef/assets/highlight.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/stupidtable.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/bootstrap.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/bowser.js"></script>
-	<script type="text/javascript" src="/assets/solr-ef/assets/download.min.js"></script>
-	<script type="text/javascript" src="/assets/solr-ef/assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/htrcwarnings.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/uploadws.js"></script>
-        <script type="text/javascript" src="/assets/solr-ef/assets/ga-download-tracking.js"></script>
-	<script type="text/javascript" src="/assets/solr-ef/assets/paging.js"></script>
--->
+    <script type="text/javascript" src="assets/jquery.js"></script>
+    <script type="text/javascript" src="assets/bootstrap.js"></script>
+    <script type="text/javascript" src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
  
   </head>
   <body>
@@ -180,11 +157,13 @@
     <div id="json-page-viewer-container-dynamic-load" style="display: none"><!-- dynamic body insert --></div>
 
     <script>
+      var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
+
       $(document).ready(function() {
         var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
-        $.get(abs_url_prefix+"json-page-viewer-dev-body-dl.html", function(data,status) {
+        $.get(abs_url_prefix+"json-page-viewer-body-dl.html", function(data,status) {
   	  $.ajax({
-	        url: abs_url_prefix+"json-page-viewer-dev-body-dl.js",
+	        url: abs_url_prefix+"json-page-viewer-body-dl.js",
 	        dataType: "script",
                 success: function() {
                   //console.log("**** json-page-viewer-dynamic-load() -- success loading json-pave-viewer-dev-jsx.js");
