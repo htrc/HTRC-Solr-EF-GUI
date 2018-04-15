@@ -73,8 +73,6 @@ function solr_ef_load_async_link_css(url_prefix)
 	var link_url = solr_ef_async_link_css_urls[i];
 	var full_link_url = url_prefix+link_url;
 
-	console.log("*** full link url = " + full_link_url);
-
 	if (document.createStyleSheet){
             document.createStyleSheet(full_link_url);
         }
@@ -98,10 +96,9 @@ function solr_ef_load_domready_scripts(url_prefix) {
 		url: url_prefix+"dev/SolrEF-dom-ready.js",          
 		dataType: "script",
 		success: function() {
-		    console.log("**** finished loading scripts, away to show page");
+		    //console.log("**** finished loading scripts, away to show page");
 		    $('#solr-ef-container-loading').hide();
 		    $('#solr-ef-container-dynamic-load').show();
-		    //$('#solr-ef-container-dynamic-load').show("slide", { direction: "up" }, 1000);
 		},
 		error: solr_ef_error
 	    });
@@ -134,7 +131,7 @@ function solr_ef_load_async_scripts(url_prefix) {
 }
 
 $(document).ready(function() {
-    console.log("*** index-dev-jsx.js: on doc ready called");
+    //console.log("*** index-dev-jsx.js: on doc ready called");
 
     var react_component = $('#solr-ef-search-type').data("react-component");
 
@@ -145,7 +142,7 @@ $(document).ready(function() {
     else {
 	url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
     }
-    console.log("*** index-dev-jsx domready(), url_prefix = " + url_prefix);
+    //console.log("*** index-dev-jsx domready(), url_prefix = " + url_prefix);
 
     solr_ef_load_async_link_css(url_prefix);
     solr_ef_load_async_scripts(url_prefix);
