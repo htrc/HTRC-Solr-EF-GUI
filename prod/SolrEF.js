@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 function ajax_solr_text_search(newSearch,newResultPage)
 {

@@ -39,6 +39,8 @@ input:disabled {
     display: none;
 }
 
+
+
 li.interaction-radio-style {
     margin-left: 6px;
 }
@@ -56,6 +58,11 @@ label.interaction-radio-style {
     background: #ffc848;
 }
 
+
+.ui-menu-item .ui-state-active:hover
+{
+    font-weight: normal;
+}
 
 form.publish-workset-form > div {
     padding: 8px;
@@ -184,6 +191,13 @@ button.htrc-delete {
 
 .ui-dialog {
     z-index: 2000 !important ;
+}
+
+.help-dialog-inset {
+    padding-left: 10px;
+    margin-bottom: 15px;
+    background-color: #f8f8f8;
+    font-size: 95%;
 }
 
 .con{    padding: 2rem;}
@@ -321,6 +335,34 @@ a.export-item {
     font-style: italic;
 }
 
+.custom-ui-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -.25em;
+    position: relative;
+    text-indent: -99999px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+
+.removeFacetIcon {
+    width: 16px; height: 16px;
+    background-image: url("../assets/jquery-ui-lightness-1.12.1/images/cancel.png");
+}
+
+.trashcan-empty24 {
+    width: 24px; height: 24px;
+    background-image: url("../assets/icons/trashcan-black-empty24.png");
+}
+
+
+.basket-empty24 {
+    width: 24px; height: 24px;
+    background-image: url("../assets/icons/basket-empty24.png");
+}
+
+
+
 /* shoppingcart selectable draggable */
 #trashcan-drop {
     width: 60px; height: 60px;
@@ -354,7 +396,7 @@ a.export-item {
 }
 
 .sr-add-delete-item {
-    font-weight: bold;
+    font-weight: normal;
     padding: 3px;    
     margin: 3px;
     width: 115px;
@@ -398,4 +440,10 @@ a.export-item {
     padding: 15px;
     min-width: 400px;
     font-size: 110%;
+}
+
+.pager-container {
+    padding-top: 15px; 
+    padding-bottom: 15px;
+    background-color: white;
 }

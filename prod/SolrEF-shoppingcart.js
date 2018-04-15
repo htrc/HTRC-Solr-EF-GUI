@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 var store_shoppingcart_ids = [];
 var store_shoppingcart_ids_hash = {};

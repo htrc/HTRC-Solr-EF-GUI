@@ -1,4 +1,4 @@
-"use strict";
+//"use strict";
 
 var FacetLevelEnum = {
     Page: 1,
@@ -487,8 +487,6 @@ FacetFilter.prototype.facetlistSet = function()
     
     var filterlist_html = "";
     
-    var cancel_png = "assets/jquery-ui-lightness-1.12.1/images/cancel.png";
-    
     for (var f in this.filters) {
 	var f_split = this.filters[f].split("--");
 
@@ -508,7 +506,7 @@ FacetFilter.prototype.facetlistSet = function()
 	
 	filterlist_html += '<li>';
 	filterlist_html +=   '<a href="javascript:;" class="unselect">';
-	filterlist_html +=     '<img alt="Delete" src="'+cancel_png+'" class="removeFacetIcon">';
+	filterlist_html +=     '<span alt="Delete" class="custom-ui-icon removeFacetIcon" />';
 	filterlist_html +=   '</a>';
 	filterlist_html +=   '&nbsp;<span class="selectedfieldname">' + filter_field_display + '</span>';
 	filterlist_html +=   ':  ' + filter_term_display;
