@@ -1,0 +1,73 @@
+label {
+    font-size: 1.0rem;
+}
+
+.con {
+  padding: 0.75rem;
+}
+
+.con .main {
+  font-size: 0.9rem;
+  padding-left: 1.5rem;
+  padding-right: 0.75rem;
+  width: 77%;
+}
+
+.con .sidebar {
+  font-size: 0.85rem;
+  padding-right: 0.5rem;
+}
+
+.con .sidebar h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.narrowsearch dd {
+  margin-bottom: 0.0rem;
+}
+
+dd.showfacet, dd.hidefacet {
+  margin-bottom: 0.0rem; 
+  font-size: 0.9rem;
+}
+
+a:not([href]):not([tabindex]) {
+  color: #d87600;
+  text-decoration: underline;
+}
+
+a:not([href]):not([tabindex]):hover {
+  color: #ff9a00;
+}
+
+.container-panel a { 
+    /* color: #014c8c; */
+    color: #0275d8; 
+}
+.container-panel a:focus, .container-panel a:hover {
+    /*color: #0275d8; */
+    text-decoration: underline;
+}
+
+.container-panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.pager-container {
+  padding-left: 1.0rem;
+  padding-right: 1.0rem;
+}
+
+.pager-container a {
+    /* color: #014c8c; */
+    color: #0275d8;
+}
+.pager-container a:focus, .pager-container a:hover {
+     text-decoration: underline;
+}
+
+.btn:focus, .btn.focus {
+  box-shadow: none;
+}
