@@ -1,5 +1,9 @@
 //"use strict";
 
+if (typeof runtime_mode == "undefined") {
+  runtime_mode = "prod";
+}
+
 var solr_ef_url_prefix = "/assets/solr-ef/";
 
 var solr_ef_async_link_css_urls = [
