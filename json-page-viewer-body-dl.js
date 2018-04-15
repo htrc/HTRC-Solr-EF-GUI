@@ -9,9 +9,8 @@ var page_viewer_async_link_css_urls = [
 
     "assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css",
     "assets/paging.css",
-    "dev/SolrEF.css",
-    //"dev/SolrEF-jsx.css",
-    "dev/SolrEF-progressbar.css",
+    runtime_mode+"/SolrEF.css",
+    runtime_mode+"/SolrEF-progressbar.css",
     "assets/pager-icons.css"
 ];
 
@@ -23,21 +22,21 @@ var page_viewer_async_script_urls = [
     //"assets/download.min.js",
 
     "assets/paging.js",
-    "dev/iso-639-1.js",
-    "dev/opennlp-lang-pos-mapping.js", // defines var 'universalPOSMapping'
-    "dev/lookup-vars.js",
-    "dev/SolrEF-settings.js",
-    "dev/SolrEF-utils.js",
-    "dev/SolrEF-authentication.js",
-    "dev/SolrEF-iprogressbar.js",
-    "dev/SolrEF-facet-filter.js"
+    runtime_mode+"/iso-639-1.js",
+    runtime_mode+"/opennlp-lang-pos-mapping.js", // defines var 'universalPOSMapping'
+    runtime_mode+"/lookup-vars.js",
+    runtime_mode+"/SolrEF-settings.js",
+    runtime_mode+"/SolrEF-utils.js",
+    runtime_mode+"/SolrEF-authentication.js",
+    runtime_mode+"/SolrEF-iprogressbar.js",
+    runtime_mode+"/SolrEF-facet-filter.js"
 ];
 
 function page_viewer_load_async_link_css(url_prefix) 
 {
     var react_component = $('#json-page-viewer-type').data("react-component");
     if (react_component) {
-	page_viewer_async_link_css_urls.push("dev/SolrEF-jsx.css");
+	page_viewer_async_link_css_urls.push(runtime_mode+"/SolrEF-jsx.css");
     }
 
     var num_links = page_viewer_async_link_css_urls.length;
@@ -63,7 +62,7 @@ function page_viewer_load_async_link_css(url_prefix)
 function page_viewer_load_domready_scripts(url_prefix) 
 {
     $.ajax({
-	url: url_prefix+"dev/JsonEF-page-viewer.js",
+	url: url_prefix+runtime_mode+"/JsonEF-page-viewer.js",
 	dataType: "script",	
 	success: function() {
 	    //$('#json-page-viewer-container-loading').hide();
@@ -98,7 +97,9 @@ function page_viewer_load_async_scripts(url_prefix)
 
 
 $(document).ready(function() {
-    //console.log("*** json-page-viewer-dev-jsx.js: on doc ready called");
+    //console.log("*** json-page-viewer-body-dl.js: on doc ready called");
+
+    //alert("runtime mode = " + runtime_mode);
 
     var react_component = $('#json-page-viewer-type').data("react-component");
 
