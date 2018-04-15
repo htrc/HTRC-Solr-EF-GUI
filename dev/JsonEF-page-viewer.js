@@ -94,7 +94,7 @@ JsonEFPageViewer.prototype.isValidPageNum = function(seq_num)
 
 JsonEFPageViewer.prototype.hashmap_to_html_table = function(hashmap)
 {
-    var $table = $("<table />");
+    var $table = $("<table/>",{ width: "100%" });
 
     for (var key in hashmap) {
 	var $tr = $('<tr class="oddevenline" />');
