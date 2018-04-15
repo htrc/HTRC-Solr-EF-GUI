@@ -41,4 +41,33 @@ a:not([href]):not([tabindex]):hover {
   color: #ff9a00;
 }
 
+.container-panel a { 
+    /* color: #014c8c; */
+    color: #0275d8; 
+}
+.container-panel a:focus, .container-panel a:hover {
+    /*color: #0275d8; */
+    text-decoration: underline;
+}
 
+.container-panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.pager-container {
+  padding-left: 1.0rem;
+  padding-right: 1.0rem;
+}
+
+.pager-container a {
+    /* color: #014c8c; */
+    color: #0275d8;
+}
+.pager-container a:focus, .pager-container a:hover {
+     text-decoration: underline;
+}
+
+.btn:focus, .btn.focus {
+  box-shadow: none;
+}

@@ -442,3 +442,8 @@ a.export-item {
     font-size: 110%;
 }
 
+.pager-container {
+    padding-top: 15px; 
+    padding-bottom: 15px;
+    background-color: white;
+}

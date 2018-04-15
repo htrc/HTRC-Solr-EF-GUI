@@ -413,6 +413,7 @@ JsonEFPageViewer.prototype.show_hide_more_metadata = function()
 var ef_page_viewer = new JsonEFPageViewer();
 
 $(document).ready(function() {
+    console.log("*** JSONEF-page-viewer on doc ready called");
 
     var seq_num = null;
 
@@ -502,6 +503,7 @@ $(document).ready(function() {
     });
 
 
+
     if (htid != null) {
 	
 	var ef_download_args = { "download-id": htid };
@@ -545,17 +547,26 @@ $(document).ready(function() {
 		$('#download-json-ef-page').attr('href',download_ef_href);
 
 		//ef_page_viewer.display_ef_page_text(seq_num); // ****
+
+		$('#json-page-viewer-container-loading').hide(); // ****
+		$('#json-page-viewer-container-dynamic-load').show(); // ****
+
 		
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		$('.search-in-progress').css("cursor","auto");
 		iprogressbar.cancel();
+		$('#json-page-viewer-container-loading').hide(); // ****
+		$('#json-page-viewer-container-dynamic-load').show(); // ****
 		ajax_error(jqXHR, textStatus, errorThrown)
 	    }
 	});
     }
     else {
 	iprogressbar.cancel();
+	$('#json-page-viewer-container-loading').hide(); // ****
+	$('#json-page-viewer-container-dynamic-load').show(); // ****
+
 	htrc_alert("Missing URL parameter 'htid'");
     }
    	

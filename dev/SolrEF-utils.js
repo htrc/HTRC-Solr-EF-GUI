@@ -195,3 +195,25 @@ function ajax_error(jqXHR, textStatus, errorThrown)
 
 }
 
+function load_async_scripts(async_script_urls, on_complete_callback) {
+
+    var num_scripts = async_script_urls.length;
+    var num_loaded_scripts = 0;
+    
+    for (var i=0; i<num_scripts; i++) {
+	
+	var script_url = async_script_urls[i];
+	$.ajax({
+	    url: script_prefix+script_url,
+	    dataType: "script",
+	    success: function() {
+		num_loaded_scripts++;
+		if (num_loaded_scripts == num_scripts) {
+		    on_complete_callback();
+		}
+	    },
+	    error: ajax_error
+        });
+	
+    }    
+}

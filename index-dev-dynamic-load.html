@@ -17,8 +17,12 @@
     <script src="assets/bootstrap.js" type="text/javascript"></script>
     
     <script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
-
+<!--
     <script src="index-dev-dynamic-load.js" type="text/javascript"></script>
+-->
+<!--
+    <script src="index-dev-jsx.js" type="text/javascript"></script>
+-->
   </head>
 
   <body>
@@ -169,9 +173,28 @@
       </div>
     </nav>
     
-
-    <div id="solr-ef-container-loading">Loading ...</div>
+    <div id="solr-ef-search-type" data-react-component="false">
+    <div id="solr-ef-container-loading" class="container container-panel" style="paddingBottom: 6pt">
+      Loading ...
+    </div>
     <div id="solr-ef-container-dynamic-load" style="display: none;"><!-- dynamic body insert --></div>
+    <script>
+      $(document).ready(function() {
+        var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
+        console.log("*** abs_url_prefix = " + abs_url_prefix);
+        $.get(abs_url_prefix+"index-dev-body-jsx.html", function(data,status) {
+  	  $.ajax({
+	        url: abs_url_prefix+"index-dev-jsx.js",
+	        dataType: "script",
+                success: function() {
+                  console.log("**** index-dev-dynamic-load() -- success loading index-dev-jsx.js");
+                  $('#solr-ef-container-dynamic-load').html(data);                  
+                }
+          });
+	});
+      });
+    </script>
+
 
     <!--
     <div class="container">
