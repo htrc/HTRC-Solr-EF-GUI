@@ -40,18 +40,18 @@
   content: "\ea38";
 }
 
-.toolbar .btn {
+.pager-toolbar .btn {
     background: #666;
     color: #eee;
     text-shadow: 0 1px 1px rgba(0,0,0,0.75);
     border-color: #333;
 }
 
-.btn {
+.pager-toolbar .btn {
     border: 1px solid #bbb;    
 }
 
-.btn:hover {
+.pager-toolbar .btn:hover {
     background-color: #333333;
     text-decoration: none;
 }
