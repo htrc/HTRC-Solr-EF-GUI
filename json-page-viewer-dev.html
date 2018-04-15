@@ -182,9 +182,9 @@
     <script>
       $(document).ready(function() {
         var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
-        $.get(abs_url_prefix+"json-page-viewer-dev-body-jsx.html", function(data,status) {
+        $.get(abs_url_prefix+"json-page-viewer-dev-body-dl.html", function(data,status) {
   	  $.ajax({
-	        url: abs_url_prefix+"json-page-viewer-dev-jsx.js",
+	        url: abs_url_prefix+"json-page-viewer-dev-body-dl.js",
 	        dataType: "script",
                 success: function() {
                   //console.log("**** json-page-viewer-dynamic-load() -- success loading json-pave-viewer-dev-jsx.js");
