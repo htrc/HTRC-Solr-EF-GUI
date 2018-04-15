@@ -112,7 +112,20 @@ function add_titles_and_authors_solr(jsonData) {
 
 	    //if ((rights != "pd") && (rights != "pdus")) { // ****
 	    //if (rights != "pd") { // ****
-		var href = 'json-page-viewer-dev.html?htid='+htid;
+	        var react_component = $('#solr-ef-search-type').data("react-component");
+	        var href;
+	        if (react_component) {
+		    href = 'solr-ef-page-viewer';
+		}
+	        else {
+		    if (runtime_mode == "dev") {
+			href = 'json-page-viewer-dev.html';
+		    }
+		    else {
+			href = 'json-page-viewer.html';
+		    }
+		}
+	        href += '?htid='+htid;
 
 		var seq_str = $(this).text();
 
