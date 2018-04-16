@@ -170,6 +170,7 @@
     </div>
     <div id="solr-ef-container-dynamic-load" style="display: none;"><!-- dynamic body insert --></div>
     <script>
+      var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
       $(document).ready(function() {
         var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
         $.get(abs_url_prefix+"index-dev-body-jsx.html", function(data,status) {
