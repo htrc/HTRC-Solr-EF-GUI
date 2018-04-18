@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <title>HTRC Page-Level Extracted Feature Solr Search</title>
+
+        <link rel="shortcut icon" href="https://analytics.hathitrust.org/assets/images/favicon.ico">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Bootstrap -->
+        <link href="assets/bootstrap.css" rel="stylesheet" media="screen">
+        <link href="assets/main.css" rel="stylesheet" media="screen">
+        <link href="assets/flat.css" rel="stylesheet" media="screen">
+        <link href="assets/font-awesome.css" rel="stylesheet">
+        <link href="assets/tomorrow.css" rel="stylesheet">
+	<link href="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css" rel="stylesheet">
+	<link href="assets/paging.css" rel="stylesheet">
+	
+        <link href="prod/SolrEF.css" rel="stylesheet">
+        <link href="prod/SolrEF-progressbar.css" rel="stylesheet">
+	
+        <script src="assets/jquery.js"></script>
+        <script src="assets/highlight.js"></script>
+        <script src="assets/stupidtable.js"></script>
+        <script src="assets/bootstrap.js"></script>
+        <script src="assets/bowser.js"></script>
+	<script src="assets/download.min.js"></script>
+	<script src="assets/lucene-query-parser.js"></script>
+	<script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="assets/htrcwarnings.js"></script>
+        <script type="text/javascript" src="assets/uploadws.js"></script>
+<!--
+        <script type="text/javascript" src="assets/ga-download-tracking.js"></script>
+-->
+	<script type="text/javascript" src="assets/paging.js"></script>
+	
+	<script src="prod/iso-639-1.js"></script> <!-- defines var 'isoLangs' -->
+	<script src="prod/lookup-vars.js"></script>
+
+	<script src="prod/SolrEF-globals.js"></script>
+	<script src="prod/SolrEF-settings.js"></script>
+	<script src="prod/SolrEF-utils.js"></script>
+	<script src="prod/SolrEF-authentication.js"></script>
+	<script src="prod/SolrEF-iprogressbar.js"></script>
+	<script src="prod/SolrEF-worksets.js"></script>
+	<script src="prod/SolrEF-stream.js"></script>
+	<script src="prod/SolrEF-explain.js"></script>
+	<script src="prod/SolrEF-facet-filter.js"></script>
+	<script src="prod/SolrEF-shoppingcart.js"></script>
+	<script src="prod/SolrEF-query-breakdown.js"></script>
+	<script src="prod/SolrEF.js"></script>
+	<script src="prod/SolrEF-result-set.js"></script>
+	<script src="prod/SolrEF-dom-ready.js"></script>
+	
+  </head>
+  <body>
+        <nav class="navbar navbar-default navbar-fixed-top navbar-htrc" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="https://analytics.hathitrust.org/"><img src="assets/hathi_small.png" style="padding-right : 5 px ; margin-top : - 1 px ;" alt=" " height="32" width="36">
+                        HTRC Portal
+                    </a>
+                </div>
+
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="https://analytics.hathitrust.org/">Home</a></li>
+                        
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Worksets <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/listuserworksets')">View my worksets</a></li>
+                                
+                                <li class="divider"></li>
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/listallworksets')">View all worksets</a></li>
+                                
+                                <li class="divider"></li>
+                                
+                                    <li><a href="#" onclick="loggingRequiredWarning('/uploadworkset')">Upload workset</a></li>
+                                
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="#" onclick="blacklightLoggingWarning ( '      https://analytics.hathitrust.org/blacklight ')">
+                                        Create workset</a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                            <li><a href="#" onclick="loggingRequiredWarning('/listalgorithms')">Algorithms</a></li>
+                        
+                        
+                            <li><a href="#" onclick="loggingRequiredWarning('/listjobs')">Results</a></li>
+                        
+                        
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    Capsule<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+Data+Capsule">
+                                        Documentation</a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    
+                                        <li><a href="#" onclick="loggingRequiredWarning('/listvms')">
+                                            Show Capsules</a></li>
+                                    
+                                    <li class="divider"></li>
+                                    
+                                        <li><a href="#" onclick="loggingRequiredWarning('/createvms')">
+                                            Create Capsule</a></li>
+                                    
+                                </ul>
+                            </li>
+                        
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Data<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://analytics.hathitrust.org/features">
+                                    Extracted Features Dataset</a>
+                                </li>
+                                <li><a href="https://analytics.hathitrust.org/genre">
+                                    Word Frequencies in English-Language Literature, 1700-1922</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Help<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+User+Getting+Started+FAQ">
+                                    Knowledge Base</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li><a href="mailto:htrc-help@hathitrust.org?Subject=Contact">
+                                    Contact</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="https://analytics.hathitrust.org/about">About</a>
+                    </li></ul>
+                    
+                        <ul class="nav pull-right navbar-nav" id="navbar-login">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    Sign In<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                  <li><a onclick="solr_ef_login()">Sign In</a></li>
+<!--				  
+				  <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
+-->
+                                  <li class="divider"></li>
+                                  <li><a href="https://analytics.hathitrust.org/passwordresetmail">
+                                        Forgot Password?</a></li>
+                                </ul>
+                            </li>
+
+                            <li><a href="https://analytics.hathitrust.org/signup"><span>Sign Up</span></a></li>
+                        </ul>
+
+			<ul class="nav pull-right" id="navbar-logout" style="display: none">
+			  <li class="dropdown">
+			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
+			    <ul class="dropdown-menu">
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-drag-and-drop" id="pref-drag-and-drop" />
+				<label for="pref-drag-and-drop">Drag-and-drop</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-checkboxes" id="pref-checkboxes" />
+				<label for="pref-checkboxes">Check-boxes</label>
+			      </li>
+			      <li class="interaction-radio-style" >
+				<input type="radio" name="interactive-style" value="pref-hybrid" id="pref-hybrid"
+				       checked="checked" />
+				<label for="pref-hybrid">Hybrid</label>
+			      </li>
+			      <li><hr /></li>
+			      <li><a onclick="solr_ef_logout()">Logout</a></li>
+			      
+			      <!--
+				  <li><a href="/logout">Logout</a></li>
+				  -->
+			    </ul>
+			  </li>
+			</ul>
+
+                    
+                </div>
+                    <!--/.nav-collapse -->
+            </div>
+        </nav>
+        
+        
+
+    <div class="container container-panel" style="padding-top: 15px; padding-bottom: 15px;">
+
+      <div id="htrc-alert-dialog" title="Alert">
+	<p id="htrc-alert-body">
+	</p>
+      </div>
+
+      <div id="htrc-login-dialog" title="Login" style="padding: 0;">
+	<p id="htrc-login-body" style="margin: 0px;">
+	</p>
+      </div>
+
+      <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
+
+	<!--
+	<p id="htrc-publish-body" style="color: red; font-size: 120%;">
+	  This feature of the Extracted Features Solr Search site is a placeholder.
+	  The form below is disable, as it is currently non-functional.
+	</p>
+
+	<div class="disabled-div">
+	  -->
+	
+	<p id="htrc-publish-body">	 
+	  Publishing result set in HathiTrust Research Center
+	  Registry:
+	</p>
+	<form class="publish-workset-form">
+	  <div>
+	    <div>
+	      Workset Title:
+	    </div>
+	    <input id="publish-ws-title" type="text"/>
+	  </div>
+
+	  <div>
+	    <div>
+	      Workset Creator:
+	    </div>
+	    <input id="publish-username" type="text" disabled="disabled" />
+	  </div>
+	  
+	  <div>
+	    <div>
+	      Abstract:
+	    </div>
+	    <textarea id="publish-ws-abstract"
+		      placeholder="Please enter an abstract of your workset"></textarea>
+	  </div>
+
+	  <div>
+	    <div>
+	      Criteria:
+	    </div>
+	    <textarea id="publish-ws-criteria"
+		      placeholder="What was the criteria established for including items in this workset?"></textarea>
+	  </div>
+
+	  <div>
+	    <div>
+	      Research Motivation:
+	    </div>
+	    <textarea id="publish-ws-motivation"
+		      placeholder="What was the research motivation for forming this workset?"></textarea>
+	  </div>
+
+	</form>
+      <!--
+      </div>
+      -->
+      </div>
+
+      
+        <div class="row">
+            <div class="col-md-2 col-sm-2 hidden-xs">
+                <img class="img-responsive" src="assets/hathi_medium.png" alt=" ">
+            </div>
+            <div class="col-md-10 col-sm-10 col-xs-12 col-lg-8" style="margin-left: 0;">
+              <h1 id="h1-header" style="font-weight:bold;font-size:46px">HTRC Extracted Feature<br/>
+		Solr Search
+		<span id="solr-col-name" style="font-size: 70%;"></span>
+	      </h1>
+            </div>
+        </div>
+        <div class="row" style="padding-top : 25px; font-size : 17px; line-height : 27px;">
+            <div class="col-md-12">
+
+	      <h2>Faceted Unigram Page-based Extracted Feature Search (Prototype)</h2>
+
+	      <div id="tabs-search">
+		<div style="float: right; padding: 10px;">
+		  <div id="show-hide-query-tabs-box"
+		       style="width: 20px; height: 20px;" title="Hide query input area">
+		    <div style="text-align: center; vertical-align: middle; line-height: 20px;">
+		      <span id="show-hide-query-tabs-turnstyle">
+			<span class="ui-icon ui-icon-triangle-1-s"></span>
+		      </span>
+		    </div>
+		  </div>
+		</div>
+		<ul>
+		  <li><a id="tab-page"     href="#tabs-shared">Page-level</a></li>
+		  <li><a id="tab-volume"   href="#tabs-shared">Volume</a></li>
+		  <li><a id="tab-combined" href="#tabs-shared">Combined</a></li>
+		  <li><a id="tab-advanced" href="#tabs-shared">Advanced</a></li>
+		</ul>
+		<div id="tabs-shared">
+
+	      
+	      <form id="search-form">
+		<input type="hidden" id="start" name="start" value="0"/>
+		
+		<table class="query-table">
+		  <tr class="volume-query-row">
+		    <td>Volume Metadata:</td>
+		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
+			       placeholder="field:term e.g., title_t:shakespeare"
+			       style="width: 600px;"/>
+		      <br />
+		      <nobr>
+			<input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on">
+			Search all volume fields
+		      </nobr>
+		    </td>
+
+		    <td>
+		      <span id="volume-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
+		    </td>		      
+		  </tr>
+		  <tr class="volume-query-row">
+		    <td></td>
+		    <td style="color: #aaaaaa; width: 400px; font-size: 14px; line-height: 16px; padding-bottom: 10px;">
+		      
+		      <div id="volume-help-dialog"
+			   title="Help: Query Volume Metadata"
+			   style="height: 500px;">
+			<div id="volume-help-body">
+
+			  <p>
+			    Volume-level metadata searching is case-insensitive.
+			  </p>
+			  
+			  <p>
+			    To enter a title-based search, simply
+			    enter the plain text words into the Volume
+			    Metadata search box.  For phrased-based
+			    searching quote the words &quot;like
+			    this&quot;
+			  </p>
+
+			  <p>
+			    To search all metadata fields, tick
+			    the <i>Search all volume fields</i>
+			    below the search box.
+			  </p>
+			  
+			  <p>
+			    To search specific volume metadata fields
+			    use the field:term form, such
+			    as <i>names_t:Austen</i> or
+			    <i>names_t:&quot;Austen, Jane&quot;</i>
+			    for a phrase-based search.
+			  </p>
+			  <p>
+			    In alphabetical order, the indexed fields are:
+			  </p>
+			  <p>
+			    Wildcard matching includes using '?' for a single
+			    character and '*' for multiple characters.  For
+			    example 'canad?' and '*land'.
+			  </p>
+
+			  <div id="volume-help-fields" style="padding-left: 10px;">
+			  </div>
+			  
+			</div>
+		      </div>		      
+		    </td>
+		  </tr>
+		  
+		  <tr class="page-query-row">
+		    <td>Page-level Text:</td>
+		    <td>
+		      <input type="text"   class="search-in-progress" id="q" name="q"
+			     style="width: 600px;"/>
+		    </td>
+		    <td>
+		      <span id="page-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
+
+		      <div id="page-help-dialog"
+			   title="Help: Query Page Metadata"
+			   style="height: 500px;">
+			<div id="page-help-body">
+
+			  <p>
+			    To enter a Part-of-Speech (POS) search, simply
+			    enter the plain text words into the Page-level
+			    Text search box.  For phrased-based
+			    searching quote the words &quot;like
+			    this&quot;
+			  </p>
+
+			  <p>
+			    Page-level metadata searching is case-insensitive.
+			  </p>
+
+
+			  <p>
+			    To gather all the matching results from
+			    one volume together when searching, tick
+			    the <i>Sort &amp; Group by volume</i> checkbox
+			    below the search box.
+			  </p>
+
+			  <p>
+			    To search specific languages and for particular
+			    parts of speech within that language (where available)
+			    use the checkboxes below the Page-level Text
+			    search box to have them include in the search.
+			  </p>
+			  <p>
+			    For languages with part-of-speech indexing
+			    a checkbox is provided to enable/disable
+			    that entire language in the search.  There
+			    is also a <i>Search all Languages</i> checkbox
+			    provided as a convenient way to override
+			    individual selections, and have the query
+			    terms entered apply to all languages
+			    and part-of-speech tags.
+			  </p>
+
+			  <p>
+			    Wildcard matching includes using '?' for a single
+			    character and '*' for multiple characters.  For
+			    example 'canad?' and '*land'.
+			  </p>
+
+			</div>
+		      </div>		      		      
+		    </td>		      				    
+		  </tr>
+		  
+		  <tr class="advanced-query-row">
+		    <td>
+		      Raw Solr Query:
+		    </td>
+		    <td>
+		      <textarea id="advanced-q" rows="5" cols="69"
+				placeholder="Enter query using raw Solr syntax"></textarea>
+		    </td>
+		    <td>
+		      <span id="advanced-query-help" style="cursor: help">
+			<span class="ui-icon ui-icon-info"></span> Help
+		      </span>
+
+		      <div id="advanced-query-help-dialog"
+			   title="Help: Advanced Query"
+			   style="height: 500px;">
+			<div id="advanced-query-help-body">
+
+			  <p>
+			    Advancecd quries can be expressed directly using the Solr Query syntax.
+			    A concise guide on this can be found at
+			    <a href="http://www.solrtutorial.com/solr-query-syntax.html" target="_blank">Solr Tutorial</a>.
+			    For comprehensive documentation see the
+			    <a href="https://lucene.apache.org/solr/guide/6_6/the-standard-query-parser.html#the-standard-query-parser" target="_blank">
+			      Apache Solr Reference
+			    </a>.
+			  </p>
+			</div>
+		      </div>
+			    
+		    </td>
+		  </tr>
+
+		  <tr class="page-or-advanced-query-row">
+		    <td>
+		    </td>
+		    <td>
+		      <nobr>
+			<input type="checkbox" id="group-results-by-vol" name="group-results-by-vol" value="on">
+			<span>Sort &amp; Group by Volume</span>
+		      </nobr>
+		    </td>
+		  </tr>
+
+		  <tr>
+		    <td></td>
+		    <td>
+		      <button class="search-in-progress" id="search-submit" style="float: right;">Search</button>
+<!--
+		      <fieldset id="tokenize-mode" style="float: right; padding-right: 10px;">
+			<span>Tokenize check:</span>
+			<input type="radio" name="tokenize-mode" id="tokenize-on" checked="checked" />
+			<label for="tokenize-on">On</label>
+			<input type="radio" name="tokenize-mode" id="tokenize-off" />
+			<label for="tokenize-off">Off</label>
+		      </fieldset>
+-->
+
+		    </td>
+		    <td>
+		    </td>
+		  </tr>
+		  
+		</table>
+
+				
+
+		<div class="page-query-row">
+		  <input type="checkbox" id="search-all-langs"    name="search-all-langs"     value="on">&nbsp;Search all Languages
+		
+		  <div id="pos-fieldsets">
+		  </div>		
+		  
+		  <fieldset class="show-hide-lang">
+		    <legend style="margin-bottom: 5px; padding-top: 15px;">
+		      Other Languages (without modelled parts-of-speech)
+		    </legend>
+		    <div id="other-langs">
+		    </div>
+		  </fieldset>
+		</div>
+
+	      </form>
+
+	      	</div> <!-- end of tabs -->
+	      </div> <!-- end of tab wrapper -->
+
+	    </div>
+        </div>
+
+	<hr />
+	<div id="search-results-area" class="search-in-progress" style="position: relative; min-height: 50px;">
+	  <div id="search-results-anchor" style="position: absolute; top: -90px;">
+	  </div>
+
+	  <div id="search-indeterminate-div" class="search-indeterminate" style="display:none;">
+	    <span class="progressbar-margin progressbar-label" >
+	      <span id="search-indeterminate-label"></span>
+	    </span>
+	    <div style="height: 34px;">
+	      <div class="progressbar-margin progressbar-cancel">	    
+		<img id="search-indeterminate-cancel"
+		     src="assets/jquery-ui-lightness-1.12.1/images/cancel.png" title="Cancel search">
+	      </div>
+	      <div id="search-indeterminate-progressbar" class="progressbar-margin" style="float: left; margin-right: 0px;"></div>
+	    </div>
+	  </div>
+
+    <div id="search-results-page" class="con page centered" style="display: none;">
+      
+      <div class="facets sidebar">
+        <div id="selectedFacets" class="advancedSelectedFacets">
+	  <h3>Applied Filters</h3>
+          <ul class="filters  list-unstyled">
+ 
+          </ul>
+	</div>
+
+	<div style="position: relative;">
+	  <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
+            <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
+	    <div>
+	      <div id="export-by-vol-div" class="tightoddevenline" style="display: none">
+		<a id="export-by-vol"  class="export-item" 
+		   download="htrc-volume-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+		</a>
+	      </div>
+	      <div id="export-by-page-div" class="tightoddevenline" style="display: none">
+		<a id="export-by-page" class="export-item"
+		   download="htrc-page-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+		</a>
+	      </div>
+	      <div id="export-ef-metadata-div" class="export-item tightoddevenline" style="display: none">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		Volume Metadata:
+		<div style="margin-top: -2px; padding-bottom: 2px;">
+		  <a id="export-ef-metadata-json" class="export-item" style="display: inline; padding-left: 20px;"
+		     download="htrc-metadata-export.json">
+		    JSON
+		  </a>, 
+		  <a id="export-ef-metadata-csv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.csv">
+		    CSV
+		  </a>,
+		  <a id="export-ef-metadata-tsv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.tsv">
+		    TSV
+		  </a>
+		</div>
+	      </div>
+	      <div id="export-ef-zip-div" class="tightoddevenline" style="display: none">
+		<a id="export-ef-zip" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> JSON Extracted Features (ZIP) 
+		</a>
+	      </div>
+	      <div id="export-ef-to-registry-div" class="tightoddevenline" style="display: none">
+		<a id="export-ef-to-registry" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		</a>
+	      </div>
+	    </div>
+          </div>
+
+	  	  
+	  <div id="status-export-by"
+	       style="position: absolute; left:0;top:-24px; z-index: 2;">
+	    <div>
+	      <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
+	      <!--
+	      <span id="XXXX-search-results-total-span"></span>
+	      -->
+	      <span class="exp-vol-count-span" style="display:none;">
+		<span class="exp-vol-count-computing">[computing volume count ...]</span>
+		<span id="exp-vol-count-sidebar" class="exp-vol-count"></span> 
+	      </span>
+	    </div>
+	  </div>
+
+	  <div id="coverup-export-by"
+	       style="position: relative; z-index: 1; visibility: hidden;">
+            <h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
+	    <div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-by-vol"  class="export-item"
+		   download="htrc-volume-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-by-page" class="export-item"
+		   download="htrc-page-export.json" target="_blank">
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+		</a>
+	      </div>
+	      <div id="coverup-export-ef-metadata" class="export-item tightoddevenline">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		Volume Metadata:
+		<div style="margin-top: -2px; padding-bottom: 2px;">
+		  <a id="coverup-export-ef-metadata-json" class="export-item" style="display: inline; padding-left: 20px;"
+		     download="htrc-metadata-export.json">
+		    JSON
+		  </a>, 
+		  <a id="coverup-export-ef-metadata-csv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.csv">
+		    CSV
+		  </a>,
+		  <a id="coverup-export-ef-metadata-tsv" class="export-item" style="display: inline;"
+		     download="htrc-metadata-export.tsv">
+		    TSV
+		  </a>
+		</div>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-ef-zip" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> JSON Extracted Features (ZIP) 
+		</a>
+	      </div>
+	      <div class="tightoddevenline">
+		<a id="coverup-export-ef-to-registry" class="export-item"
+		   download>
+		  <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		</a>
+	      </div>
+	    </div>
+	    
+<!--
+
+
+	    <h3 class="narrowexport">Export Results</h3>
+	    <div>
+	      <a id="coverup-export-by-vol"  class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+	      </a>
+	      <a id="coverup-export-by-page" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+	      </a>
+	      <div id="coverup-export-ef-metadata" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		   Volume Metadata:
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.json" target="_blank">
+		     json
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.csv">
+		     csv
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.tsv" target="_blank">
+		     tsv
+		   </a>
+	      </div>
+	      <a id="coverup-export-ef-zip" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
+	      </a>
+	      <a id="coverup-export-ef-to-registry" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+	      </a>	      
+	    </div>
+-->
+	  </div>	  
+
+	  
+<!--
+	  <div id="coverup-export-by"
+	       style="position: relative; z-index: 1; visibility: hidden;">
+	    <h3 class="narrowexport">Export Results</h3>
+	    <div>
+	      <a id="coverup-export-by-vol"  class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Volume IDs
+	      </a>
+	      <a id="coverup-export-by-page" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Page IDs
+	      </a>
+	      <div id="coverup-export-ef-metadata" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span>
+		   Volume Metadata:
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.json" target="_blank">
+		     json
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.csv">
+		     csv
+		   </a>,
+		   <a class="export-item" style="display: inline;"
+		      download="htrc-metadata-export.tsv" target="_blank">
+		     tsv
+		   </a>
+	      </div>
+	      <a id="coverup-export-ef-zip" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
+	      </a>
+	      <a id="coverup-export-ef-to-registry" class="export-item">
+		<span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+	      </a>	      
+	    </div>
+	  </div>	  
+	-->
+	</div>
+
+        <div class="narrow">
+          <h3 class="narrowsearch" style="display: none">Refine Results
+	    <span id="facet-units" class="page-count"></span></h3>
+          <div id="facetlist">
+         
+          </div>
+        </div>
+      </div>
+
+      <div class="main">
+
+	<div id="droppable-targets" class="drag-and-drop-style">
+	  <div id="trashcan-drop" style="display: none; float: left"
+	       titleXXXX="Click on item(s) in the result list to select them and then drag them on to the trash can to delete" >
+	  </div>
+
+	  <div id="shoppingcart-drop-wrapper" style="display: none; float: right; position: relative">
+	    <div id="shoppingcart-drop" style="position: relative">
+	    </div>
+	    <div id="shoppingcart-label"
+		 style="position: absolute; bottom: -10px; left: 15px; font-style: italic; font-size: 90%">(0 items)</div>
+	  </div>
+
+	  <div id="tr-add-delete-wrapper" class="checkbox-style">
+	    <form style="float: right; padding-top: 20px;">
+	      <button id="tr-delete-item" class="adi-delete sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
+	      <button id="tr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/basket-empty24.png" /></button>
+	      <button id="tr-goto-cart"   class="adi-goto   sr-add-delete-item">View basket<span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	    </form>
+	    <!--
+	    <div style="clear:both;"></div>
+	    <hr />		  
+-->
+	  </div>
+
+	  
+	  <div style="clear:both"></div>	  
+	</div>
+
+	
+
+	<div id="search-results-total">
+	  <div style="float:left;">
+	    <span id="search-results-total-span"></span>
+	    <span id="srt-vol-count-span" class="exp-vol-count-span" style="display:none;">
+	      <span id="srt-vol-count-computing" class="exp-vol-count-computing">[computing volume count ...]</span>
+	      <span id="srt-vol-count" class="exp-vol-count"></span> 
+	    </span>
+	  </div>
+	  
+	  <div style="float:right; width=144px;">
+	    <div class="search-loading-more" style="display:none;">
+	      <span class="progressbar-label">Loading more results: </span>
+	      <div id="search-lm-progressbar-top"></div>
+	    </div>
+	  </div>
+
+	  <div style="clear:both"></div>
+	  
+	</div>
+	<div id="search-explain">
+	</div>
+	<div id="search-showing-wrapper">
+	  <hr />
+	  <div id="search-showing" style="float:left;">
+	  </div>
+	  <div id="select-for-shoppingcart" style="float:right;">
+	    <form>
+	      <button id="sr-select-all" class="sr-item-multisel">Select All</button>
+	      <button id="sr-deselect-all" class="sr-item-multisel" disabled="disabled">Deselect All</button>
+	      <button id="sr-invert-selection" class="sr-item-multisel" disabled="disabled">Invert Selection</button>
+	    </form>
+	  </div>
+	  <div style="clear:both; padding-bottom: 7px;"></div>
+	</div>
+
+      	<div id="search-results">	  
+	</div>
+	
+      	<div class="search-loading-more" style="display:none;">
+	  <span class="progressbar-label">Loading more results: </span>
+	  <div id="search-lm-progressbar-bot"></div>	    
+	</div>
+
+	<div id="sr-add-delete-wrapper" class="checkbox-style">
+	  <form style="float: right; padding-bottom: 5px;">
+	    <button id="sr-delete-item" class="adi-delete sr-add-delete-item">Delete <img src="assets/icons/trashcan-black-empty24.png" /></button>
+	    <button id="sr-add-item"    class="adi-add    sr-add-delete-item">Add <img src="assets/icons/basket-empty24.png" /></button>
+	    <button id="sr-goto-cart"   class="adi-goto   sr-add-delete-item">View basket <span class="ui-icon ui-icon-arrowthick-1-e"/></button>
+	  </form>
+	  <div style="clear:both;"></div>
+	  <hr />		  
+	</div>
+	
+	<div id="next-prev" style="display:none;">
+	  <div style="width:100%;">
+	    <hr />
+	    <div id="search-prev" style="float: left;">
+	      <a><span class="ui-icon ui-icon-circle-triangle-w"></span>Previous</a>
+	    </div>
+	    <div id="search-next" style="float: right;">
+	      <a>Next<span class="ui-icon ui-icon-circle-triangle-e"></span></a>
+	    </div>
+	  </div>
+	</div>
+	<div id="page-bar">	  
+	</div>
+
+      </div>      
+      
+    </div>
+	  
+	</div>
+	
+    </div>
+
+
+            
+    <div class="container">
+      <h4>Additional Resources</h4>
+      <ul>
+	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB (docs not stored)</li>
+<!--
+	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.7 billion pages)</a></li>
+-->
+	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
+	<li><a href="solr-ef-query-api.txt">View details about searching directory using the SOLR API</a></li>
+	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
+	<li><a href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
+	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
+	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
+	<li><a href="?solr-col=faceted-htrc-fictsample-ef20">Switch to Ted's <i>FictMeta</i> 1055 samples collection</a></li>
+	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>	
+      </ul>
+    </div>
+
+	
+        <div class="container">
+        <p style="text-align: center; font-size: small; margin-top: 10px;">HTRC Portal (<a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+Service+Release+v3.1+for+Uncamp+2015" target="_blank">v3.2.x</a>)
+        </p>
+        </div>
+
+        
+        <div id="push"></div>
+        
+        
+        <div class="modal fade" id="create-collection-modal" aria-hidden="true" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Create Workset</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>You are being redirected to the Workset 
+Builder.
+                            If this is the first time accessing it 
+during this browser session,
+                            you will need to select "Login" from the 
+top-right menu bar before creating or modifying a workset.
+                            We are aware this is inconvenient and we're 
+working on a technical solution to eliminate this requirement.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <span class="pull-left" style="padding-top : 5 px ;"><input id="dont-show" style="margin : - 3 px 0 0 ;" type="checkbox">
+                            Don't Show This Again.</span>
+                        <a href="#" class="btn btn-link btn-sm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                        <a id="modal-wb-url" href="" class="btn btn-sm btn-primary" onclick="goToCreateCollection ( )">
+                            Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="login-required-modal" aria-hidden="true" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Please Sign in</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>You need to sign in to access this functionality.</p>
+                    </div>
+                    <div class="modal-footer">
+                        
+                        
+                        <a href="#" class="btn btn-link btn-sm" data-dismiss="modal" aria-hidden="true">Cancel</a>
+                        <a id="modal-target-url" href="" data-toggle="modal" class="btn btn-sm btn-primary">
+                            Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+</body></html>

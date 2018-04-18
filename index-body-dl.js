@@ -14,8 +14,8 @@ var solr_ef_async_link_css_urls = [
     "assets/jquery-ui-lightness-1.12.1/jquery-ui.min.css",
 
     "assets/paging.css",
-    "dev/SolrEF.css",
-    "dev/SolrEF-progressbar.css"
+    runtime_mode+"/SolrEF.css",
+    runtime_mode+"/SolrEF-progressbar.css"
 ];
 
 var solr_ef_async_script_urls = [ 
@@ -30,21 +30,21 @@ var solr_ef_async_script_urls = [
     "assets/uploadws.js",
 
     "assets/paging.js",
-    "dev/iso-639-1.js",
-    "dev/lookup-vars.js",
-    "dev/SolrEF-globals.js",
-    "dev/SolrEF-settings.js",
-    "dev/SolrEF-utils.js",
-    "dev/SolrEF-authentication.js",
-    "dev/SolrEF-iprogressbar.js",
-    "dev/SolrEF-worksets.js",
-    "dev/SolrEF-stream.js",
-    "dev/SolrEF-explain.js",
-    "dev/SolrEF-facet-filter.js",
-    "dev/SolrEF-shoppingcart.js",
-    "dev/SolrEF-query-breakdown.js",
-    "dev/SolrEF.js",
-    "dev/SolrEF-result-set.js"
+    runtime_mode+"/iso-639-1.js",
+    runtime_mode+"/lookup-vars.js",
+    runtime_mode+"/SolrEF-globals.js",
+    runtime_mode+"/SolrEF-settings.js",
+    runtime_mode+"/SolrEF-utils.js",
+    runtime_mode+"/SolrEF-authentication.js",
+    runtime_mode+"/SolrEF-iprogressbar.js",
+    runtime_mode+"/SolrEF-worksets.js",
+    runtime_mode+"/SolrEF-stream.js",
+    runtime_mode+"/SolrEF-explain.js",
+    runtime_mode+"/SolrEF-facet-filter.js",
+    runtime_mode+"/SolrEF-shoppingcart.js",
+    runtime_mode+"/SolrEF-query-breakdown.js",
+    runtime_mode+"/SolrEF.js",
+    runtime_mode+"/SolrEF-result-set.js"
  ];
 
 
@@ -67,7 +67,7 @@ function solr_ef_load_async_link_css(url_prefix)
 {
     var react_component = $('#solr-ef-search-type').data("react-component");
     if (react_component) {
-	solr_ef_async_link_css_urls.push("dev/SolrEF-jsx.css");
+	solr_ef_async_link_css_urls.push(runtime_mode+"/SolrEF-jsx.css");
     }
 
     var num_links = solr_ef_async_link_css_urls.length;
@@ -93,11 +93,11 @@ function solr_ef_load_async_link_css(url_prefix)
 
 function solr_ef_load_domready_scripts(url_prefix) {
     $.ajax({
-	url: url_prefix+"dev/SolrEF-autocomplete.js",          
+	url: url_prefix+runtime_mode+"/SolrEF-autocomplete.js",          
 	dataType: "script",
 	success: function() {			
 	    $.ajax({
-		url: url_prefix+"dev/SolrEF-dom-ready.js",          
+		url: url_prefix+runtime_mode+"/SolrEF-dom-ready.js",          
 		dataType: "script",
 		success: function() {
 		    //console.log("**** finished loading scripts, away to show page");
