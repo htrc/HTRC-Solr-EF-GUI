@@ -549,7 +549,7 @@ $(document).ready(function() {
 		//ef_page_viewer.display_ef_page_text(seq_num); // ****
 
 		$('#json-page-viewer-container-loading').hide(); // ****
-		$('#json-page-viewer-container-dynamic-load').show(); // ****
+		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
 
 		
 	    },
@@ -557,7 +557,7 @@ $(document).ready(function() {
 		$('.search-in-progress').css("cursor","auto");
 		iprogressbar.cancel();
 		$('#json-page-viewer-container-loading').hide(); // ****
-		$('#json-page-viewer-container-dynamic-load').show(); // ****
+		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
 		ajax_error(jqXHR, textStatus, errorThrown)
 	    }
 	});
@@ -565,7 +565,7 @@ $(document).ready(function() {
     else {
 	iprogressbar.cancel();
 	$('#json-page-viewer-container-loading').hide(); // ****
-	$('#json-page-viewer-container-dynamic-load').show(); // ****
+	$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
 
 	htrc_alert("Missing URL parameter 'htid'");
     }

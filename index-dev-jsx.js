@@ -102,7 +102,7 @@ function solr_ef_load_domready_scripts(url_prefix) {
 		success: function() {
 		    //console.log("**** finished loading scripts, away to show page");
 		    $('#solr-ef-container-loading').hide();
-		    $('#solr-ef-container-dynamic-load').show();
+		    $('#solr-ef-container-dynamic-load').show("slide", { direction: "up" }, 1000);
 		},
 		error: solr_ef_error
 	    });
