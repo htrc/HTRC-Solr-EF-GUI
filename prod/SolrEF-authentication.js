@@ -41,6 +41,38 @@ function solr_ef_logout()
 
 function solr_ef_login_to_publish()
 {
+    var react_component = $('#solr-ef-search-type').data("react-component");
+    console.log("**** react component = " + react_component);
+
+    if (react_component) {
+	solr_ef_login_to_publish_react()
+    }
+    else {
+	solr_ef_login_to_publish_FAKED()
+    }
+}
+
+function solr_ef_login_to_publish_react()
+{
+    $.ajax({
+	url: '/isauthenticated',
+	dataType: "json",
+	success: function (json_data) {
+	    console.log("*** is authenticated: " + JSON.stringify(json_data));
+	    $('#publish-username').val(json_data.user);
+	    $("#htrc-publish-dialog").dialog( "open" );
+	},
+	error: function () {
+	    console.log("**** user is not currently authenticated");
+	    window.location.replace("/signin");
+	    //document.location.href = 
+	}
+    });
+
+}
+
+function solr_ef_login_to_publish_FAKED()
+{
     var needs_login = true;
     var username = "";
     
