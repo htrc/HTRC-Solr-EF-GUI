@@ -1,4 +1,6 @@
 
+var debug_autocomplete = false;
+
 // From https://stackoverflow.com/questions/17005823/getting-deleted-character-or-text-on-pressing-delete-or-backspace-on-a-textbox
 $.fn.getCursorPosition = function() {
     var el = $(this).get(0);
@@ -94,9 +96,7 @@ function term_split(val,strip_quotes) {
 
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
-    console.log("*** domready_volume_autocomplete() called");
-
-    var dynamic_fields_dic = {  'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
+    var dynamic_fields_dic = { 'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
     var dynamic_fields     = Object.keys(dynamic_fields_dic);
     
     var dynamic_fields_re_str = "^("+dynamic_fields.join("|")+")";
@@ -158,15 +158,19 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	var pos_start = position[0];
 	var pos_end   = position[1];
 
-	console.log("autocomplete_keydown(): text cursor/selected range = [" + pos_start + "," + pos_end +"]");
-	console.log("autocomplete_keydown(): number of available_tags = " + available_tags.length );
-	
+	if (debug_autocomplete) {
+	    console.log("autocomplete_keydown(): text cursor/selected range = [" + pos_start + "," + pos_end +"]");
+	    console.log("autocomplete_keydown(): number of available_tags = " + available_tags.length );
+	}
+
 	if (pos_start == typed_text_len) {
 	    // cursor is at the end of the line => 
 	    // => append
 	    
 	    if (event.key == ':') {
-		console.log("Pressed ':' =>  typed text = " + typed_text);
+		if (debug_autocomplete) {
+		    console.log("Pressed ':' =>  typed text = " + typed_text);
+		}
 		var last_term = extract_last_term(typed_text);
 		if (!last_term.match(/_t$/)) {
 		    // auto-correct to include it
@@ -189,11 +193,15 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 
 	    }
 	    else if (event.key == ' ') {
-		console.log("Pressed ' ' typed_text = " + typed_text);
+		if (debug_autocomplete) {
+		    console.log("Pressed ' ' typed_text = " + typed_text);
+		}
 		// consider removing if not within double-quotes // ******
 		var last_term = extract_last_term(typed_text);
-		console.log("  last_term = " + last_term);
-		
+		if (debug_autocomplete) {
+		    console.log("  last_term = " + last_term);
+		}
+
 		var compound_match = dynamic_fields_compound_re.exec(last_term);
 		if (compound_match) {	   	    
 		    var dynamic_field = compound_match[1];
@@ -204,8 +212,10 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    else if (event.keyCode == $.ui.keyCode.BACKSPACE) {
 		// Consider handling $.ui.keyCode.DELETE ???
 		
-		console.log("Delete/Backspace=" + event.keyCode + ", typed_text = " + typed_text);
-		
+		if (debug_autocomplete) {
+		    console.log("Delete/Backspace=" + event.keyCode + ", typed_text = " + typed_text);
+		}
+
 		var last_term = extract_last_term(typed_text); // Note trailing colon stripped off, as term incomplete
 		
 		if (typed_text.match(/:$/)) {
@@ -213,7 +223,9 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		    var simple_match = dynamic_fields_simple_re.exec(last_term);
 		    if (simple_match) {
 			var dynamic_field = simple_match[1];
-			console.log("contract field");
+			if (debug_autocomplete) {
+			    console.log("contract field");
+			}
 			contract_autocomplete_field(dynamic_field,volume_metadata_dic);
 		    }
 		}
@@ -269,11 +281,16 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		}
 	    });
 
-	    console.log("autocomplete_source(): number of filtered tags   = " + filtered_available_tags.length);
+	    if (debug_autocomplete) {
+		console.log("autocomplete_source(): number of filtered tags   = " + filtered_available_tags.length);
+	    }
+
 	    response(filtered_available_tags);
 	}
 	else {
-	    console.log("returning empty string");
+	    if (debug_autocomplete) {
+		console.log("returning empty string");
+	    }
 	    response("");
 	}
     }
