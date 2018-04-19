@@ -330,6 +330,9 @@ function initialize_new_solr_search()
     }
     $('.search-in-progress').css("cursor","wait");
 
+    // determine if publishing result will need login authentication
+    authentication_check_for_publish_workset();
+
     num_found=0;
     $('#page-bar').html('');
 

@@ -1,5 +1,5 @@
-var solr_prefix_url = "//solr1.ischool.illinois.edu/solr/"; // ****
-//var solr_prefix_url = "https://solr1.ischool.illinois.edu/solr/"; // ****
+//var solr_prefix_url = "//solr1.ischool.illinois.edu/solr/"; // ****
+var solr_prefix_url = "https://solr1.ischool.illinois.edu/solr/"; // ****
 var solr_collection = "faceted-htrc-full-ef20";
 
 var solr_search_action = solr_prefix_url+solr_collection+"/select";

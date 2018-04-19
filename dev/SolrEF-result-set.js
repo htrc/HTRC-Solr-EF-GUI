@@ -9,6 +9,21 @@ var InteractionStyleEnum = {
 // add_titles_ht() designed to work with information return by HT Metadata API
 // => Deprecated, as this information can now be returned by Solr directly
 
+function opt_auto_publish()
+{
+    var auto_publish = getURLParameter("auto-publish");
+    if ((auto_publish != null) && (auto_publish == "true")) {
+	// Remove it
+	var update_search = window.location.search;
+	update_search = update_search.replace("auto-publish=true","");
+	var updated_url = window.location.pathname + update_search + window.location.hash;
+	window.history.replaceState(null,null,updated_url);
+
+	// Enact the auto-publish
+	$("#htrc-publish-dialog").dialog( "open" );
+    }
+}
+
 function add_titles_ht_DEPRECATED(json_data)
 {
     var itemURLs = [];
@@ -195,6 +210,7 @@ function show_volume_count(jsonData)
 	if (!$('#export-by').is(":visible")) {	
 	    $('#export-by').fadeIn(1500);
 	}
+	opt_auto_publish();
     }
     else {
 	$('#export-by').hide("slide", { direction: "up" }, 1000);
@@ -531,8 +547,9 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-ef-zip-div").show();
 			$("#export-ef-to-registry-div").show();
 
-			$("#export-by").fadeIn(1500);
-			
+			$('#export-by').fadeIn(1500);
+			opt_auto_publish();
+
 			// restore vol-count display back to default text, ready for next vol count computation
 			$('.exp-vol-count-computing').show();
 			$('.exp-vol-count').hide();

@@ -39,6 +39,22 @@ function solr_ef_logout()
 
 }
 
+function authentication_check_for_publish_workset()
+{
+    var react_component = $('#solr-ef-search-type').data("react-component");
+    if (react_component) {
+	$.ajax({
+	    url: '/isauthenticated',
+	    dataType: "json",
+	    success: function() {}, // already logged in => nothing to do
+	    error: function () {
+		$('#export-ef-to-registry-text').html("Publish as Workset (login needed)");
+	    }
+	});
+    }
+}
+
+
 function solr_ef_login_to_publish()
 {
     var react_component = $('#solr-ef-search-type').data("react-component");
@@ -64,6 +80,20 @@ function solr_ef_login_to_publish_react()
 	},
 	error: function () {
 	    console.log("**** user is not currently authenticated");
+	    var auto_publish = getURLParameter("auto-publish");
+	    if (auto_publish == null) {
+		var update_search = window.location.search;
+		if (update_search == "") {
+		    update_search = "?auto-publish=true";
+		}
+		else {
+		    update_search += "&auto-publish=true";
+		}
+		
+		var updated_url = window.location.pathname + update_search + window.location.hash;
+		window.history.replaceState(null,null,updated_url);
+	    }
+
 	    window.location.replace("/signin");
 	    //document.location.href = 
 	}
