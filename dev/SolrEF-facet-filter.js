@@ -1,8 +1,8 @@
 //"use strict";
 
 var FacetLevelEnum = {
-    Page: 1,
-    Volume: 2
+    Page: 'Page',
+    Volume: 'Volume'
 };
 
 function FacetFilter()
