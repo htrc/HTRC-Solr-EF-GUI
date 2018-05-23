@@ -26,7 +26,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
-	type: "POST", // used to be "GET"
+	type: "POST", // used to be "GET" // ****
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
@@ -61,7 +61,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 				store_search_args.start =0;
 				num_found=0;
 				$('#page-bar').html('');
-				ajax_solr_text_search(true,true);
+				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 			    },
 			    callback: function(a) {
 				store_search_args.start = (a-1)* parseInt(num_results_per_page);
@@ -492,6 +492,15 @@ function submit_action(event) {
 	//  q=en_NOUN_htrctokentext:farming
 	
 	var arg_start = $('#start').attr('value');
+
+	gtag('event','search',	     
+	     { //'event_category': 'engagement', // default, used to be 'query' // ****
+	       'search_term': arg_q,
+	       'event_label': '[page: ' + q_text + '], [volume: ' + vq_text + ']',
+	       'user-q-text': q_text, 'user-vq-text': vq_text,
+	       'query-level': facet_filter.getFacetLevel(),
+	       'arg-start': arg_start,
+	       'group-by-vol': group_by_vol_checked});
 	
 	initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
     }
