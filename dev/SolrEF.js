@@ -764,7 +764,7 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 
     // For display purposes, determine how many terms in query
     var count_terms = 0;
-    var iprogressbar_message = "Searching 20 CPU-Core index";
+    var iprogressbar_message = "Searching 15.1 million volumes/5.5 billion pages"; // **** Change this to use dynamic data??
     if (store_search_args != null) {
 	count_terms = (store_search_args.q.match(/:/g) || []).length;
     }
