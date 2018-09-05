@@ -20,7 +20,7 @@
       gtag('config', 'UA-42842720-11');
     </script>
     
-    <script src="assets/jquery.js" type="text/javascript"></script>    
+    <script src="assets/jquery-1.12.4.js" type="text/javascript"></script>    
     <script src="assets/bootstrap.js" type="text/javascript"></script>
     <script src="assets/jquery-ui-lightness-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
   </head>
@@ -193,22 +193,94 @@
 	});
       });
     </script>
+
     
-    <div class="container">
+    <div class="container htrcdoc">
       <h4>Additional Resources</h4>
       <ul>
-	<li>Total Disk Usage of 20-Core Solr Collection: 4.68TB (docs not stored)</li>
-	<li><a href="index.html">Return to public-facing main interface (fully-indexed 5.7 billion pages)</a></li>
+	<li><i>Total Disk Usage of 20-Core Solr Collection: 4.68TB (5.7 billion pages indexed, docs not stored)</i></li>
+	<li>Currently accessing the Development Version ... <a href="index.html">Switch to public-facing production interface</a></li>
 	<!--
 	<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>
 	-->
-	<li><a href="solr-ef-query-api.txt">View details about searching directory using the SOLR API</a></li>
-	<li><a href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a></li>
-	<li><a href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
-	<li><a href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
-	<li><a href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML on shard</a></li>
+      </ul>
+
+      <hr />
+      <h5>Alternative Collections to Try Out</h5>
+      <ul>
+	<li>Switch to Ted's <i>FictMeta</i> 32205 sample collection:</li>
+	<ul>
+	  <li>
+	    <a href="?solr-col=dbbridge-fictmeta32205-baseline">Solr Schema Baseline version</a>
+	    <br />(ingest details: 1h 1min to build, 5.98 GB index; incremental not possible)
+	  </li>
+	  <li>
+	    <a href="?solr-col=dbbridge-fictmeta32205-docvals">Solr Schema DocVals version</a>
+	    <br />(ingest details: 1h 4mins to build, 6.47 GB index; incremental update of volume-level metadata possible)
+	  </li>
+	  <li>
+	    <a href="?solr-col=dbbridge-fictmeta32205-storeall">Solr Schema StoreAll version</a>
+	    <br />(ingest details: 1h 5mins to build, 19.90 GB index; fully incremental)
+	  </li>
+	</ul>
+	<li>Try out Concepts in <i>FictMeta</i> 1055 sample collection:</li>
+	<ul>
+	  <li>
+	    <a href="?solr-col=	dbbridge-fict1055-htrc-configs-storeall&solr-q=concept_t:Bank">Storeall with Concepts (concept_t:Bank)</a>
+	  </li>
+	</ul>
+      </ul>
+
+      <hr />
+      <h5>For Developers</h5>
+      <p>
+	The Solr index built to support POS Extracted Features
+        searching is strongly based around the dynamic fields that are
+        part of the default managed schema provided in the Apache
+        project.  The key variation made to this schema is that the
+        <tt>_txt</tt> dynamic field is <i>not stored</i>.
+      <p>
+	The <tt>_t</tt> dynamic field remains unchanged and <i>is
+	stored</i>.  This provides a useful way to retrieve metadata
+	about matching items when producing the result set page in
+	response to a query.  Both <tt>_txt</tt> and <tt>_t</tt>
+	are used to perform queries at the volume-level.
+      </p>
+      <p>
+	The dynamic field <tt>_htrctokentext</tt> field is very similar to
+	<tt>_txt</tt> but used for page-level indexed fields.
+      </p>
+      <p>
+	For faceting, it is important that multiple word terms (such as <i>non fiction</i>)
+	remain as a single entity, and are not tokenized into separate words.  This
+	leads to the use of dynamic fields such as <tt>_s</tt>, <tt>_ss</tt> at the
+	volume-level when metadata can, respectively, only have one value (e.g., Copyright)
+	and multiple values (e.g., Genre).  At the page-level the dynamic fields used
+	are <tt>_htrcstring</tt> and <tt>htrcstrings</tt>.
+      </p>
+      <p>
+	For more details, see <a href="docs/README-Solr-Schema.txt">README-Solr-Schema.txt</a>.
+      </p>
+      
+      <ul>
+	<li><a target="_blank" href="solr-ef-query-api.txt">Examples of POS Solr-EF searching directly using the SOLR API</a></li>
+	<li><a target="_blank" href="docs/htrc-configs-docvals/conf/managed-schema">Customized Solr Schema (conf/managed-schema);</a>
+	  comments with 'htrc' prefix mark where changes from, and new additions to, the default configuration have been made.</li>
+	<li><a target="_blank" href="/htrc-ef-access/get?action=">View details about the HTRC Extracted Feature API</a>;
+	  Used to support features such as download JSON extracted feature files, and producing a hash-value to represent
+	  a user's query.</li>
+	<li><a target="_blank" href="/solr/index.html">HTRC-EF Solr Admin UI (log in)</a></li>
+	<li><a target="_blank" href="/solr/luke_lang_mappings.html">Dynamically Generated Language Map (Part-of-Speech, and Other)</a></li>
+	<li><a target="_blank" href="/solr/htrc-full-ef20_shard6_replica1/admin/luke">Luke XML example shard</a></li>
+      </ul>
+
+      <hr />
+      <h5>Deprecated</h5>
+      <ul>
+	<li><a href="stream-query.html">Stream based combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>
+	<!--
 	<li><a href="?solr-col=faceted-htrc-fictsample-ef20">Switch to Ted's <i>FictMeta</i> 1055 samples collection</a></li>
-	<li><a href="stream-query.html">Combined Volume Metadata and Page-level POS Term searching (deprecated)</a></li>	
+	-->
       </ul>
     </div>
 
