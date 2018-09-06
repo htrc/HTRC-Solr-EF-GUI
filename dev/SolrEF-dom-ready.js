@@ -314,9 +314,17 @@ function solref_dom_ready() {
     var solr_col = getURLParameter("solr-col");
     if (solr_col != null) {
 	solr_collection = solr_col;
-	solr_search_action = solr_prefix_url+solr_collection+"/select";
-	solr_stream_action = solr_prefix_url+solr_collection+"/stream";
-	$('#solr-col-name').html('<br/>(FictMeta 1055 Sample)');
+	if (solr_collection.match(/^solr3456-/)) {
+	    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
+	    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+	}
+	else {
+	    solr_search_action = solr_prefix_url+solr_collection+"/select";
+	    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	}
+	
+	// $('#solr-col-name').html('<br/>(FictMeta 1055 Sample)'); // ****
+	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
     }
 
     $('#search-form').attr("action",solr_search_action);
@@ -403,7 +411,7 @@ function solref_dom_ready() {
 	width: 750,
 	height: 620,
 	buttons: {
-	    "Publish": function() {
+	    "Save": function() {
 		solr_ef_publish_workset($(this));
 	    },
 	    "Cancel": function() {

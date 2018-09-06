@@ -920,7 +920,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
     
     var fl_args = [ "id", "title_s", "handleUrl_s", "rightsAttributes_s",
-		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s" ];
+		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s", "classification_lcc_ss", "concept_ss" ];
     var fl_args_str = fl_args.join(",");
     
     var url_args = {

@@ -203,7 +203,7 @@ button.htrc-delete {
 .con{    padding: 2rem;}
 .con .main {
     min-height: 1rem ; /* used to be 40rem */
-    width: 79%;
+    width: 78%;
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;

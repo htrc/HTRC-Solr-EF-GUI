@@ -1,5 +1,6 @@
 //var solr_prefix_url = "//solr1.ischool.illinois.edu/solr/"; // ****
 var solr_prefix_url = "https://solr1.ischool.illinois.edu/solr/"; // ****
+var robust_solr_prefix_url = "https://solr1.ischool.illinois.edu/robust-solr/"; // ****
 var solr_collection = "faceted-htrc-full-ef20";
 
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
@@ -37,5 +38,5 @@ var export_ef_limit = 4000;
     
 
 var SolrEFSettings = {
-    iprogressbar_delay_threshold: 5000 // 5 secs
+    iprogressbar_delay_threshold: 3000 // used to be 5000 msecs
 }

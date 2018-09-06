@@ -25,7 +25,7 @@
       </p>
     </div>
 
-    <div id="htrc-publish-dialog" title="Publish Search Results as Workset">
+    <div id="htrc-publish-dialog" title="Save Search Results as Workset">
 
       <!--
 	  <p id="htrc-publish-body" style="color: red; font-size: 120%;">
@@ -37,8 +37,8 @@
 	    -->
       
       <p id="htrc-publish-body">	 
-	Publishing result set in HathiTrust Research Center
-	Registry:
+	Saving the result set as a workset in the
+	HathiTrust Research Center Registry:
       </p>
       <form class="publish-workset-form">
 	<div>
@@ -88,7 +88,10 @@
     <div class="row" style="padding-top: 10px; font-size: 17px; line-height: 27px;">
       <div class="col-md-12">
 	
-	<h2>Faceted Unigram Page-based Extracted Feature Search (Prototype)</h2>
+	<h2>
+	  Faceted Unigram Page-based Extracted Feature Search (Prototype)
+	  <span id="solr-col-name" style="font-size: 40%;"></span>
+	</h2>
 	
 	<div id="tabs-search">
 	  <div style="float: right; padding: 10px;">
@@ -449,7 +452,7 @@
 		  <a id="export-ef-to-registry" class="export-item"
 		     download="download">
 		    <span class="ui-icon ui-icon-circle-arrow-s"></span> 
-		    <span id="export-ef-to-registry-text">Publish as Workset</span>
+		    <span id="export-ef-to-registry-text">Save as Workset</span>
 		  </a>
 		</div>
 	      </div>
@@ -513,7 +516,7 @@
 		<div class="tightoddevenline">
 		  <a id="coverup-export-ef-to-registry" class="export-item"
 		     download="download">
-		    <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		    <span class="ui-icon ui-icon-circle-arrow-s"></span> Save as Workset
 		  </a>
 		</div>
 	      </div>
@@ -549,7 +552,7 @@
 		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 		    </a>
 		    <a id="coverup-export-ef-to-registry" class="export-item">
-		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Save as Workset
 		    </a>	      
 		  </div>
 		  -->
@@ -587,7 +590,7 @@
 		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Extracted Features Volumes
 		    </a>
 		    <a id="coverup-export-ef-to-registry" class="export-item">
-		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Publish as Workset
+		      <span class="ui-icon ui-icon-circle-arrow-s"></span> Save as Workset
 		    </a>	      
 		  </div>
 		</div>	  
@@ -662,7 +665,7 @@
 	    </div>
 	    <div id="select-for-shoppingcart" style="float:right;">
 	      <form>
-		<button id="sr-select-all" class="sr-item-multisel">Select All</button>
+		<button id="sr-select-all" class="sr-item-multisel">Select All On This Page</button>
 		<button id="sr-deselect-all" class="sr-item-multisel" disabled="disabled">Deselect All</button>
 		<button id="sr-invert-selection" class="sr-item-multisel" disabled="disabled">Invert Selection</button>
 	      </form>

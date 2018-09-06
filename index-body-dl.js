@@ -57,6 +57,7 @@ function solr_ef_error(jqXHR, textStatus, errorThrown)
 	mess += '  Error: ' + errorThrown + '\n';
 	
 	console.error(mess);
+	console.error("errorThrown line number = " + errorThrown.stack);
     }
     else {
 	console.error("solr_ef_error(): Error occurred loading script")
