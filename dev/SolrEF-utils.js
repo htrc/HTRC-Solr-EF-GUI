@@ -5,6 +5,12 @@ String.prototype.capitalize = function()
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+function escapeRegExp(string)
+{
+    // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 function strtrim(s)
 {
     return s.trim();
