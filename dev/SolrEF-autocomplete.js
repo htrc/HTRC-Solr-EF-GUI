@@ -254,12 +254,14 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	    if (last_term_field_split_pos>0) {
 		var last_label = last_term.substring(last_term_field_split_pos+1);
 		if (last_label != "") {
-		    last_label_re = new RegExp(last_label,'i');
+		    last_label_esc = escapeRegExp(last_label);
+		    
+		    last_label_re = new RegExp(last_label_esc,'i');
 		    var last_term_field = last_term.substring(0,last_term_field_split_pos);
 		    last_term_field_re = new RegExp("^"+last_term_field,'i');
 		    
 		    //console.log("*** last term field = " + last_term_field);
-		    //console.log("*** last label = " + last_label);
+		    //console.log("*** last label_esc = " + last_label_esc);
 		}
 	    }
 	    
