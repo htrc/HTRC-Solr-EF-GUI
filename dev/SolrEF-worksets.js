@@ -125,12 +125,11 @@ function load_workset_id(workset_id)
     });
 }
 
-function add_worksets(json_data)
+function add_worksets_sparql_direct(json_data)
 {
-
     if (json_data.hasOwnProperty('@graph')) {
 	$.each(json_data["@graph"], function (ws_index, ws_val) {
-	    var workset_id = ws_val["@id"];
+	    var workset_id = ws_val["@id"];	    
 	    var workset_title = ws_val["http://purl.org/dc/terms/title"][0]["@value"];
 	    
 	    // http://acbres224.ischool.illinois.edu:8890/sparql?query=describe <http://worksets.hathitrust.org/wsid/189324112>&format=text/x-html+ul
@@ -167,6 +166,38 @@ function add_worksets(json_data)
 	console.log("Empty workset list returned");
     }
 }
+
+
+function add_worksets(json_data)
+{
+    if (json_data.hasOwnProperty('graph')) {
+	$.each(json_data["graph"], function (vid_index, vid_val) {
+	    var vol_id_url = vid_val["id"];
+	    // console.log("vol id url = " + vol_id_url); // ****
+
+	    $.each(vid_val["gatheredInto"], function (ws_index, ws_val) {
+		var workset_id = ws_val["id"];
+		var workset_title = worksets_public_lookup[workset_id];
+		// console.log("*** workset title = " + workset_title); // ****
+
+		var hyperlinked_workset_title = '<a onclick="newWindowSolrEF(\'' + workset_id + '\')">' + workset_title + '</a>';
+	    
+		$("[name='" + vol_id_url + "']").each(function () {
+		    $(this).parent().show();
+		    if ($(this).children().size() >= 1) {
+			$(this).append("; ");
+		    }
+		    
+		    $(this).append("<span>" + hyperlinked_workset_title + "</span>")
+		});
+	    });	    			
+	});
+    }
+    else {
+	console.log("Empty workset list returned");
+    }
+}
+
 
 
 function workset_enrich_results(itemURLs)
@@ -229,7 +260,8 @@ function workset_enrich_results(itemURLs)
     // &format=application/x-json+ld&timeout=0&debug=on
     
     //var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
-    var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+    //var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+
     var sparql_data = {
 	"default-graph-uri": "",
 	"format": "application/x-json+ld",
@@ -238,11 +270,28 @@ function workset_enrich_results(itemURLs)
     };
     sparql_data.query = sparql_query;
     
+//    $.ajax({
+//	type: "POST",
+//	url: sparql_url,
+//	data: sparql_data,
+//	dataType: "jsonp",
+//	jsonpCallback: "add_worksets"
+//    });
+
+
+    var worksets_api_data = "contains_vol=";
+
+    for (var hi = 0; hi < item_urls_len; hi++) {
+	if (hi>0) { worksets_api_data += ",";}
+	worksets_api_data += itemURLs[hi];
+    }
+
     $.ajax({
-	type: "POST",
-	url: sparql_url,
-	data: sparql_data,
-	dataType: "jsonp",
-	jsonpCallback: "add_worksets"
+	type: "GET", 
+	url: worksets_api_url,
+	data: worksets_api_data,
+	dataType: "json",
+	success: function(jsonData) { add_worksets(jsonData); }
     });
+
 }
