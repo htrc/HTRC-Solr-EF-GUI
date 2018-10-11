@@ -72,9 +72,9 @@ function parse_workset_results(jsonData)
     var gathers = jsonData.gathers;
     var gathers_len = gathers.length;
 
-    if (gathers_len>1000) {
+    if (gathers_len>1000) { // ****
 	console.log("Workset size of " + gathers_len + " exceeds limit of 1000");
-	console.log("Applying cap of 1000 items");
+	console.log("Applying cap of 1000 items for Boolean term query by Volume IDs");
 	gathers_len = 1000;
     }
     
@@ -98,7 +98,7 @@ function parse_workset_results(jsonData)
     initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
 }
 
-function load_workset_id(workset_id)
+function load_workset_id_old_api(workset_id)
 {
     var workset_items_url = workset_base_url + "getItems";
     var data_str = "id=" + workset_id;
@@ -125,7 +125,35 @@ function load_workset_id(workset_id)
     });
 }
 
-function add_worksets_sparql_direct(json_data)
+function load_workset_id(workset_id_url)
+{
+    // Example workset id API call:
+    //  https://worksets.hathitrust.org/api/worksets/https://worksets.hathitrust.org/wsid/e8e90b30-b700-11e8-bd63-2587a66f96d9
+
+    var workset_items_url = worksets_api_url + "/" + workset_id_url;
+    
+    store_search_xhr = new window.XMLHttpRequest();
+
+    console.log("worket items url = " + workset_items_url);
+    iprogressbar.trigger_delayed_display(3,"Retrieving workset");
+    
+    $.ajax({
+	type: "GET", 
+	url: workset_items_url,
+	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
+	success: function(jsonData) { parse_workset_results(jsonData); },
+	error: function(jqXHR, textStatus, errorThrown) {
+	    $('.search-in-progress').css("cursor","auto");
+	    iprogressbar.cancel();
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });    
+}
+
+function add_worksets_sparql_old_api(json_data)
 {
     if (json_data.hasOwnProperty('@graph')) {
 	$.each(json_data["@graph"], function (ws_index, ws_val) {
