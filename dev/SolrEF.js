@@ -234,16 +234,45 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
     return bool_query;
 }
 
+function lang_pos_all_selected(universal_pos_tags,lang)
+{
+    var all_selected = true;
+    
+    for (var ti = 0; ti < universal_pos_tags.length; ti++) {
+	var tag = universal_pos_tags[ti];
+	var lang_tag_id = lang + "-" + tag + "-htrctoken-cb";
+	var $lang_tag_cb = $('#' + lang_tag_id);
+	if (!$lang_tag_cb.is(':checked')) {
+	    all_selected = false;
+	    break;
+	}
+    }
+
+    return all_selected;
+} 
+
 
 function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search_all_checked) {
 	var fields = [];
 	var universal_pos_tags = ["VERB", "NOUN", "ADJ", "ADV", "ADP", "CONJ", "DET", "NUM", "PRT", "X"];
 
+        if (do_solr_field_optimization && search_all_checked) {
+	    console.log("Search all languages checked on: => (optimizing to use alllangs_htrctokentext Solr field)");
+	    return "alllangs_htrctokentext:" + q_text;
+	}
+    
 	for (var li = 0; li < langs_with_pos.length; li++) {
 		var lang = langs_with_pos[li];
 		var lang_enabled_id = lang + "-enabled";
 		var $lang_enabled_cb = $('#' + lang_enabled_id);
-		if ($lang_enabled_cb.is(':checked')) {
+	        if ($lang_enabled_cb.is(':checked')) {
+
+		    if (do_solr_field_optimization && lang_pos_all_selected(universal_pos_tags,lang)) {
+			console.log("POS tags all selected for: " + lang + " => (optimizing to use combined Solr field)");
+			var lang_field = lang + "_htrctokentext";
+			fields.push(lang_field + ":" + q_text);
+		    }
+		    else {
 			console.log("Extracting POS tags for: " + lang);
 
 			for (var ti = 0; ti < universal_pos_tags.length; ti++) {
@@ -255,6 +284,7 @@ function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search
 					fields.push(lang_tag_field + ":" + q_text);
 				}
 			}
+		    }
 		}
 	}
 

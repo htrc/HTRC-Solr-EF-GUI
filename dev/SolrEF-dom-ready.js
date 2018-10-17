@@ -317,10 +317,12 @@ function solref_dom_ready() {
 	if (solr_collection.match(/^solr3456-/)) {
 	    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
 	    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+	    do_solr_field_optimization = 1;
 	}
 	else {
 	    solr_search_action = solr_prefix_url+solr_collection+"/select";
 	    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	    do_solr_field_optimization = 0;
 	}
 	
 	// $('#solr-col-name').html('<br/>(FictMeta 1055 Sample)'); // ****

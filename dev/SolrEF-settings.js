@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 
 //var base_domain_url = "//solr1.ischool.illinois.edu"; // ****
 var base_domain_url="https://solr1.ischool.illinois.edu"
@@ -6,6 +7,7 @@ var base_domain_url="https://solr1.ischool.illinois.edu"
 var solr_prefix_url = base_domain_url+"/solr/";
 var robust_solr_prefix_url = base_domain_url+"/robust-solr/";
 var solr_collection = "faceted-htrc-full-ef20"; // ****
+var do_solr_field_optimization = 0;
 
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
