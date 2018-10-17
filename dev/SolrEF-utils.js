@@ -32,6 +32,22 @@ function getURLParameter(sParam)
     return null;
 }
 
+function setURLParameter(sParam,sVal)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+
+    for (var i=0; i<sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam)
+	{
+	    sURLVariables[i]=sParameterName[0]+'='+sVal;
+	}
+    }
+
+    window.location.search = '?' + sURLVariables.join('&');
+}
+
 // From: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
 function uuidv4()
 {

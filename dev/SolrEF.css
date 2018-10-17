@@ -388,6 +388,14 @@ a.export-item {
     background: #ffffff url("../assets/icons/basket-empty60.png") no-repeat right top;
 }
 
+#shoppingcart-info {
+    width: 60px; height: 60px;
+    padding: 1.5em;
+    margin: 10px; 
+/*    background: #ffffff url("../assets/icons/shoppingcart-empty60.png") no-repeat right top;*/
+    background: #ffffff url("../assets/icons/basket-empty60.png") no-repeat right top;
+}
+
 #shoppingcart-drop.ui-state-highlight {
     background-color: #fbd850
 }

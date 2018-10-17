@@ -368,10 +368,12 @@ function update_shoppingcart_count()
     var shoppingcart_len = store_shoppingcart_ids.length;
     if (shoppingcart_len == 1) {
 	$('#shoppingcart-label').html("(1 item)")
+	$('#shoppingcart-info-label').html("(1 item)")
 	$('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
     }
     else {
 	$('#shoppingcart-label').html("(" + shoppingcart_len + " items)");
+	$('#shoppingcart-info-label').html("(" + shoppingcart_len + " items)");
 	if (shoppingcart_len == 0) {
 	    $('#shoppingcart-drop-wrapper').attr("title","");
 	}
@@ -534,6 +536,46 @@ function selectable_and_draggable_hard_reset()
     }
 */
 }
+
+
+function empty_shoppingcart()
+{
+    var shoppingcart_key = getShoppingcartId();
+    console.log("*** Shopping cart key = " + shoppingcart_key);
+
+    var shoppingcart_q = getURLParameter("shoppingcart-q");
+    var raw_fielded_ids = shoppingcart_q.split("%20OR%20");
+    var del_shoppingcart_ids = raw_fielded_ids.map(function(fielded_id){return fielded_id.match(/\(id:(.*)\)/)});
+
+    //console.log("**** deleting the followig items to the shopping cart" + del_shoppingcart_ids.join(","));
+
+    // Fire off Ajax call to delete all the IDs on the server
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'shoppingcart',
+	    'mode': 'del-ids',
+	    'key': shoppingcart_key,
+	    'ids': del_shoppingcart_ids.join(",")
+	},
+	dataType: "text",
+	success: function(textData) {
+	    console.log("Deleting Shopping:" + textData);
+	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
+	    setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+
+    update_shoppingcart_count();
+    
+    selectable_and_draggable_hard_reset();
+}
+
 
 $(document).ready(function() {
     

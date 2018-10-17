@@ -559,6 +559,16 @@ function solref_dom_ready() {
 	$('#select-for-shoppingcart').hide();
 	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
+	$('#search-explain').hide();
+	
+	// Show shoppingcartId
+	var shoppingcart_key = getShoppingcartId();
+	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
+	$('#shoppingcart-info-id').val(shoppingcart_key);
+	$('#shoppingcart-info-area').show();
+
+	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
+	
 	load_solr_q(shoppingcart_q);
     }
     else {
