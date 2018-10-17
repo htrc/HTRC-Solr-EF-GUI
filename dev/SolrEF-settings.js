@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 
 //var base_domain_url = "//solr1.ischool.illinois.edu"; // ****
 var base_domain_url="https://solr1.ischool.illinois.edu"
