@@ -27,6 +27,11 @@ function retrieve_shoppingcart()
 	    if (textData != "") {
 		var cart = JSON.parse(textData);
 		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ******
+
+		if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		    mark_shoppingcart_items_in_resultset();
+		}
+		
 		update_shoppingcart_count();
 	    }
 	    //console.log("Shopping cart: " + add_shoppingcart_ids.length + "item(s) successfully added");
@@ -359,6 +364,29 @@ function do_delete_drop_action()
 	});
     }
     selectable_and_draggable_hard_reset();
+}
+
+function mark_shoppingcart_items_in_resultset()
+{
+    // cross-check shoppingcart ids with those in the displayed resultset
+    // and change 'x' to be a shoppingcart logo
+    
+    for (var i=0; i<store_shoppingcart_ids.length; i++) {
+	var id = store_shoppingcart_ids[i];
+	
+	var span_id = $('span[name="'+id+'"]');
+	var $span_id = $(span_id);
+	console.log("***### span_id len = " + $span_id.length);
+	
+	if ($span_id.length>0) {
+	    var $close_button = $span_id.parent().find('.htrc-delete')
+	    
+	    convert_close_to_shoppingcart_action($close_button);
+	    var $item_div = $span_id.parent().parent();
+	    
+	    make_undraggable($item_div);
+	}
+    }
 }
 
 function update_shoppingcart_count()

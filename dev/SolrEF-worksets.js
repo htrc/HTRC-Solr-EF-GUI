@@ -18,6 +18,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 
 */
 
+/*
 function getURLParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
@@ -33,6 +34,7 @@ function getURLParameter(sParam)
     return null;
 }
 
+*/
 
 
 function newWindowSolrEF(workset_id)
