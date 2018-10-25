@@ -90,10 +90,10 @@ function getShoppingcartId()
 	    else {
 		xsid = xsid.substring(11);
 	    }
-	    shoppingcart_id = "shoppingcart-xsid-" + xsid;
+	    shoppingcart_id = "session-xsid-" + xsid;
 	}
 	else {
-	    shoppingcart_id = "shoppingcart-rnd-"+uuidv4(); // probably running local server spawned from Eclipse
+	    shoppingcart_id = "session-rnd-"+uuidv4(); // probably running local server spawned from Eclipse
 	}
     }
 
