@@ -1,12 +1,20 @@
 function solr_ef_login()
 {
+    // Simplified
+    $('#navbar-username').html('Settings');
+    $('#navbar-login').hide();
+    $('#navbar-logout').show();
+}
+
+function solr_ef_login_THROUGH_POPUP()
+{
     htrc_login({
 	"Sign In" : function() {
 
 	    var $iframe_contents = $('#loginFrame').contents();
 	    var username = $iframe_contents.find('#username').val();
 	    var password = $iframe_contents.find('#password').val();
-
+	    
 	    if ((username != "")  && (password != "")) {
 		if (typeof(Storage) !== "undefined") {
 		    sessionStorage.setItem("htrc-username", username);
