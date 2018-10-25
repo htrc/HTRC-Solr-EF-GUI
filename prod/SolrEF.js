@@ -26,7 +26,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
-	type: "POST", // used to be "GET"
+	type: "POST", // used to be "GET" // ****
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
@@ -61,7 +61,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 				store_search_args.start =0;
 				num_found=0;
 				$('#page-bar').html('');
-				ajax_solr_text_search(true,true);
+				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 			    },
 			    callback: function(a) {
 				store_search_args.start = (a-1)* parseInt(num_results_per_page);
@@ -234,16 +234,45 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
     return bool_query;
 }
 
+function lang_pos_all_selected(universal_pos_tags,lang)
+{
+    var all_selected = true;
+    
+    for (var ti = 0; ti < universal_pos_tags.length; ti++) {
+	var tag = universal_pos_tags[ti];
+	var lang_tag_id = lang + "-" + tag + "-htrctoken-cb";
+	var $lang_tag_cb = $('#' + lang_tag_id);
+	if (!$lang_tag_cb.is(':checked')) {
+	    all_selected = false;
+	    break;
+	}
+    }
+
+    return all_selected;
+} 
+
 
 function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search_all_checked) {
 	var fields = [];
 	var universal_pos_tags = ["VERB", "NOUN", "ADJ", "ADV", "ADP", "CONJ", "DET", "NUM", "PRT", "X"];
 
+        if (do_solr_field_optimization && search_all_checked) {
+	    console.log("Search all languages checked on: => (optimizing to use alllangs_htrctokentext Solr field)");
+	    return "alllangs_htrctokentext:" + q_text;
+	}
+    
 	for (var li = 0; li < langs_with_pos.length; li++) {
 		var lang = langs_with_pos[li];
 		var lang_enabled_id = lang + "-enabled";
 		var $lang_enabled_cb = $('#' + lang_enabled_id);
-		if ($lang_enabled_cb.is(':checked')) {
+	        if ($lang_enabled_cb.is(':checked')) {
+
+		    if (do_solr_field_optimization && lang_pos_all_selected(universal_pos_tags,lang)) {
+			console.log("POS tags all selected for: " + lang + " => (optimizing to use combined Solr field)");
+			var lang_field = lang + "_htrctokentext";
+			fields.push(lang_field + ":" + q_text);
+		    }
+		    else {
 			console.log("Extracting POS tags for: " + lang);
 
 			for (var ti = 0; ti < universal_pos_tags.length; ti++) {
@@ -255,6 +284,7 @@ function expand_field_lang_pos(q_text, langs_with_pos, langs_without_pos, search
 					fields.push(lang_tag_field + ":" + q_text);
 				}
 			}
+		    }
 		}
 	}
 
@@ -492,6 +522,15 @@ function submit_action(event) {
 	//  q=en_NOUN_htrctokentext:farming
 	
 	var arg_start = $('#start').attr('value');
+
+	gtag('event','search',	     
+	     { //'event_category': 'engagement', // default, used to be 'query' // ****
+	       'search_term': arg_q,
+	       'event_label': '[page: ' + q_text + '], [volume: ' + vq_text + ']',
+	       'user-q-text': q_text, 'user-vq-text': vq_text,
+	       'query-level': facet_filter.getFacetLevel(),
+	       'arg-start': arg_start,
+	       'group-by-vol': group_by_vol_checked});
 	
 	initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
     }
@@ -755,7 +794,7 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 
     // For display purposes, determine how many terms in query
     var count_terms = 0;
-    var iprogressbar_message = "Searching 20 CPU-Core index";
+    var iprogressbar_message = "Searching 15.1 million volumes/5.5 billion pages"; // **** Change this to use dynamic data??
     if (store_search_args != null) {
 	count_terms = (store_search_args.q.match(/:/g) || []).length;
     }

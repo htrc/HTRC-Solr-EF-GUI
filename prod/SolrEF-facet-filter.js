@@ -1,8 +1,8 @@
 //"use strict";
 
 var FacetLevelEnum = {
-    Page: 1,
-    Volume: 2
+    Page: 'Page',
+    Volume: 'Volume'
 };
 
 function FacetFilter()
@@ -22,7 +22,10 @@ FacetFilter.FacetFieldsDisplay =
       'rightsAttributes_s'   : 'Copyright Status',
       'names_ss'             : 'Author',
       'pubPlace_s'           : 'Place of Publication',
-      'bibliographicFormat_s': 'Original Format' };
+      'bibliographicFormat_s': 'Original Format',
+      'classification_lcc_ss': 'Classification',
+      'concept_ss': 'Concepts'
+    };
     
 FacetFilter.prototype.resetRefineQuery = function()
 {
@@ -184,11 +187,17 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
     var facet_html = "";    
     
     for (var facet_field in facet_fields) {
-	var facet_dl = "<dl>";
 
 	var facet_field_neutral = this.getFieldNeutral(facet_field);
 	var facet_field_neutral_display = this.prettyPrintField(facet_field);
+
+	var facet_dl = '<dl id="facet_'+facet_field_neutral+'">';
+
+	if (facet_field_neutral == "classification_lcc_ss") {
+	    console.log("**** start ajax retrieve lcc vals"); //xxxxx adsfkjakldfs = 5:;
+	}
 	
+
 	var apply_icon = '<span class="ui-icon ui-icon-circle-triangle-e"></span>';
 
 	facet_dl += '<dt class="facetField">';

@@ -203,7 +203,7 @@ button.htrc-delete {
 .con{    padding: 2rem;}
 .con .main {
     min-height: 1rem ; /* used to be 40rem */
-    width: 79%;
+    width: 78%;
     font-size: 14px ;
     font-size: 1.4rem ;
     display: table-cell;
@@ -381,6 +381,14 @@ a.export-item {
 }
 
 #shoppingcart-drop {
+    width: 60px; height: 60px;
+    padding: 1.5em;
+    margin: 10px; 
+/*    background: #ffffff url("../assets/icons/shoppingcart-empty60.png") no-repeat right top;*/
+    background: #ffffff url("../assets/icons/basket-empty60.png") no-repeat right top;
+}
+
+#shoppingcart-info {
     width: 60px; height: 60px;
     padding: 1.5em;
     margin: 10px; 

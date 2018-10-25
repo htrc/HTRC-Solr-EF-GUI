@@ -18,6 +18,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 
 */
 
+/*
 function getURLParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
@@ -33,6 +34,7 @@ function getURLParameter(sParam)
     return null;
 }
 
+*/
 
 
 function newWindowSolrEF(workset_id)
@@ -72,9 +74,9 @@ function parse_workset_results(jsonData)
     var gathers = jsonData.gathers;
     var gathers_len = gathers.length;
 
-    if (gathers_len>1000) {
+    if (gathers_len>1000) { // ****
 	console.log("Workset size of " + gathers_len + " exceeds limit of 1000");
-	console.log("Applying cap of 1000 items");
+	console.log("Applying cap of 1000 items for Boolean term query by Volume IDs");
 	gathers_len = 1000;
     }
     
@@ -98,7 +100,7 @@ function parse_workset_results(jsonData)
     initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked);
 }
 
-function load_workset_id(workset_id)
+function load_workset_id_old_api(workset_id)
 {
     var workset_items_url = workset_base_url + "getItems";
     var data_str = "id=" + workset_id;
@@ -125,12 +127,39 @@ function load_workset_id(workset_id)
     });
 }
 
-function add_worksets(json_data)
+function load_workset_id(workset_id_url)
 {
+    // Example workset id API call:
+    //  https://worksets.hathitrust.org/api/worksets/https://worksets.hathitrust.org/wsid/e8e90b30-b700-11e8-bd63-2587a66f96d9
 
+    var workset_items_url = worksets_api_url + "/" + workset_id_url;
+    
+    store_search_xhr = new window.XMLHttpRequest();
+
+    console.log("worket items url = " + workset_items_url);
+    iprogressbar.trigger_delayed_display(3,"Retrieving workset");
+    
+    $.ajax({
+	type: "GET", 
+	url: workset_items_url,
+	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
+	success: function(jsonData) { parse_workset_results(jsonData); },
+	error: function(jqXHR, textStatus, errorThrown) {
+	    $('.search-in-progress').css("cursor","auto");
+	    iprogressbar.cancel();
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });    
+}
+
+function add_worksets_sparql_old_api(json_data)
+{
     if (json_data.hasOwnProperty('@graph')) {
 	$.each(json_data["@graph"], function (ws_index, ws_val) {
-	    var workset_id = ws_val["@id"];
+	    var workset_id = ws_val["@id"];	    
 	    var workset_title = ws_val["http://purl.org/dc/terms/title"][0]["@value"];
 	    
 	    // http://acbres224.ischool.illinois.edu:8890/sparql?query=describe <http://worksets.hathitrust.org/wsid/189324112>&format=text/x-html+ul
@@ -167,6 +196,38 @@ function add_worksets(json_data)
 	console.log("Empty workset list returned");
     }
 }
+
+
+function add_worksets(json_data)
+{
+    if (json_data.hasOwnProperty('graph')) {
+	$.each(json_data["graph"], function (vid_index, vid_val) {
+	    var vol_id_url = vid_val["id"];
+	    // console.log("vol id url = " + vol_id_url); // ****
+
+	    $.each(vid_val["gatheredInto"], function (ws_index, ws_val) {
+		var workset_id = ws_val["id"];
+		var workset_title = worksets_public_lookup[workset_id];
+		// console.log("*** workset title = " + workset_title); // ****
+
+		var hyperlinked_workset_title = '<a onclick="newWindowSolrEF(\'' + workset_id + '\')">' + workset_title + '</a>';
+	    
+		$("[name='" + vol_id_url + "']").each(function () {
+		    $(this).parent().show();
+		    if ($(this).children().size() >= 1) {
+			$(this).append("; ");
+		    }
+		    
+		    $(this).append("<span>" + hyperlinked_workset_title + "</span>")
+		});
+	    });	    			
+	});
+    }
+    else {
+	console.log("Empty workset list returned");
+    }
+}
+
 
 
 function workset_enrich_results(itemURLs)
@@ -229,7 +290,8 @@ function workset_enrich_results(itemURLs)
     // &format=application/x-json+ld&timeout=0&debug=on
     
     //var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
-    var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+    //var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+
     var sparql_data = {
 	"default-graph-uri": "",
 	"format": "application/x-json+ld",
@@ -238,11 +300,28 @@ function workset_enrich_results(itemURLs)
     };
     sparql_data.query = sparql_query;
     
+//    $.ajax({
+//	type: "POST",
+//	url: sparql_url,
+//	data: sparql_data,
+//	dataType: "jsonp",
+//	jsonpCallback: "add_worksets"
+//    });
+
+
+    var worksets_api_data = "contains_vol=";
+
+    for (var hi = 0; hi < item_urls_len; hi++) {
+	if (hi>0) { worksets_api_data += ",";}
+	worksets_api_data += itemURLs[hi];
+    }
+
     $.ajax({
-	type: "POST",
-	url: sparql_url,
-	data: sparql_data,
-	dataType: "jsonp",
-	jsonpCallback: "add_worksets"
+	type: "GET", 
+	url: worksets_api_url,
+	data: worksets_api_data,
+	dataType: "json",
+	success: function(jsonData) { add_worksets(jsonData); }
     });
+
 }

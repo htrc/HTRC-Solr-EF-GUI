@@ -5,6 +5,12 @@ String.prototype.capitalize = function()
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+function escapeRegExp(string)
+{
+    // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 function strtrim(s)
 {
     return s.trim();
@@ -24,6 +30,22 @@ function getURLParameter(sParam)
     }
 
     return null;
+}
+
+function setURLParameter(sParam,sVal)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+
+    for (var i=0; i<sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam)
+	{
+	    sURLVariables[i]=sParameterName[0]+'='+sVal;
+	}
+    }
+
+    window.location.search = '?' + sURLVariables.join('&');
 }
 
 // From: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript

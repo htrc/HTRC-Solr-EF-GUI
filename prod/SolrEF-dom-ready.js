@@ -314,9 +314,19 @@ function solref_dom_ready() {
     var solr_col = getURLParameter("solr-col");
     if (solr_col != null) {
 	solr_collection = solr_col;
-	solr_search_action = solr_prefix_url+solr_collection+"/select";
-	solr_stream_action = solr_prefix_url+solr_collection+"/stream";
-	$('#solr-col-name').html('<br/>(FictMeta 1055 Sample)');
+	if (solr_collection.match(/^solr3456-/)) {
+	    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
+	    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+	    do_solr_field_optimization = 1;
+	}
+	else {
+	    solr_search_action = solr_prefix_url+solr_collection+"/select";
+	    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	    do_solr_field_optimization = 0;
+	}
+	
+	// $('#solr-col-name').html('<br/>(FictMeta 1055 Sample)'); // ****
+	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
     }
 
     $('#search-form').attr("action",solr_search_action);
@@ -403,7 +413,7 @@ function solref_dom_ready() {
 	width: 750,
 	height: 620,
 	buttons: {
-	    "Publish": function() {
+	    "Save": function() {
 		solr_ef_publish_workset($(this));
 	    },
 	    "Cancel": function() {
@@ -549,6 +559,16 @@ function solref_dom_ready() {
 	$('#select-for-shoppingcart').hide();
 	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
+	$('#search-explain').hide();
+	
+	// Show shoppingcartId
+	var shoppingcart_key = getShoppingcartId();
+	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
+	$('#shoppingcart-info-id').val(shoppingcart_key);
+	$('#shoppingcart-info-area').show();
+
+	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
+	
 	load_solr_q(shoppingcart_q);
     }
     else {
@@ -564,7 +584,7 @@ function solref_dom_ready() {
 	$('#tabs-search').hide();
 	load_solr_q(solr_q);
     }
-
+    
     if ((shoppingcart_q == null) && (solr_q == null)) { // **** also need to check workset_id ??/
 	// see if there is a solr-key-q
 	var solr_key_q = getURLParameter("solr-key-q");
@@ -586,12 +606,39 @@ function solref_dom_ready() {
 
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-		    console.error("Failed to retrieve expanded form of key: '" + solr_key_q + "'");
+		    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
 		    ajax_error(jqXHR, textStatus, errorThrown)
 		}		
-	  });
+	    });
 	}
+	else {
 
+	    // see if there is a shoppingcart-key-q
+	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
+	    if (shoppingcart_key_q != null) {
+		// ajax call to get query specified by key
+		
+		$.ajax({
+		    type: "POST",
+		    url: ef_download_url, 
+		    data: {
+			'action': 'key-value-storage',
+			'key': encodeURI(shoppingcart_key_q)
+		    },
+		    dataType: "text",
+		    success: function(textData) {
+			var text_q = textData;
+			select_optimal_query_tab(text_q);
+			$('#search-submit').click();			
+		    },
+		    error: function(jqXHR, textStatus, errorThrown) {
+			console.error("Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "'");
+			ajax_error(jqXHR, textStatus, errorThrown)
+		    }		
+		});
+	    }
+	}
+	
     $('input[name="interactive-style"]:radio').on("click",function(event) {
 	var radio_id = $(this).attr("id");
 	if (radio_id == "pref-drag-and-drop") {

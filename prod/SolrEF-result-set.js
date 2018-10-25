@@ -251,11 +251,20 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     download_span +=    '</div>';
 
     var opt_dnd_style = "";
-    if ((store_interaction_style != InteractionStyleEnum.DragAndDrop) 
+    if (store_interaction_style == null) {
+	if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+	    // want to show 'x' for delete => leave 'opt_dnd_style' empty
+	}
+	else {
+	    opt_dnd_style = " style-hidden";
+	}
+    }
+    else if ((store_interaction_style != InteractionStyleEnum.DragAndDrop) 
     	&& (store_interaction_style != InteractionStyleEnum.Hybrid)) {
 	opt_dnd_style = " style-hidden";
     }
-
+    console.log("**** store_interaction_style = " + store_interaction_style);
+    
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
     var delete_div = '<div class="htrc-delete-container drag-and-drop-style'+opt_dnd_style+'" style="float: right;">';
     delete_div += '     <button type="button" id="result-set-delete-'+line_num+'" class="htrc-delete" ';
@@ -848,6 +857,9 @@ function show_results(jsonData,newSearch,newResultPage)
 	}
 	else {
 	    // if not done set_shoppingcart_icons() do it now // ******
+	    if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		mark_shoppingcart_items_in_resultset();
+	    }
 	    update_shoppingcart_count();
 	    progressbar_top.progressbar( "value",0);
 	    progressbar_bot.progressbar( "value",0);
@@ -859,6 +871,9 @@ function show_results(jsonData,newSearch,newResultPage)
 	// => hide progressbars
 
 	// if not done set_shoppingcart_icons() do it now // ******
+	if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+	    mark_shoppingcart_items_in_resultset();
+	}
 	update_shoppingcart_count();
 
 	progressbar_top.progressbar( "value",0);
@@ -920,7 +935,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
     
     var fl_args = [ "id", "title_s", "handleUrl_s", "rightsAttributes_s",
-		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s" ];
+		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s", "classification_lcc_ss", "concept_ss" ];
     var fl_args_str = fl_args.join(",");
     
     var url_args = {

@@ -48,7 +48,7 @@ function authentication_check_for_publish_workset()
 	    dataType: "json",
 	    success: function() {}, // already logged in => nothing to do
 	    error: function () {
-		$('#export-ef-to-registry-text').html("Publish as Workset (login needed)");
+		$('#export-ef-to-registry-text').html("Save as Workset (login needed)");
 	    }
 	});
     }

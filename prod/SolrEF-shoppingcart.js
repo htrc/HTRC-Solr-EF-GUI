@@ -27,6 +27,11 @@ function retrieve_shoppingcart()
 	    if (textData != "") {
 		var cart = JSON.parse(textData);
 		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ******
+
+		if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		    mark_shoppingcart_items_in_resultset();
+		}
+		
 		update_shoppingcart_count();
 	    }
 	    //console.log("Shopping cart: " + add_shoppingcart_ids.length + "item(s) successfully added");
@@ -361,6 +366,29 @@ function do_delete_drop_action()
     selectable_and_draggable_hard_reset();
 }
 
+function mark_shoppingcart_items_in_resultset()
+{
+    // cross-check shoppingcart ids with those in the displayed resultset
+    // and change 'x' to be a shoppingcart logo
+    
+    for (var i=0; i<store_shoppingcart_ids.length; i++) {
+	var id = store_shoppingcart_ids[i];
+	
+	var span_id = $('span[name="'+id+'"]');
+	var $span_id = $(span_id);
+	console.log("***### span_id len = " + $span_id.length);
+	
+	if ($span_id.length>0) {
+	    var $close_button = $span_id.parent().find('.htrc-delete')
+	    
+	    convert_close_to_shoppingcart_action($close_button);
+	    var $item_div = $span_id.parent().parent();
+	    
+	    make_undraggable($item_div);
+	}
+    }
+}
+
 function update_shoppingcart_count()
 {
     console.log("**** update_shoppingcart_count()");
@@ -368,10 +396,12 @@ function update_shoppingcart_count()
     var shoppingcart_len = store_shoppingcart_ids.length;
     if (shoppingcart_len == 1) {
 	$('#shoppingcart-label').html("(1 item)")
+	$('#shoppingcart-info-label').html("(1 item)")
 	$('#shoppingcart-drop-wrapper').attr("title","Click to open shopping cart");
     }
     else {
 	$('#shoppingcart-label').html("(" + shoppingcart_len + " items)");
+	$('#shoppingcart-info-label').html("(" + shoppingcart_len + " items)");
 	if (shoppingcart_len == 0) {
 	    $('#shoppingcart-drop-wrapper').attr("title","");
 	}
@@ -534,6 +564,46 @@ function selectable_and_draggable_hard_reset()
     }
 */
 }
+
+
+function empty_shoppingcart()
+{
+    var shoppingcart_key = getShoppingcartId();
+    console.log("*** Shopping cart key = " + shoppingcart_key);
+
+    var shoppingcart_q = getURLParameter("shoppingcart-q");
+    var raw_fielded_ids = shoppingcart_q.split("%20OR%20");
+    var del_shoppingcart_ids = raw_fielded_ids.map(function(fielded_id){return fielded_id.match(/\(id:(.*)\)/)});
+
+    //console.log("**** deleting the followig items to the shopping cart" + del_shoppingcart_ids.join(","));
+
+    // Fire off Ajax call to delete all the IDs on the server
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'shoppingcart',
+	    'mode': 'del-ids',
+	    'key': shoppingcart_key,
+	    'ids': del_shoppingcart_ids.join(",")
+	},
+	dataType: "text",
+	success: function(textData) {
+	    console.log("Deleting Shopping:" + textData);
+	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
+	    setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+
+    update_shoppingcart_count();
+    
+    selectable_and_draggable_hard_reset();
+}
+
 
 $(document).ready(function() {
     
