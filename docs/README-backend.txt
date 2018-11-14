@@ -15,10 +15,10 @@ The backend consists of:
   1. A set of Jetty servers that provide access to a Solr cloud for
        searching the Extracted Features JSON data
 
-  2. A Tomcat server provides the "HTRC-Access-EF" restful interface,
-       supporting features such as the shopping-cart and downloading
-       JSON EF files (which in turn reaches out to the htrc rsync
-       server)
+  2. An additional Jetty server provides the "HTRC-Access-EF" restful
+       interface, supporting features such as the shopping-cart and
+       downloading JSON EF files (which in turn reaches out to the
+       htrc rsync server)
 
      The HTRC-Access-EF servlet itself makes use of a MongoDB server,
        used to store user selections for the shopping-cart amongst
