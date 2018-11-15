@@ -202,7 +202,7 @@
     <div id="additional-resources" class="container htrcdoc" style="display:none;">
       <h4>Additional Resources</h4>
       <ul>
-	<li><i>Total Disk Usage of 20-Core Solr Collection: 4.68TB (5.7 billion pages indexed, docs not stored)</i></li>
+	<li><i>Total Disk Usage of 16-Core x 2 Replication Solr Collection: 4.68TB (5.7 billion pages indexed, docs not stored)</i></li>
 	<script type="text/javascript">
 	  if (runtime_mode == "dev") {
 	    document.writeln('<li>Currently accessing the Development Version ... <a href="index.html">Switch to public-facing production interface</a></li>');
@@ -216,7 +216,11 @@
       <hr />
       <h5>Alternative Collections to Try Out</h5>
       <ul>
+	<!--
 	<li><b>Switch to <a href="?solr-col=solr3456-faceted-htrc-full-ef16">New Robust Full Collection [16 Shard x 2 Replication Zookeeper Ensemble Solr3-6]</a> (indexing in progress)</b></li>
+	-->
+	<li><b>Switch to <a href="?solr-col=faceted-htrc-full-ef20">Original Full Collection [20 Shard x 1 Replication Zookeeper Solr1-2]</a></b></li>
+	
 	<li>Switch to Ted's <i>FictMeta</i> 32205 sample collection:</li>
 	<ul>
 	  <li>
