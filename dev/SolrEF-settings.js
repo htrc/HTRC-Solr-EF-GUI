@@ -50,3 +50,21 @@ var export_ef_limit = 4000;
 var SolrEFSettings = {
     iprogressbar_delay_threshold: 3000 // used to be 5000 msecs
 }
+
+
+$.ajax({
+    type: "GET", 
+    url: worksets_api_url,
+    data: 'vis=public',
+    dataType: "json",
+    success: function(json_data) {
+	console.log("Updating static list of worksets_public_lookup with dynamically retrieved information");
+	if (json_data.hasOwnProperty('graph')) {
+	    $.each(json_data["graph"], function (wsid_index, wsid_val) {
+		var workset_id_url = wsid_val["id"];
+		var workset_title = wsid_val["title"];
+		worksets_public_lookup[workset_id_url] = workset_title;
+	    });
+	}
+    }
+});
