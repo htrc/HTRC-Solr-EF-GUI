@@ -324,12 +324,12 @@ function solref_dom_ready() {
 	    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 	    do_solr_field_optimization = 0;
 	}
-	
-	if (runtime_mode == "dev")  {
-	    $('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
-	}
     }
-    
+
+    if (runtime_mode == "dev")  {
+	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
+    }
+
     $('#search-form').attr("action",solr_search_action);
 
     //$('.volume-query-row').hide(); // ****
