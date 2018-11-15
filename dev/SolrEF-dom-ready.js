@@ -325,10 +325,11 @@ function solref_dom_ready() {
 	    do_solr_field_optimization = 0;
 	}
 	
-	// $('#solr-col-name').html('<br/>(FictMeta 1055 Sample)'); // ****
-	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
+	if (runtime_mode == "dev")  {
+	    $('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
+	}
     }
-
+    
     $('#search-form').attr("action",solr_search_action);
 
     //$('.volume-query-row').hide(); // ****
@@ -534,6 +535,10 @@ function solref_dom_ready() {
 
     show_hide_lang();
 
+    if (runtime_mode == "dev")  {
+	$('#additional-resources').show();
+    }
+    
     if ($('#search-submit').length > 0) {
 	$('#search-submit').click(submit_action);
     }
