@@ -363,8 +363,8 @@ a.export-item {
 
 .basket-empty24 {
     width: 24px; height: 24px;
-    background-image: url("../assets/icons/trashcan-black-empty24.png");
-/*    background-image: url("../assets/icons/shoppingcart-empty24.png"); */
+/*    background-image: url("../assets/icons/trashcan-black-empty24.png"); */
+    background-image: url("../assets/icons/shoppingcart-empty24.png"); 
 /*    background-image: url("../assets/icons/basket-empty24.png"); */
 }
 
