@@ -54,7 +54,7 @@ function newWindowSolrEF(workset_id)
 
 function parse_workset_results(jsonData)
 {
-    console.log("*** parse workset results()");
+    //console.log("*** parse workset results()");
     
     // ajax call has returned successfully
     store_search_xhr = null;
@@ -203,10 +203,11 @@ function add_worksets(json_data)
     if (json_data.hasOwnProperty('graph')) {
 	$.each(json_data["graph"], function (vid_index, vid_val) {
 	    var vol_id_url = vid_val["id"];
-	    // console.log("vol id url = " + vol_id_url); // ****
+	    //console.log("vol id url = " + vol_id_url); // ****
 
 	    $.each(vid_val["gatheredInto"], function (ws_index, ws_val) {
-		var workset_id = ws_val["id"];
+		var workset_id = (typeof ws_val == "string") ? ws_val : ws_val["id"];
+		//console.log("*** workset id = " + workset_id); // ****
 		var workset_title = worksets_public_lookup[workset_id];
 		// console.log("*** workset title = " + workset_title); // ****
 
