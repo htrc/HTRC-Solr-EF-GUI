@@ -573,6 +573,9 @@ function solref_dom_ready() {
 	$('#shoppingcart-info-area').show();
 
 	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
+
+	console.log("*** changing export header label");
+	$('#export-header').html("Export Selection Cart");
 	
 	load_solr_q(shoppingcart_q);
     }
