@@ -1114,14 +1114,10 @@ var worksets_public_lookup = {
     "https://worksets.hathitrust.org/wsid/09fecd10-b543-11e8-bd63-2587a66f96d9":"Albion12",
     "https://worksets.hathitrust.org/wsid/3edff4d0-b5db-11e8-bd63-2587a66f96d9":"TDM",
     "https://worksets.hathitrust.org/wsid/16202420-b5ea-11e8-bd63-2587a66f96d9":"new_ws",
-    "https://worksets.hathitrust.org/wsid/908015b0-b5ed-11e8-bd63-2587a66f96d9":"grrhrhr",
     "https://worksets.hathitrust.org/wsid/74ab8ef0-b5f7-11e8-bd63-2587a66f96d9":"Arthur_C._Doyle",
-    "https://worksets.hathitrust.org/wsid/911af850-b5fc-11e8-bd63-2587a66f96d9":"ws1",
     "https://worksets.hathitrust.org/wsid/c39136a0-b5fc-11e8-bd63-2587a66f96d9":"HT_WS",
     "https://worksets.hathitrust.org/wsid/93605e00-b608-11e8-bd63-2587a66f96d9":"19th Century African American",
     "https://worksets.hathitrust.org/wsid/98373a70-b608-11e8-bd63-2587a66f96d9":"19th Century African American",
-    "https://worksets.hathitrust.org/wsid/b6c55760-b608-11e8-bd63-2587a66f96d9":"ACD_test",
-    "https://worksets.hathitrust.org/wsid/58779f80-b6c4-11e8-bd63-2587a66f96d9":"ArabObserverWorkset",
-    "https://worksets.hathitrust.org/wsid/e8e90b30-b700-11e8-bd63-2587a66f96d9":"dddd"
+    "https://worksets.hathitrust.org/wsid/58779f80-b6c4-11e8-bd63-2587a66f96d9":"ArabObserverWorkset"
 };
 
