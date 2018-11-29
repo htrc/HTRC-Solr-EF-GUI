@@ -4,6 +4,15 @@
     opacity: 0.6;
 }
 
+button:disabled,
+button[disabled]{
+    pointer-events: none;
+    opacity: 0.6;
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+}
+
 .nobr {
     white-space: nowrap;
 }
