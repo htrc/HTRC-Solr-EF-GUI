@@ -72,3 +72,41 @@ $.ajax({
 	}
     }
 });
+
+var solr_total_num_vols  = 15000000;
+var solr_total_num_pages = 5700000000;
+
+$.ajax({
+    type: "GET", 
+    url: solr_search_action,
+    //data: 'q=volumeid_s:*',
+    data: 'q=*:*', // technically this works out total of pages *and* vols, but is quicker to return than strict volumeid_s count
+    dataType: "json",
+    success: function(json_data) {
+	if (json_data.hasOwnProperty('response')) {
+	    var num_found = json_data["response"].numFound;
+	    if (num_found !== undefined) {
+		console.log("Dynamically retrieved number of pages in collection: " + num_found);
+		solr_total_num_pages = num_found;
+	    }
+	}
+    }
+});
+
+
+$.ajax({
+    type: "GET", 
+    url: solr_search_action,
+    data: 'q=schemaVersion_s:*',
+    dataType: "json",
+    success: function(json_data) {
+	if (json_data.hasOwnProperty('response')) {
+	    var num_found = json_data["response"].numFound;
+	    if (num_found !== undefined) {
+		console.log("Dynamically retrieved number of volumes in collection: " + num_found);
+		solr_total_num_vols = num_found;
+	    }
+	}
+    }
+});
+
