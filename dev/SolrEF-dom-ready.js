@@ -572,7 +572,7 @@ function solref_dom_ready() {
 	var shoppingcart_key = getShoppingcartId();
 	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
 	$('#shoppingcart-info-id').val(shoppingcart_key);
-	$('#shoppingcart-info-id-export-as-workset').html('<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a>');
+	$('#shoppingcart-info-id-export-as-workset').html('<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a> (only available for htrc-admin)');
 	$('#shoppingcart-info-area').show();
 
 	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
