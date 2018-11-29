@@ -257,7 +257,13 @@ function workset_enrich_results(itemURLs)
     
     // 	FILTER ( ?gar  = <http://hdl.handle.net/2027/uc2.ark:/13960/t4fn12212> || ?gar = <http://hdl.handle.net/2027/uva.x030825627> )
     // 	       }
-    
+
+    var item_urls_len = itemURLs.length;
+    if (item_urls_len == 0) {
+	console.log("No items to cross-check for membership in workset(s)");
+	return;
+    }
+
     var prefixes = "";
     prefixes += "prefix dcterms: <http://purl.org/dc/terms/>\n";
     prefixes += "prefix edm: <http://www.europeana.eu/schemas/edm/>\n";
@@ -274,7 +280,7 @@ function workset_enrich_results(itemURLs)
     graph_body += "   edm:gathers ?gar .\n";
     
     var filter_array = [];
-    var item_urls_len = itemURLs.length;
+    
     for (var hi = 0; hi < item_urls_len; hi++) {
 	var htid = itemURLs[hi];
 	filter_array.push("?gar = " + "<" + htid + ">");
