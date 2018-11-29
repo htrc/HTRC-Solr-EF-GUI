@@ -535,7 +535,8 @@ function show_results(jsonData,newSearch,newResultPage)
 			ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 			$("#export-ef-metadata-div").show();
 			$("#export-ef-zip-div").show();
-			$("#export-ef-to-registry-div").show();
+			console.log("Supressing export-ef-to-registry-div for beta version"); // ****
+			//$("#export-ef-to-registry-div").show();
 		    }
 		    else {
 			$('.exp-vol-count-computing').hide();
@@ -554,7 +555,8 @@ function show_results(jsonData,newSearch,newResultPage)
 			$("#export-by-page-div").hide();
 			$("#export-ef-metadata-div").show();
 			$("#export-ef-zip-div").show();
-			$("#export-ef-to-registry-div").show();
+			console.log("Supressing export-ef-to-registry-div for beta version");
+			//$("#export-ef-to-registry-div").show();
 
 			$('#export-by').fadeIn(1500);
 			opt_auto_publish();
