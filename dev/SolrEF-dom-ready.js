@@ -314,16 +314,16 @@ function solref_dom_ready() {
     var solr_col = getURLParameter("solr-col");
     if (solr_col != null) {
 	solr_collection = solr_col;
-	if (solr_collection.match(/^solr3456-/)) {
-	    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
-	    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
-	    do_solr_field_optimization = 1;
-	}
-	else {
-	    solr_search_action = solr_prefix_url+solr_collection+"/select";
-	    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
-	    do_solr_field_optimization = 0;
-	}
+    }
+    if (solr_collection.match(/^solr3456-/)) {
+	solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
+	solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+	do_solr_field_optimization = 1;
+    }
+    else {
+	solr_search_action = solr_prefix_url+solr_collection+"/select";
+	solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+	do_solr_field_optimization = 0;
     }
 
     if (runtime_mode == "dev")  {
