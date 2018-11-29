@@ -565,11 +565,14 @@ function solref_dom_ready() {
 	$('#sr-add-delete-wrapper').hide();
 	$('#tabs-search').hide();
 	$('#search-explain').hide();
+
+	$('#solr-ef-title').hide();
 	
 	// Show shoppingcartId
 	var shoppingcart_key = getShoppingcartId();
 	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
 	$('#shoppingcart-info-id').val(shoppingcart_key);
+	$('#shoppingcart-info-id-export-as-workset').html('<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadefsworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a>');
 	$('#shoppingcart-info-area').show();
 
 	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
