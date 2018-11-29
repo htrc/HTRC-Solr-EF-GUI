@@ -847,7 +847,8 @@
 
 	  
 	  <div style="clear:both"></div>	  
-	</div>	
+	</div>
+	
 	<div id="shoppingcart-info-area" style="display:none; padding-bottom: 20px;">
 	  <div id="shoppingcart-info-wrapper" style="float: left; position: relative">
 	    <div id="shoppingcart-info" style="position: relative">
@@ -856,8 +857,15 @@
 		 style="position: absolute; bottom: -10px; left: 15px; font-style: italic; font-size: 90%">(0 items)
 	    </div>
 	  </div>
-	  <div style="padding-top:20px; padding-bottom:10px;">Selection Cart ID: <input type="text" id="shoppingcart-info-id" size="60" readonly="readonly" /></div>
-	  <div><button id="shoppingcart-info-empty">Empty Selection Cart</button></div>
+	  <div style="padding-top:20px; padding-bottom:10px;">
+	    Selection Cart ID: <input type="text" id="shoppingcart-info-id" size="60" readonly="readonly" />
+	    <div style="display: inline;">
+	      <button id="shoppingcart-info-id-export-as-workset">Export as Workset</button>
+	      &nbsp;<span id="shoppingcart-info-id-export-as-workset-clarification"></span>
+	    </div>
+	    
+	  </div>
+	  <div><button id="shoppingcart-info-empty">Empty Selection</button></div>
 
 	  <div style="clear:both"></div>	  
 	</div>
