@@ -1,7 +1,8 @@
 
 //var base_domain_url = "//solr1.ischool.illinois.edu"; // ****
-var base_domain_url="https://solr1.ischool.illinois.edu"
+//var base_domain_url="https://solr1.ischool.illinois.edu"
 //var base_domain_url="https://solr2.ischool.illinois.edu"
+var base_domain_url=window.location.protocol + "//" + window.location.hostname;
 
 var solr_prefix_url = base_domain_url+"/solr/";
 var robust_solr_prefix_url = base_domain_url+"/robust-solr/";
