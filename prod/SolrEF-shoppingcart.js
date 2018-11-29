@@ -520,6 +520,11 @@ function make_selectable_and_draggable($search_results)
 function open_shoppingcart()
 {
     // (id:inu.32000009471279)+OR+(id:mdp.39015001149007)
+
+    if (store_shoppingcart_ids.length==0) {
+	console.log("Shopping-cart is empty. Nothing to view.");
+	return
+    }
     
     var ids_escaped = store_shoppingcart_ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});	
     var ids_or_str = ids_escaped.join(" OR ");	
