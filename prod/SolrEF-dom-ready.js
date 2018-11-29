@@ -572,7 +572,16 @@ function solref_dom_ready() {
 	var shoppingcart_key = getShoppingcartId();
 	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
 	$('#shoppingcart-info-id').val(shoppingcart_key);
-	$('#shoppingcart-info-id-export-as-workset').html('<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a>');
+
+	if (window.location.hostname.match(/^solr1\./)) {
+	    // public facing machine => message that this not available
+	    $("#shoppingcart-info-id-export-as-workset").attr("disabled", "disabled")
+	    $('#shoppingcart-info-id-export-as-workset-clarification').html('&nbsp;(htrc-admin only)');
+	}
+	else {
+	    // development machine => allow export
+	    $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
+	}
 	$('#shoppingcart-info-area').show();
 
 	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);

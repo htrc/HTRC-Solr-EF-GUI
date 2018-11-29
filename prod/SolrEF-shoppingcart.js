@@ -570,6 +570,24 @@ function selectable_and_draggable_hard_reset()
 */
 }
 
+function export_shoppingcart()
+{
+    var shoppingcart_key = getShoppingcartId();
+    //console.log("*** Shopping cart key = " + shoppingcart_key);
+
+    //'<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a>'
+    var export_shoppingcart_url = 'https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr';    
+    var win = window.open(export_shoppingcart_url, '_blank');
+    if (win) {
+	// => Browser has allowed it to be opened
+	win.focus();
+    }
+    else {
+	// => Browser has blocked it
+	alert('New window/tab request blocked by browser.\nPlease enable popups for this website');
+    }
+
+}
 
 function empty_shoppingcart()
 {
