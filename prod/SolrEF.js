@@ -794,7 +794,14 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 
     // For display purposes, determine how many terms in query
     var count_terms = 0;
-    var iprogressbar_message = "Searching 15.1 million volumes/5.5 billion pages"; // **** Change this to use dynamic data??
+    var num_vols_mil = solr_total_num_vols / 1000000;
+    var num_vols_mil_str = Math.round( num_vols_mil * 10) / 10;
+
+    var num_pages_bil = solr_total_num_pages / 1000000000;
+    var num_pages_bil_str = Math.round( num_pages_bil * 10) / 10;
+
+    var iprogressbar_message = "Searching " + num_vols_mil_str + " million volumes/" + num_pages_bil_str + " billion pages"; 
+    
     if (store_search_args != null) {
 	count_terms = (store_search_args.q.match(/:/g) || []).length;
     }
