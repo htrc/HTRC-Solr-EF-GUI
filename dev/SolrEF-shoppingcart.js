@@ -338,11 +338,35 @@ function convert_close_to_shoppingcart_action($close_button)
     $close_button.on("click.openshoppingcart",open_shoppingcart);
 }
 
+function delete_item_if_shoppingcart(item_id,$close_div)
+{
+    if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+	// Delete this id
+	var shoppingcart_key = getShoppingcartId();
+	
+	$.ajax({
+	    type: "POST",
+	    url: ef_download_url, 
+	    data: {
+		'action': 'shoppingcart',
+		'mode': 'del-ids',
+		'key': shoppingcart_key,
+		'ids': item_id
+	    },
+	    dataType: "text",
+	    success: function(textData) {
+		console.log("Deleted Shopping id:" + item_id);
+	    },
+	    error: function(jqXHR, textStatus, errorThrown) {
+		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		ajax_error(jqXHR, textStatus, errorThrown)
+	    }
+	});		    
+    }
+}
+    
 function do_delete_drop_action()
 {
-    // Check to see if any of the items selected are in the shopping cart
-    // => popup alert if there are
-
     var delete_list = []
     
     if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
@@ -350,8 +374,10 @@ function do_delete_drop_action()
 
 	$my_checkboxes.each(function() {
 	    var $close_div = $(this).parent().parent().find(".htrc-delete");
+	    
 	    delete_list.push($close_div);
 	    $close_div.trigger("click");
+	    delete_item_if_shoppingcart(item_id,$close_div);
 	});
     }		       
     else {
@@ -359,8 +385,16 @@ function do_delete_drop_action()
     
 	$my_selected_items.each(function() {
 	    var $close_div = $(this).find(".htrc-delete");
-	    delete_list.push($close_div);
-	    $close_div.trigger("click");
+	    var shoppingcart_marker = $close_div.find(".shoppingcart-marker");	    
+	    if (shoppingcart_marker.length > 0) {
+		var item_id = $(this).find("span[name]").attr("name");		
+		console.log("The item " + item_id + " is already in the shoppingcat. Ignoring request to delete it from the result set")
+	    }
+	    else {
+		delete_list.push($close_div);
+		$close_div.trigger("click");		
+		//delete_item_if_shoppingcart(item_id,$close_div);
+	    }	    
 	});
     }
     selectable_and_draggable_hard_reset();
@@ -425,9 +459,14 @@ function do_shoppingcart_drop_action()
 
 	$my_checkboxes.each(function() {
 	    var item_id = $(this).parent().parent().find('span[name]').attr("name");
-	    store_shoppingcart_ids.push(item_id);
-	    store_shoppingcart_ids_hash[item_id] = item_id;
-	    add_shoppingcart_ids.push(item_id);
+	    if (!store_shoppingcart_ids_hash.hasOwnProperty(item_id)) {
+		store_shoppingcart_ids.push(item_id);
+		store_shoppingcart_ids_hash[item_id] = item_id;
+		add_shoppingcart_ids.push(item_id);
+	    }
+	    else {
+		console.log("Skipping add, as " + item_id + " is already in the shoppingcart");
+	    }
 	});
 
     }
@@ -436,44 +475,52 @@ function do_shoppingcart_drop_action()
 	    var $this = $(this);
 	    
 	    var item_id = $this.find('span[name]').attr("name");
-	    store_shoppingcart_ids.push(item_id);
-	    store_shoppingcart_ids_hash[item_id] = item_id;
-	    add_shoppingcart_ids.push(item_id);
+	    if (!store_shoppingcart_ids_hash.hasOwnProperty(item_id)) {
+		store_shoppingcart_ids.push(item_id);
+		store_shoppingcart_ids_hash[item_id] = item_id;
+		add_shoppingcart_ids.push(item_id);
 
-	    // Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
-	    var $close_button = $this.find(".htrc-delete");
+		// Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
+		var $close_button = $this.find(".htrc-delete");
+		
+		convert_close_to_shoppingcart_action($close_button);
 	    
-	    convert_close_to_shoppingcart_action($close_button);
-	    
-	    make_undraggable($this);
+		make_undraggable($this);
+	    }
+	    else {
+		console.log("Skipping add, as " + item_id + " is already in the shoppingcart");
+	    }
+
 	});
     }
 
     //console.log("**** add the followig items to the shopping cart" + add_shoppingcart_ids.join(","));
 
 
-    // Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
-    $.ajax({
-	type: "POST",
-	url: ef_download_url, 
-	data: {
-	    'action': 'shoppingcart',
-	    'mode': 'add-ids',
-	    'key': shoppingcart_key,
-	    'ids': add_shoppingcart_ids.join(",")
-	},
-	dataType: "text",
-	success: function(textData) {
+    if (add_shoppingcart_ids.length>0) {
+	// Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
+	$.ajax({
+	    type: "POST",
+	    url: ef_download_url, 
+	    data: {
+		'action': 'shoppingcart',
+		'mode': 'add-ids',
+		'key': shoppingcart_key,
+		'ids': add_shoppingcart_ids.join(",")
+	    },
+	    dataType: "text",
+	    success: function(textData) {
 		console.log("Saving Shopping:" + textData);
 		console.log("Shopping cart: " + add_shoppingcart_ids.length + " item(s) successfully added");
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}
-    });
-
-    update_shoppingcart_count();
+	    },
+	    error: function(jqXHR, textStatus, errorThrown) {
+		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		ajax_error(jqXHR, textStatus, errorThrown)
+	    }
+	});
+	
+	update_shoppingcart_count();
+    }
     
     selectable_and_draggable_hard_reset();
 }

@@ -896,6 +896,8 @@ function result_set_delete_item(line_num) {
 	var $wrapper_line_div = $close_div.parent();
 	
 	var id = $close_div.next().attr("name");
+
+	delete_item_if_shoppingcart(id,$close_div);	
 	$wrapper_line_div.slideUp(500, function() { $wrapper_line_div.remove(); });
 
 	//var escaped_id = id.replace(/:/g,"\\:").replace(/\\/g,"\\\\");
