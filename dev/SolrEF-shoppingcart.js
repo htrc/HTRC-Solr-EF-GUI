@@ -601,6 +601,7 @@ function empty_shoppingcart()
     //console.log("**** deleting the followig items to the shopping cart" + del_shoppingcart_ids.join(","));
 
     // Fire off Ajax call to delete all the IDs on the server
+    /*
     $.ajax({
 	type: "POST",
 	url: ef_download_url, 
@@ -609,6 +610,26 @@ function empty_shoppingcart()
 	    'mode': 'del-ids',
 	    'key': shoppingcart_key,
 	    'ids': del_shoppingcart_ids.join(",")
+	},
+	dataType: "text",
+	success: function(textData) {
+	    console.log("Deleting Shopping:" + textData);
+	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
+	    setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}
+    });
+*/
+        $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'shoppingcart',
+	    'mode': 'del',
+	    'key': shoppingcart_key
 	},
 	dataType: "text",
 	success: function(textData) {
