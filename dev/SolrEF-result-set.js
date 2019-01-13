@@ -108,7 +108,7 @@ function add_titles_and_authors_solr(jsonData) {
 	if (doc_val.concept_ss) {
 	    var concepts = doc_val.concept_ss.map(strtrim).join(", ");
 	    if (!concepts.match(/^\s*$/)) {
-		details.push("Concept(s) " + concepts.capitalize() );
+		details.push("Concept(s): " + concepts.capitalize() );
 	    }
 	}
 
