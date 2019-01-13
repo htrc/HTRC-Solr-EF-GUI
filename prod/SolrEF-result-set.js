@@ -105,6 +105,12 @@ function add_titles_and_authors_solr(jsonData) {
 	if (doc_val.typeOfResource_s && !doc_val.typeOfResource_s.match(/^\s*$/)) {
 	    details.push("Resource type: " + doc_val.typeOfResource_s.capitalize() );
 	}
+	if (doc_val.concept_ss) {
+	    var concepts = doc_val.concept_ss.map(strtrim).join(", ");
+	    if (!concepts.match(/^\s*$/)) {
+		details.push("Concept(s) " + concepts.capitalize() );
+	    }
+	}
 
 	var details_str = details.map(strtrim).join(";\n");	    
 	var $tooltip_tanda = $('<span />').attr('title',details_str).html(title_and_authors);
