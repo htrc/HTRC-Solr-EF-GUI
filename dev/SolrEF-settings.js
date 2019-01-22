@@ -1,7 +1,7 @@
 
-//var base_domain_url = "//solr1.ischool.illinois.edu"; // ****
-//var base_domain_url="https://solr1.ischool.illinois.edu"
-//var base_domain_url="https://solr2.ischool.illinois.edu"
+//var base_domain_url = "//solr1.htrc.illinois.edu"; // ****
+//var base_domain_url="https://solr1.htrc.illinois.edu"
+//var base_domain_url="https://solr2.htrc.illinois.edu"
 var base_domain_url=window.location.protocol + "//" + window.location.hostname;
 
 var solr_prefix_url = base_domain_url+"/solr/";
@@ -18,14 +18,14 @@ var solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
 var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
-//var ef_download_url  = "http://solr1.ischool.illinois.edu:8080/get";
+//var ef_download_url  = "http://solr1.htrc.illinois.edu:8080/get";
 //var ef_download_url  = "http://localhost:8080/htrc-access-ef/get";
 var ef_download_url  = base_domain_url+"/htrc-ef-access/get";
 
 var workset_base_url    = base_domain_url+"/dcWSfetch/";
 var publish_workset_url = base_domain_url+"/fetchCollection";
 
-//var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+//var sparql_url = "https://solr1.htrc.illinois.edu/triple-store/sparql";
 var sparql_url = base_domain_url+"/triple-store/sparql";
 
 var worksets_api_url = base_domain_url+"/worksets-api/worksets";

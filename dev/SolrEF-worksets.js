@@ -297,7 +297,7 @@ function workset_enrich_results(itemURLs)
     // &format=application/x-json+ld&timeout=0&debug=on
     
     //var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
-    //var sparql_url = "https://solr1.ischool.illinois.edu/triple-store/sparql";
+    //var sparql_url = "https://solr1.htrc.illinois.edu/triple-store/sparql";
 
     var sparql_data = {
 	"default-graph-uri": "",

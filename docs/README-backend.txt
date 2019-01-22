@@ -38,7 +38,7 @@ The initial HTRC-Solr-EF-GUI + backend that was setup runs off solr1 and solr2.
 
 You access this version through:
 
-  https://solr1.ischool.illinois.edu/solr-ef/index.html
+  https://solr1.htrc.illinois.edu/solr-ef/index.html
 
 The default Solr collection that is searched through the
 interface is 'faceted-htrc-full-ef20', which is the
@@ -47,7 +47,7 @@ interface is 'faceted-htrc-full-ef20', which is the
 It is possible to specify which Solr collection to search through the
 'solr-col' CGI argument, so an equivalent to the above is:
 
-  https://solr1.ischool.illinois.edu/solr-ef/index.html?solr-col=faceted-htrc-full-ef20
+  https://solr1.htrc.illinois.edu/solr-ef/index.html?solr-col=faceted-htrc-full-ef20
 
 We will take advantage of this ability below.
 
@@ -66,9 +66,9 @@ In summary:
 
 You can visit either:
 
-  https://solr1.ischool.illinois.edu/solr-ef/index.html?solr-col=solr3456-faceted-htrc-full-ef16
+  https://solr1.htrc.illinois.edu/solr-ef/index.html?solr-col=solr3456-faceted-htrc-full-ef16
 or
-  https://solr2.ischool.illinois.edu/solr-ef/index.html?solr-col=solr3456-faceted-htrc-full-ef16
+  https://solr2.htrc.illinois.edu/solr-ef/index.html?solr-col=solr3456-faceted-htrc-full-ef16
 
 to search the EF data.
 

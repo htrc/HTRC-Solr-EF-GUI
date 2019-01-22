@@ -933,7 +933,7 @@ function show_results(jsonData,newSearch,newResultPage)
     // => Retrieve from solr volume level metadata to fill out place-holder title information (etc)
 
     // Example URL for using the Solr-EF collection to retrieve volume id info
-    //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
+    //   http://solr1.htrc.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
 
     // ****
     //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});

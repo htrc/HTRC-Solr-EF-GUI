@@ -3,7 +3,7 @@ Solr query syntax
 collection name: faceted-htrc-full-ef20
 
 Base URL for searching:
-  https://solr1.ischool.illinois.edu/solr/faceted-htrc-full-ef20/select
+  https://solr1.htrc.illinois.edu/solr/faceted-htrc-full-ef20/select
 
 
 Makes use of dynamic fields

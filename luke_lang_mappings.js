@@ -12,7 +12,7 @@ function ajax_error(jqXHR, textStatus, errorThrown) {
 
 
 $(function() {
-    //var luke_url="solr1.ischool.illinois.edu/solr/htrc-full-ef_shard6_replica1/admin/luke";
+    //var luke_url="solr1.htrc.illinois.edu/solr/htrc-full-ef_shard6_replica1/admin/luke";
     var luke_url="htrc-full-ef_shard6_replica1/admin/luke";
     
     $.ajax({

@@ -1,11 +1,11 @@
 
-var solr_prefix_url = "http://solr1.ischool.illinois.edu/solr/";
+var solr_prefix_url = "http://solr1.htrc.illinois.edu/solr/";
 var solr_collection = "faceted-htrc-full-ef20";
 
 var solr_search_action = solr_prefix_url+solr_collection+"/select";
 var solr_stream_action = solr_prefix_url+solr_collection+"/stream";
 
-var ef_download_url = "http://solr1.ischool.illinois.edu:8080/get";
+var ef_download_url = "http://solr1.htrc.illinois.edu:8080/get";
 
 var num_found_page_limit_str = "700,000";
 var num_found_vol_limit_str  = "100,000";
@@ -315,14 +315,14 @@ function add_worksets(json_data) {
 		var workset_id = ws_val["@id"];
 		var workset_title = ws_val["http://purl.org/dc/terms/title"][0]["@value"];
 
-		// http://acbres224.ischool.illinois.edu:8890/sparql?query=describe <http://worksets.hathitrust.org/wsid/189324112>&format=text/x-html+ul
-		// http://acbres224.ischool.illinois.edu:8890/sparql?query=describe+%3Chttp%3A%2F%2Fworksets.hathitrust.org%2Fwsid%2F189324112%3E&format=text%2Fx-html%2Bul
+		// http://acbres224.htrc.illinois.edu:8890/sparql?query=describe <http://worksets.hathitrust.org/wsid/189324112>&format=text/x-html+ul
+		// http://acbres224.htrc.illinois.edu:8890/sparql?query=describe+%3Chttp%3A%2F%2Fworksets.hathitrust.org%2Fwsid%2F189324112%3E&format=text%2Fx-html%2Bul
 
-		//var describe_url = "http://acbres224.ischool.illinois.edu:8890/sparql?query=describe+<" +
+		//var describe_url = "http://acbres224.htrc.illinois.edu:8890/sparql?query=describe+<" +
 		//    workset_id + ">&format=text%2Fx-html%2Bul";
 
-	        // http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=http://worksets.hathitrust.org/wsid/147967316
-	        var describe_url = "http://acbres224.ischool.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
+	        // http://acbres224.htrc.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=http://worksets.hathitrust.org/wsid/147967316
+	        var describe_url = "http://acbres224.htrc.illinois.edu:8080/dcWSfetch/getWsDescripWithVolMeta?id=" + workset_id;
 
 		var hyperlinked_workset_title = '<a target="_blank" href="' + describe_url + '">' + workset_title + '</a>';
 
@@ -827,10 +827,10 @@ function workset_enrich_results(itemURLs) {
 	var sparql_query = prefixes + construct + where;
 	//console.log("*** sparql query = " + sparql_query);
 
-	// http://acbres224.ischool.illinois.edu:8890/sparql?default-graph-uri=&query
+	// http://acbres224.htrc.illinois.edu:8890/sparql?default-graph-uri=&query
 	// &format=application/x-json+ld&timeout=0&debug=on
 
-	var sparql_url = "http://acbres224.ischool.illinois.edu:8890/sparql";
+	var sparql_url = "http://acbres224.htrc.illinois.edu:8890/sparql";
 	var sparql_data = {
 		"default-graph-uri": "",
 		"format": "application/x-json+ld",
@@ -1374,7 +1374,7 @@ function show_results(jsonData,newResultPage)
     // => Retrieve from solr volume level metadata to fill out place-holder title information (etc)
 
     // Example URL for using the Solr-EF collection to retrieve volume id info
-    //   http://solr1.ischool.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
+    //   http://solr1.htrc.illinois.edu/solr/htrc-full-ef20/select?q=(id:mdp.39015071574472)&indent=on&wt=json&start=0&rows=200
 
     //var ids_escaped = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"});
 
