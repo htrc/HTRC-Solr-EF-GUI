@@ -117,7 +117,11 @@ function add_titles_and_authors_solr(jsonData) {
 	
 	$("[name='" + htid + "']").each(function () {
 	    var $tooltip_tanda_clone = $tooltip_tanda.clone();
-	    $tooltip_tanda_clone.tooltip();
+	    $tooltip_tanda_clone.tooltip({
+	        open: function (event, ui) {
+		    ui.tooltip.css("max-width", "800px");
+		}
+	    });
 	    $(this).html($tooltip_tanda_clone)
 	});
 	console.log(htid + ", title = " + title);
