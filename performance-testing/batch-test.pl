@@ -37,7 +37,7 @@ sub run_query
 
 	    my $total_secs = $min * 60 + $sec;
 	    lock($TOUT);		
-	    print $TOUT "$batch_no,$total_secs\n";
+	    print $TOUT "$batch_no,$query,$total_secs\n";
 	    unlock($TOUT);
 	    $num_real_time_matches++;
 	}	    
@@ -61,22 +61,24 @@ sub run_query
 
 sub wramp_batch_test
 {
-    my ($realtime_data_file,$num_forks,$query) = @_;
+    my ($realtime_data_file,$num_forks,$query_array) = @_;
 
     print "Saving realtime data output to: $realtime_data_file\n";
 
     open(TOUT,">$realtime_data_file")
 	|| die "Failed to open '$realtime_data_file' for output: $!\n";
 
-    print TOUT "Batch,Realtime\n";
+    print TOUT "Batch,Query,Realtime\n";
 
     for (my $batch_no=1; $batch_no<=$num_forks; $batch_no++) {
 
+	print "Batch Number: $batch_no\n";
 	for (my $i=0; $i<$batch_no; $i++) {	    
 	    my $pid = fork();
 	    die "fork failed: $!" unless defined $pid;
 	    
 	    if ($pid == 0) {
+		my $query = $query_array->[rand @$query_array];
 		run_query(TOUT,$batch_no,$query);
 		close(TOUT);
 		exit;
@@ -93,6 +95,47 @@ sub wramp_batch_test
     
 }
 
+
+sub read_in_word_frequencies
+{
+    my ($in_filename) = @_;
+
+    open(WIN, "<$in_filename")
+	|| die "Failed to open file '$in_filename': $!";
+
+    while (defined(my $line = <WIN>)) {
+	chomp($line);
+	my ($word) = ($line =~ m/\d+\t(.+)\t\d+/);
+	push(@$word_freq,$word)
+    }
+
+    close(WIN);
+
+    return $word_freq;
+}
+
+sub generate_slice
+{
+    my ($word_freq,$slice_no) = @_;
+
+    my $slice_start = $slice_no;
+    my $slice_end = $slice_no + 999;
+
+    #my @rand_query_slice = @{$word_freq->[$slice_no..$slice_end]};
+    my @rand_query_slice = ();
+    for (my $i=$slice_start; $i<=$slice_end; $i++) {
+	push(@rand_query_slice,$word_freq->[$i]);
+    }
+    
+    map { $_ = "en_htrctokentext:$_" }  @rand_query_slice;
+
+#    foreach my $q (@rand_query_slice) {
+#	print "$q\n";
+#    }
+
+    return \@rand_query_slice;
+}
+
 # Example queries:
 #   title_t:sherlock
 #  ((volumetitle_txt:sherlock)) AND ((en_htrctokentext:violin))
@@ -101,11 +144,25 @@ sub wramp_batch_test
 my $exptname = $ARGV[0] || "trial";
 my $data_tail = "-realtime-data-wramp.csv";
 
-my $title_sherlock_data_file = "$exptname-titlesherlock-$data_tail";
-wramp_batch_test($title_sherlock_data_file,5,"title_t:sherlock");
+my $word_freq = read_in_word_frequencies("en-word-freq-top-10000.txt");
 
-my $entext_violins_data_file = "$exptname-entextviolins-$data_tail";
-wramp_batch_test($entext_violins_data_file,5,"en_htrctokentext:violin");
+my $title_sherlock_data_file = "$exptname-titleSherlock-$data_tail";
+#wramp_batch_test($title_sherlock_data_file,5,["title_t:sherlock"]);
+
+my $entext_violins_data_file = "$exptname-entextViolins-$data_tail";
+#wramp_batch_test($entext_violins_data_file,10,["en_htrctokentext:violins"]);
+
+my $entext_violin_data_file = "$exptname-entextViolin-$data_tail";
+#wramp_batch_test($entext_violin_data_file,10,["en_htrctokentext:violin"]);
  
 
+my $rand_query_slice7000 = generate_slice($word_freq,7000);
+#my @rand_query_slice7000 = @$word_freq[7000..7999];
+#map { $_ = "en_htrctokentext:$_" }  @rand_query_slice7000;
 
+#foreach my $q (@$rand_query_slice7000) {
+#    print "$q\n";
+#}
+
+my $entext_slice7000_data_file = "$exptname-randSlice7000-$data_tail";
+wramp_batch_test($entext_slice7000_data_file,5,$rand_query_slice7000);
