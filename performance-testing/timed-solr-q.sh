@@ -1,10 +1,7 @@
 #!/bin/bash
 
+#title_t:sherlock
 #((volumetitle_txt:sherlock)) AND ((en_htrctokentext:violin))
-
-#echo wget -O result-page.html "https://solr1.htrc.illinois.edu/solr-ef/index.html?solr-q=$*"
-
-#time wget -O result-page.html "https://solr1.htrc.illinois.edu/solr-ef/index.html?solr-q=$*"
 
 q_arg="q=$*" 
 
@@ -18,6 +15,6 @@ echo
 echo wget -O result-page.json "$full_url"
 echo
 
-wget -O result-page.json "$full_url"
+time wget -O result-page.json "$full_url"
 
 
