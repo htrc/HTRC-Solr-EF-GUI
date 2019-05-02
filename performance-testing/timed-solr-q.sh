@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#title_t:sherlock
-#((volumetitle_txt:sherlock)) AND ((en_htrctokentext:violin))
 
 q_arg="q=$*" 
 
