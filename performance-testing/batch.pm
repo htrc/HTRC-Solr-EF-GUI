@@ -111,10 +111,32 @@ sub read_in_word_frequencies
     return $word_freq;
 }
 
+sub read_in_word_frequencies_2col
+{
+    my ($in_filename) = @_;
+
+    open(WIN, "<$in_filename")
+	|| die "Failed to open file '$in_filename': $!";
+
+    while (defined(my $line = <WIN>)) {
+	chomp($line);
+	my ($word) = ($line =~ m/^\s*\d+\s+(.+)\s*/);
+	push(@$word_freq,$word)
+    }
+
+    close(WIN);
+
+    return $word_freq;
+}
+
 sub generate_slice
 {
-    my ($word_freq,$slice_no) = @_;
+    my ($word_freq,$slice_no,$lang) = @_;
 
+    if (!defined $lang) {
+	$lang = "en";
+    }
+    
     my $slice_start = $slice_no;
     my $slice_end = $slice_no + 999;
 
@@ -130,7 +152,7 @@ sub generate_slice
 	}
     }
     
-    map { $_ = "en_htrctokentext:$_" }  @rand_query_slice;
+    map { $_ = $lang."_htrctokentext:$_" }  @rand_query_slice;
 
 #    foreach my $q (@rand_query_slice) {
 #	print "$q\n";
