@@ -1,3 +1,4 @@
 for f in $*/json-output/*.json ; do
-    ./check-numFound.sh $f ;
+    echo "File: $f"
+    ./check-numFound.sh $f
 done 
