@@ -4,14 +4,14 @@ use Fcntl qw(:flock SEEK_END);
 
 sub lock {
     my ($fh) = @_;
-    flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
+    flock($fh, LOCK_EX) or die "Cannot lock file - $!\n";
     # and, in case someone appended while we were waiting...
     seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
 }
 
 sub unlock {
     my ($fh) = @_;
-    flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
+    flock($fh, LOCK_UN) or die "Cannot unlock file - $!\n";
 }
     
 sub run_query
