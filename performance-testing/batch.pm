@@ -58,10 +58,9 @@ sub run_query
 
 
 
-
-sub wramp_batch_test
+sub jumpstart_wramp_batch_test
 {
-    my ($realtime_data_file,$num_forks,$step_size,$query_array) = @_;
+    my ($realtime_data_file,$start_num_forks,$end_num_forks,$step_size,$query_array) = @_;
 
     print "Saving realtime data output to: $realtime_data_file\n";
 
@@ -70,7 +69,7 @@ sub wramp_batch_test
 
     print TOUT "Batch;Query;Realtime\n";
 
-    for (my $batch_no=1; $batch_no<=$num_forks; $batch_no+=$step_size) {
+    for (my $batch_no=$start_num_forks; $batch_no<=$end_num_forks; $batch_no+=$step_size) {
 
 	print "Batch Number: $batch_no\n";
 	for (my $i=0; $i<$batch_no; $i++) {	    
@@ -90,6 +89,13 @@ sub wramp_batch_test
 
     # print "All done!\n";
     close(TOUT);    
+}
+    
+sub wramp_batch_test
+{
+    my ($realtime_data_file,$num_forks,$step_size,$query_array) = @_;
+
+    wramp_batch_test($realtime_data_file,0,$num_forks,$step_size,$query_array);
 }
 
 
