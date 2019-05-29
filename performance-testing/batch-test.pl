@@ -33,7 +33,8 @@ my $en_word_freq = batch::read_in_word_frequencies("en-word-freq-top-10000.txt")
 
 my $en_rand_query_slice2000 = batch::generate_slice($en_word_freq,2000,"en");
 my $en_text_slice2000_data_file = "$exptname-randSlice2000-en-$data_tail";
-batch::jumpstart_wramp_batch_test($en_text_slice2000_data_file,30,50,10,$en_rand_query_slice2000);
+#batch::jumpstart_wramp_batch_test($en_text_slice2000_data_file,30,50,10,$en_rand_query_slice2000);
+batch::jumpstart_wramp_batch_test($en_text_slice2000_data_file,10,20,5,$en_rand_query_slice2000);
 
 
 if (defined $exptdir) {
