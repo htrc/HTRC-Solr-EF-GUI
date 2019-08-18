@@ -30,6 +30,12 @@ var sparql_url = base_domain_url+"/triple-store/sparql";
 
 var worksets_api_url = base_domain_url+"/worksets-api/worksets";
 
+//(runtime_mode == "dev")
+// //var export_shoppingcart_url = 'https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr';    
+// var export_shoppingcart_url = 'https://analytics-ws.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr';
+
+var workset_hostname = (runtime_mode == "dev") ? "analytics-ws" : "analytics";
+var export_shoppingcart_base_url = 'https://'+workset_hostname+'.htrc.indiana.edu';
 
 //var num_found_vol_limit_str  = "100,000";
 var num_found_vol_limit_str  = "4,000,000";

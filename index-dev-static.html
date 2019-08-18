@@ -50,6 +50,9 @@
 	<script src="dev/lookup-vars.js"></script>
 
 	<script src="dev/SolrEF-globals.js"></script>
+	<script>
+	  var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
+	</script>	
 	<script src="dev/SolrEF-settings.js"></script>
 	<script src="dev/SolrEF-utils.js"></script>
 	<script src="dev/SolrEF-authentication.js"></script>
@@ -64,9 +67,6 @@
 	<script src="dev/SolrEF-result-set.js"></script>
 	<script src="dev/SolrEF-autocomplete.js"></script>
 	<script src="dev/SolrEF-dom-ready.js"></script>
-	<script>
-	  var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
-	  </script>
   </head>
   <body>
         <nav class="navbar navbar-default navbar-fixed-top navbar-htrc" role="navigation">
