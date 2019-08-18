@@ -622,10 +622,6 @@ function export_shoppingcart()
     var shoppingcart_key = getShoppingcartId();
     //console.log("*** Shopping cart key = " + shoppingcart_key);
 
-    //'<a target="_blank" href="https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr">Export as workset</a>'
-    // //var export_shoppingcart_url = 'https://analytics.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr';    
-    // var export_shoppingcart_url = 'https://analytics-ws.htrc.indiana.edu/uploadworkset?id='+shoppingcart_key+'&s=solr';
-
     var export_shoppingcart_url = export_shoppingcart_base_url + '/uploadworkset?id='+shoppingcart_key+'&s=solr';
     
     var win = window.open(export_shoppingcart_url, '_blank');
