@@ -897,8 +897,26 @@ function solref_dom_ready() {
     
 }
 
+function recompute_shoppingcart_on_history_back()
+{
+    // Based on:
+    //   https://stackoverflow.com/questions/43043113/how-to-force-reloading-a-page-when-using-browser-back-button
+    
+    window.addEventListener( "pageshow", function ( event ) {
+	var historyTraversal = event.persisted ||
+	    ( typeof window.performance != "undefined" &&
+	      window.performance.navigation.type === 2 );
+	if ( historyTraversal ) {
+	    // Handle page restore.
+	    //window.location.reload();
+	    retrieve_shoppingcart()
+	}
+    });
+}
+
 $(document).ready(function() {
-    console.log("*** Away to call solref_dom_ready()");
+    //console.log("*** Away to call solref_dom_ready()");
     solref_dom_ready();
+    //recompute_shoppingcart_on_history_back();
 });
 

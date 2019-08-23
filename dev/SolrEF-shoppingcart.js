@@ -40,7 +40,9 @@ function retrieve_shoppingcart()
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    htrc_alert("Failed to retrieve shopping-cart information.<br/>"
+		       +"Items currently unavailable.");
+	    ajax_error_console(jqXHR, textStatus, errorThrown)
 	}
     });
 }
@@ -577,6 +579,9 @@ function open_shoppingcart()
     var ids_or_str = ids_escaped.join(" OR ");	
     
     var load_shoppingcart_url = window.location.pathname + "?shoppingcart-q=" + ids_or_str;
+    //document.location.href = load_shoppingcart_url;
+    //var win = window.open(load_shoppingcart_url);
+    
     var win = window.open(load_shoppingcart_url, '_blank');
     if (win) {
 	// => Browser has allowed it to be opened

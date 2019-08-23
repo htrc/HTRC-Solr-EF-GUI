@@ -193,6 +193,18 @@ function escape_solr_query(query)
 
 
 
+function ajax_error_console(jqXHR, textStatus, errorThrown)
+{        
+    console.log('====');
+    console.log('Detected Network AJAX Error/Abort');
+    console.log('====');
+    console.log('textStatus:' + textStatus);
+    console.log('errorThrown:' + errorThrown);
+    console.log('responseText:' + jqXHR.responseText);
+    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
+
+}
+
 function ajax_error(jqXHR, textStatus, errorThrown)
 {
     
@@ -206,15 +218,8 @@ function ajax_error(jqXHR, textStatus, errorThrown)
 
 	htrc_alert(mess);
     }
-    
-    console.log('====');
-    console.log('Detected Network AJAX Error/Abort');
-    console.log('====');
-    console.log('textStatus:' + textStatus);
-    console.log('errorThrown:' + errorThrown);
-    console.log('responseText:' + jqXHR.responseText);
-    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
 
+    ajax_error_console(jqXHR, textStatus, errorThrown);
 }
 
 function load_async_scripts(async_script_urls, on_complete_callback) {
