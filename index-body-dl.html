@@ -12,7 +12,8 @@
   <link href="assets/solr-ef/dev/SolrEF-jsx.css" rel="stylesheet" /> !-- **** --
   <link href="assets/solr-ef/dev/SolrEF-progressbar.css" rel="stylesheet" />
 -->
-  
+
+  <!-- **solr-ef-container:start -->
   <div id="solr-ef-container" class="container container-panel">
 
     <div id="htrc-alert-dialog" title="Alert">
@@ -94,6 +95,15 @@
 	  
 	  <span id="solr-col-name" style="font-size: 40%;"></span>
 	</h2>
+
+	<div id="solr-ef-description">
+	<p>This experimental tool allows you to build worksets from unigram queries over the <a href="http://dx.doi.org/10.13012/J8X63JT3">HTRC Extracted Features</a> dataset.</p>
+	<p>This dataset contains data and metadata extracted from volumes in HathiTrust. Add entire volumes or single pages from your search results to your selection basket. If you want more full-text search flexibility, <a href="https://www.hathitrust.org/">use the HathiTrust Digital Library</a>. Create an HTRC workset from your selection or download the associated metadata.</p>
+
+<p>This tool is still in development and we anticipate that it will change through 2019-2020.</p>
+
+<p>Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
+	</div>
 	
 	<div id="tabs-search">
 	  <div style="float: right; padding: 10px;">
@@ -107,8 +117,8 @@
 	    </div>
 	  </div>
 	  <ul>
-	    <li><a id="tab-page"     href="#tabs-shared">Page-level</a></li>
-	    <li><a id="tab-volume"   href="#tabs-shared">Volume</a></li>
+	    <li><a id="tab-page"     href="#tabs-shared">Text</a></li>
+	    <li><a id="tab-volume"   href="#tabs-shared">Metadata</a></li>
 	    <li><a id="tab-combined" href="#tabs-shared">Combined</a></li>
 	    <li><a id="tab-advanced" href="#tabs-shared">Advanced</a></li>
 	  </ul>
@@ -144,42 +154,21 @@
 			   title="Help: Query Volume Metadata"
 			   style="height: 500px;">
 			<div id="volume-help-body">
-			  
+			 
+			  <p>Volume-level metadata searching is not case-sensitive.</p>
+
+			  <p>Unless you specify a metadata field to search, the default is to search the title field.</p>
+
+			  <p>To search for a phrase, use quotes around your search (“like this”).</p>
+		
+			  <p>To search all metadata fields, tick the Search all metadata fields below the search box.</p>
+	
+			  <p>To search specific volume metadata fields use the field:term form, such as names_t:Austen or names_t:"Austen, Jane" for a phrase-based search.</p>
+	
+			  <p>Wildcard matching includes using '?' for a single character and '*' for multiple characters. For example 'canad?' and '*land'.</p>
+ 
 			  <p>
-			    Volume-level metadata searching is case-insensitive.
-			  </p>
-			  
-			  <p>
-			    To enter a title-based search, simply
-			    enter the plain text words into the Volume
-			    Metadata search box.  For phrased-based
-			    searching quote the words &quot;like
-			    this&quot;
-			  </p>
-			  
-			  <p>
-			    To search all metadata fields, tick
-			    the <i>Search all volume fields</i>
-			    below the search box.
-			  </p>
-			  
-			  <p>
-			    To search specific volume metadata fields
-			    use the field:term form, such
-			    as <i>names_t:Austen</i> or
-			    <i>names_t:&quot;Austen, Jane&quot;</i>
-			    for a phrase-based search.
-			  </p>
-			  
-			  <p>
-			    Wildcard matching includes using '?' for a single
-			    character and '*' for multiple characters.  For
-			    example 'canad?' and '*land'.
-			  </p>
-			  
-			  
-			  <p>
-			    In alphabetical order, the indexed fields are:
+			    In alphabetical order, the indexed codes are:
 			  </p>
 			  
 			  <div id="volume-help-fields" class="help-dialog-inset">
@@ -245,49 +234,15 @@
 			   style="height: 500px;">
 			<div id="page-help-body">
 
-			  <p>
-			    To enter a Part-of-Speech (POS) search, simply
-			    enter the plain text words into the Page-level
-			    Text search box.  For phrased-based
-			    searching quote the words &quot;like
-			    this&quot;
-			  </p>
+			  <p>To search page text, enter a term in the search box. This search is not case-sensitive. For phrased-based searching quote the words "like this".</p>
 
-			  <p>
-			    Page-level metadata searching is case-insensitive.
-			  </p>
+			  <p>Your search will return the individual pages in a volume where your search term was found. To return the entire volume instead, tick the Sort & Group by volume checkbox below the search box.</p>
 
+			  <p>By default, your search will be conducted on pages recognized as English. Click “Search all Languages” if you prefer to search everything. Choose a different language from those that appear under “Show other languages.”</p>
 
-			  <p>
-			    To gather all the matching results from
-			    one volume together when searching, tick
-			    the <i>Sort &amp; Group by volume</i> checkbox
-			    below the search box.
-			  </p>
+			  <p>Limit your search to a specific part-of-speech by using the checkboxes under the language. Not all of the languages have the functionality to search by part-of-speech.</p>
 
-			  <p>
-			    To search specific languages and for particular
-			    parts of speech within that language (where available)
-			    use the checkboxes below the Page-level Text
-			    search box to have them include in the search.
-			  </p>
-			  <p>
-			    For languages with part-of-speech indexing
-			    a checkbox is provided to enable/disable
-			    that entire language in the search.  There
-			    is also a <i>Search all Languages</i> checkbox
-			    provided as a convenient way to override
-			    individual selections, and have the query
-			    terms entered apply to all languages
-			    and part-of-speech tags.
-			  </p>
-
-			  <p>
-			    Wildcard matching includes using '?' for a single
-			    character and '*' for multiple characters.  For
-			    example 'canad?' and '*land'.
-			  </p>
-
+			  <p>Wildcard matching includes using '?' for a single character and '*' for multiple characters. For example 'canad?' and '*land'.</p>
 			</div>
 		      </div>		      		      
 		    </td>		      				    
@@ -361,14 +316,14 @@
 	      
 
 	      <div class="page-query-row">
-		<input type="checkbox" id="search-all-langs"    name="search-all-langs"     value="on" />&nbsp;Search all Languages
+		<input type="checkbox" id="search-all-langs"    name="search-all-langs"     value="on" />&nbsp;Search pages in all languages
 		
 		<div id="pos-fieldsets">
 		</div>		
 		
 		<fieldset class="show-hide-lang">
 		  <legend style="margin-bottom: 5px; padding-top: 15px;">
-		    Other Languages (without modelled parts-of-speech)
+		    Other Languages (part-of-speech not available)
 		  </legend>
 		  <div id="other-langs">
 		  </div>
@@ -661,8 +616,10 @@
       
 
      
-    </div> <!-- search-results-area -->
-  </div> <!-- solr-ef-container -->
+    </div>
+    <!-- send of earch-results-area -->
+  </div>
+  <!-- **solr-ef-container:end** -->
   
 </div>
 
