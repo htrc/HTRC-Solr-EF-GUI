@@ -151,9 +151,4 @@ $(document).ready(function() {
 
     solr_ef_load_async_link_css(url_prefix);
     solr_ef_load_async_scripts(url_prefix);
-/*
-    $("#solr-ef-container-dynamic-load").load("index-dev-body-dynamic-load.html", function() {
-	solr_ef_load_async_scripts();
-    });
-*/
 });
