@@ -1,5 +1,7 @@
 //"use strict";
 
+var resultset_debug = false;
+    
 var InteractionStyleEnum = {
     DragAndDrop: 1,
     Checkboxes: 2,
@@ -36,7 +38,9 @@ function add_titles_ht_DEPRECATED(json_data)
 	    $("[name='" + htid + "']").each(function () {
 		$(this).html(title)
 	    });
-	    console.log(htid + ", title = " + metadata.titles[0]);
+	    if (resultset_debug) {
+		console.log(htid + ", title = " + metadata.titles[0]);
+	    }
 	});
 	
 	$.each(htid_val.items, function (item_index, item_val) {
@@ -124,7 +128,9 @@ function add_titles_and_authors_solr(jsonData) {
 	    });
 	    $(this).html($tooltip_tanda_clone)
 	});
-	console.log(htid + ", title = " + title);
+	if (resultset_debug) {
+	    console.log(htid + ", title = " + title);
+	}
 
 	// Change any non-public domain seq links to view internal JSON EF-POS volume
 	var $result_line = $("[name='" + htid + "']").parent();
@@ -273,7 +279,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     	&& (store_interaction_style != InteractionStyleEnum.Hybrid)) {
 	opt_dnd_style = " style-hidden";
     }
-    console.log("**** store_interaction_style = " + store_interaction_style);
+    //console.log("**** store_interaction_style = " + store_interaction_style);
     
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
     var delete_div = '<div class="htrc-delete-container drag-and-drop-style'+opt_dnd_style+'" style="float: right;">';
@@ -454,7 +460,6 @@ var store_result_page_starts = [];
 
 function show_results(jsonData,newSearch,newResultPage)
 {
-	 
     var response = jsonData.response;
     var num_found = response.numFound;
     var docs = response.docs;
@@ -509,7 +514,7 @@ function show_results(jsonData,newSearch,newResultPage)
     }
 
     if (newResultPage) {
-	    
+
 	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
 	
 	if (num_docs > 0) {
@@ -531,7 +536,8 @@ function show_results(jsonData,newSearch,newResultPage)
 		.append($num_found_span)
 		.append(doc_units_label + "matched");
 
-	    if (search_start == 0) {
+	    //if (search_start == 0) { // no longer true with jump start URLS 
+	    if (newResultPage) {
 
 		if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
@@ -788,7 +794,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
 		update_select_all_none_buttons();
-		console.log("*** in checkbox only mode => returning (having updated count)");
+		//console.log("*** in checkbox only mode => returning (having updated count)");
 		return;
 	    }
 		
@@ -809,7 +815,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    else {
 		//console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked OFF"); // ****
 		if ($my_selected_item.hasClass("ui-draggable")) {
-		    console.log("*** removing draggable");
+		    //console.log("*** removing draggable");
 		    $my_selected_item.draggable("destroy");
 		    $my_selected_item.find(".ui-selected").removeClass("ui-selected"); // in case an inner element selected from a rubber-band drag
 		    $my_selected_item.removeClass("ui-selected");
@@ -828,7 +834,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 //	if (jQuery.inArray(id,store_shoppingcart_ids) >= 0) { // ****
 	if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
-	    console.log("**** updating icon to be shopping cart!!");
+	    //console.log("**** updating icon to be shopping cart!!");
 	    convert_close_to_shoppingcart_action($close_button);
 	}
     });
@@ -845,7 +851,30 @@ function show_results(jsonData,newSearch,newResultPage)
     var progressbar_bot = $( "#search-lm-progressbar-bot" );
 
     if (newResultPage) {
-	document.location.href = "#search-results-anchor";
+	console.log("***!!! supressing browser nav to top of search results");
+	//var starting_search_page_url = document.location.href;
+	//console.log("*** Navigating browser to #search-results-anchor as replaceState history operation");
+	//document.location.href = "#search-results-anchor";
+	//window.history.replaceState({key: null},"Starting Search Page",starting_search_page_url);
+
+		// https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
+		/*
+function scrollToElement(pageElement) {    
+    var positionX = 0,         
+        positionY = 0;    
+
+    while(pageElement != null){        
+        positionX += pageElement.offsetLeft;        
+        positionY += pageElement.offsetTop;        
+        pageElement = pageElement.offsetParent;        
+        window.scrollTo(positionX, positionY);    
+    }
+}
+
+var pageElement = document.getElementById("insideNYTimesHeader");
+scrollToElement(pageElement);
+		*/
+		
     }
     
     var search_end = search_start + num_pages;

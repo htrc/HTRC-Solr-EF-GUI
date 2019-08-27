@@ -610,26 +610,12 @@ function solref_dom_ready() {
 	var solr_key_q = getURLParameter("solr-key-q");
 	if (solr_key_q != null) {
 	    // ajax call to get query specified by key
-	
-	    $.ajax({
-		type: "POST",
-		url: ef_download_url, // change this global variable to something more sutiable???
-		data: {
-		    'action': 'url-shortener',
-		    'key': encodeURI(solr_key_q)
-		},
-		dataType: "text",
-		success: function(textData) {
-		    var text_q = textData;
-		    select_optimal_query_tab(text_q);
-		    $('#search-submit').click();
 
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
-		    ajax_error(jqXHR, textStatus, errorThrown)
-		}		
-	    });
+	    var arg_start = getURLParameter("start") || 1;
+	    var start = parseInt(arg_start)-1; // 'start' value and cgi-arg version work 'off by one' to each other
+	    var group_by_vol_checked_arg = getURLParameter("group-by-vol") || "0";
+	    group_by_vol_checked = parseInt(group_by_vol_checked_arg);	   
+	    trigger_solr_key_search(solr_key_q,start,false); // want this query added to browser history
 	}
 	else {
 
@@ -914,9 +900,11 @@ function recompute_shoppingcart_on_history_back()
     });
 }
 
+
 $(document).ready(function() {
     //console.log("*** Away to call solref_dom_ready()");
     solref_dom_ready();
     //recompute_shoppingcart_on_history_back();
+    solref_home_pathname = document.location.pathname; // ** consider changing variable name of _pathname
 });
 

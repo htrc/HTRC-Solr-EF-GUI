@@ -5,6 +5,38 @@ var explain_search = { 'group_by_vol':       null,
 		       'volume_level_desc':  null,
 		       'page_level_terms':   null,
 		       'page_level_desc':    null  };
+
+function advanced_query_set_explain_fields(arg_q)
+{
+
+    if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
+	doc_unit  = " page ";
+	doc_units = " pages ";
+	facet_filter.setFacetLevel(FacetLevelEnum.Page);
+		
+	if (arg_q.match(/volume[^_]+_txt:/)) {
+	    explain_search.volume_level_desc  = "[Volume: Terms]";
+	}
+	if (arg_q.match(/htrctokentext:/)) {		
+	    explain_search.page_level_desc   = "[Page-level: POS-Terms]";
+	}
+	
+	if (group_by_vol_checked) {
+	    explain_search.group_by_vol = "Search results sorted by volume ID";
+	}
+	
+	if (arg_q.match(/[^_]+_t:/)) {
+	    doc_unit  = " page/volume mix ";
+	    doc_units = " page/volume mix ";
+	}
+	    }
+    else {
+	doc_unit  = " volume ";
+	doc_units = " volumes ";
+	explain_search.volume_level_desc  = "[Volume: TERMS]";	    
+    }
+}
+
 /*
 function add2any_html(store_search_url)
 {
@@ -44,17 +76,26 @@ function add2any_html(store_search_url)
 }
 */
 
-/*
-window.onpopstate = function(e) {
-    console.log("**** OnPopState() called");
+
+window.onpopstate = function(event) {
     
-    if ((e.state) && (e.state.key)) {
-	console.log("*** Browser back operation on key injected state");
-	// go back two steps
-	window.history.go(-1);
+    if ((event.state) && (event.state.key)) {
+	var state = event.state;
+
+	group_by_vol_checked = state.group_by_vol_checked;
+	trigger_solr_key_search(state.key,state.start,false); // don't want this query added to browser history
+    }    
+    else if ((event.state) && (event.state.key == null)) {
+	// A key of null is a sign that this is the first result set in history sequence
+	if ($('#search-results-page').is(":hidden")) {
+	    $('#search-results-page').show("slide", { direction: "up" }, 1000);
+	}	
+    }
+    else if (document.location.pathname == solref_home_pathname) {
+	$('#search-results-page').hide("slide", { direction: "up" }, 1000);
     }
 };
-*/
+
 
 //function explain_add2any_dom(store_search_url) // ****
 function explain_add2any_dom(store_value)
@@ -66,7 +107,8 @@ function explain_add2any_dom(store_value)
     }
 
     if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
-
+	value = value.trim();
+	
     $.ajax({
 	type: "POST",
 	url: ef_download_url, // change this global variable to something more sutiable???
@@ -77,26 +119,66 @@ function explain_add2any_dom(store_value)
 	dataType: "text",
 	success: function(textData) {
 	    var key = textData;	    
+	    
+	    // If query has been cause by a forward/backward browser button being pressed, then
+	    // solr_add_to_history will be false
+	    
+	    if (solr_add_to_history) {
+		// Update browser's URL so key is stored there
 
-	    // Update browser's URL so key is stored there
-	    // https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
-	    var update_search = location.search;
+		var update_search = location.search;
+		
+		if (update_search == "") {
+		    update_search = "?solr-key-q=" + key;
+		}
+		else if (location.search.match(/solr-key-q=/)) {
+		    update_search = update_search.replace(/solr-key-q=.*?(&|$)/,"solr-key-q="+key+"$1");
+		}
+		else {
+		    // solr-key-q not in URL, but other arguments are present
+		    update_search += "&solr-key-q=" + key;
+		}
 
-	    if (update_search == "") {
-		update_search = "?solr-key-q=" + key;
+		var start = parseInt(store_search_args.start)
+		if (start>0) {
+		    var arg_start = parseInt(start)+1; // 'start' value and cgi-arg version work 'off by one' to each other
+
+		    if (update_search.match(/start=\d+/)) {
+			var arg_start = parseInt(start)+1; // 'start' value and cgi-arg version work 'off by one' to each other
+			update_search = update_search.replace(/start=.*?(&|$)/,"start="+arg_start+"$1");
+		    }
+		    else {
+			update_search += "&start="+arg_start;
+		    }
+		}
+		
+		if (location.search.match(/group-by-vol=/)) {
+		    update_search = update_search.replace(/group-by-vol=.*?(&|$)/,"group-by-vol="+group_by_vol_checked+"$1");
+		}
+		else {
+		    // solr-key-q not in URL, but other arguments are present
+		    update_search += "&group-by-vol=" + group_by_vol_checked;
+		}
+
+		var updated_url = location.pathname + update_search + location.hash;	    	
+
+		if (update_search != document.location.search) {
+		    var state = { key: key, q: store_search_args.q, start: start, group_by_vol_checked: group_by_vol_checked }
+		    var title_str = "Search by Query '" + store_search_args.q +"', row-start=" + start;
+		    window.history.pushState(state,title_str,updated_url);
+
+		}
+		else {
+		    console.log("**** No need to record history as URL already matches current browser loaded URL:")
+		    console.log("**** " + document.location.href);
+		}
+
 	    }
-	    else if (location.search.match(/solr-key-q=/)) {
-		update_search = update_search.replace(/solr-key-q=.*?(&|$)/,"solr-key-q="+key+"$1");
-	    }
-	    else {
-		// solr-key-q not in URL, but other arguments are present
-		update_search += "&solr-key-q=" + key;
-	    }
-	    var updated_url = location.pathname + update_search + location.hash;
 
-	    window.history.replaceState({key: key},"Search by Query Key "+key,updated_url);
-
-
+	    // Return solr_add_to_history back to its default state (true)
+	    // in preparation for a fresh query
+	    solr_add_to_history = true;
+	    
 	    var retrieve_store_search_url = location.protocol + "//" + location.host + location.pathname;
 	    retrieve_store_search_url += "?solr-key-q="+key;
 	    /*

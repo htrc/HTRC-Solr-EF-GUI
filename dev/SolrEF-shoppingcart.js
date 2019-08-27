@@ -412,7 +412,7 @@ function mark_shoppingcart_items_in_resultset()
 	
 	var span_id = $('span[name="'+id+'"]');
 	var $span_id = $(span_id);
-	console.log("***### span_id len = " + $span_id.length);
+	//console.log("***### span_id len = " + $span_id.length);
 	
 	if ($span_id.length>0) {
 	    var $close_button = $span_id.parent().find('.htrc-delete')
@@ -579,9 +579,9 @@ function open_shoppingcart()
     var ids_or_str = ids_escaped.join(" OR ");	
     
     var load_shoppingcart_url = window.location.pathname + "?shoppingcart-q=" + ids_or_str;
-    //document.location.href = load_shoppingcart_url;
+    window.location.href = load_shoppingcart_url;
     //var win = window.open(load_shoppingcart_url);
-    
+/*    
     var win = window.open(load_shoppingcart_url, '_blank');
     if (win) {
 	// => Browser has allowed it to be opened
@@ -591,6 +591,7 @@ function open_shoppingcart()
 	// => Browser has blocked it
 	alert('New window/tab request blocked by browser.\nPlease enable popups for this website');
     }
+*/
 }
 
 function selectable_and_draggable_hard_reset()

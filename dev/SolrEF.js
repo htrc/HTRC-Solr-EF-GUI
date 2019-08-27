@@ -1,5 +1,36 @@
 //"use strict";
 
+// ****
+var solr_add_to_history = true; // by default want solr-key-q expressed quiry URLs added to browser history
+
+function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
+{
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, // change this global variable to something more sutiable???
+	data: {
+	    'action': 'url-shortener',
+	    'key': encodeURI(solr_key_q)
+	},
+	dataType: "text",
+	success: function(textData) {	    
+	    var text_q = textData.trim();
+	    select_optimal_query_tab(text_q);
+	    solr_add_to_history = add_to_history;
+	    initialize_new_solr_search();
+	    advanced_query_set_explain_fields(text_q);
+
+	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked); // group_by_vol_checked
+	    //$('#search-submit').click(); // ****
+	    
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}		
+    });
+}
+
 function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
@@ -33,7 +64,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	success: function(jsonData) { 
+	success: function(jsonData) {
 	    if (group_by_vol_checked) {
 		// Possible merging of items in search results means
 		// page-bar next pages not directly computable
@@ -51,14 +82,17 @@ function ajax_solr_text_search(newSearch,newResultPage)
 
 			$('#next-prev').hide();
 			$('#page-bar').show();
-			
+
+			var start = (store_search_args.start>0) ? store_search_args.start : 0;
+
 			$('#page-bar').Paging({
 			    pagesize: num_results_per_page,
 			    count: num_found,
+			    current: Math.floor(store_search_args.start / num_results_per_page) +1,
 			    toolbar: true ,changePagesize: function(ps) {
 				num_results_per_page=ps;
 				store_search_args.rows=ps;
-				store_search_args.start =0;
+				//store_search_args.start=start; // **** jump-start
 				num_found=0;
 				$('#page-bar').html('');
 				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
@@ -424,33 +458,7 @@ function submit_action(event) {
 	    }
 	    arg_q = advanced_q_text;
 
-
-	    if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
-		doc_unit  = " page ";
-		doc_units = " pages ";
-		facet_filter.setFacetLevel(FacetLevelEnum.Page);
-		
-		if (arg_q.match(/volume[^_]+_txt:/)) {
-	    	    explain_search.volume_level_desc  = "[Volume: Terms]";
-		}
-		if (arg_q.match(/htrctokentext:/)) {		
-		    explain_search.page_level_desc   = "[Page-level: POS-Terms]";
-		}
-		
-		if (group_by_vol_checked) {
-		    explain_search.group_by_vol = "Search results sorted by volume ID";
-		}
-		
-		if (arg_q.match(/[^_]+_t:/)) {
-		    doc_unit  = " page/volume mix ";
-		    doc_units = " page/volume mix ";
-		}
-	    }
-	    else {
-		doc_unit  = " volume ";
-		doc_units = " volumes ";
-		explain_search.volume_level_desc  = "[Volume: TERMS]";	    
-	    }
+	    advanced_query_set_explain_fields(arg_q);
 	    
 	}
 	else {
@@ -459,8 +467,7 @@ function submit_action(event) {
 		htrc_alert("No query term(s) entered");
 		return;
 	    }
-	    
-	    
+	    	    
 	    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
 	    
 	    if (arg_q == "") {
@@ -890,7 +897,8 @@ function result_set_delete_item(line_num) {
     var di_id = "result-set-delete-"+line_num;
 
     $('#'+di_id).on("click.deleteitem", function (event) {
-	event.stopImmediatePropagation()
+	event.stopImmediatePropagation(); // ****
+	//event.stopPropagation();
 	
 	var $close_div = $(this).parent();
 	var $wrapper_line_div = $close_div.parent();
