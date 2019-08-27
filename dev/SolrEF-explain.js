@@ -126,12 +126,13 @@ function explain_add2any_dom(store_value)
 	    if (solr_add_to_history) {
 		// Update browser's URL so key is stored there
 
-		var update_search = location.search;
+		var update_search = window.location.search;
 		
 		if (update_search == "") {
 		    update_search = "?solr-key-q=" + key;
 		}
-		else if (location.search.match(/solr-key-q=/)) {
+		//else if (location.search.match(/solr-key-q=/)) { // ****
+		else if (update_search.match(/solr-key-q=/)) {
 		    update_search = update_search.replace(/solr-key-q=.*?(&|$)/,"solr-key-q="+key+"$1");
 		}
 		else {
@@ -152,7 +153,8 @@ function explain_add2any_dom(store_value)
 		    }
 		}
 		
-		if (location.search.match(/group-by-vol=/)) {
+		//if (location.search.match(/group-by-vol=/)) { // ****
+		if (update_search.match(/group-by-vol=/)) {
 		    update_search = update_search.replace(/group-by-vol=.*?(&|$)/,"group-by-vol="+group_by_vol_checked+"$1");
 		}
 		else {
@@ -160,8 +162,11 @@ function explain_add2any_dom(store_value)
 		    update_search += "&group-by-vol=" + group_by_vol_checked;
 		}
 
-		var updated_url = location.pathname + update_search + location.hash;	    	
+		var updated_url = window.location.pathname + update_search + window.location.hash;	    	
 
+		//if (update_search != document.location.search) { // ****
+		// Consider changing from using 'document' to 'window' ???
+		// Note: browsers alias 'document.location' and 'window.location' to be the same theing
 		if (update_search != document.location.search) {
 		    var state = { key: key, q: store_search_args.q, start: start, group_by_vol_checked: group_by_vol_checked }
 		    var title_str = "Search by Query '" + store_search_args.q +"', row-start=" + start;
@@ -179,7 +184,7 @@ function explain_add2any_dom(store_value)
 	    // in preparation for a fresh query
 	    solr_add_to_history = true;
 	    
-	    var retrieve_store_search_url = location.protocol + "//" + location.host + location.pathname;
+	    var retrieve_store_search_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
 	    retrieve_store_search_url += "?solr-key-q="+key;
 	    /*
 	    var retrieve_store_search_url = ef_download_url

@@ -622,8 +622,9 @@ function solref_dom_ready() {
 	    // see if there is a shoppingcart-key-q
 	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
 	    if (shoppingcart_key_q != null) {
-		// ajax call to get query specified by key
-		
+		trigger_shoppingcart_key_search(shoppingcart_key_q);
+		/*
+		// ajax call to get query specified by key		
 		$.ajax({
 		    type: "POST",
 		    url: ef_download_url, 
@@ -642,6 +643,7 @@ function solref_dom_ready() {
 			ajax_error(jqXHR, textStatus, errorThrown)
 		    }		
 		});
+*/
 	    }
 	}
 	
@@ -904,7 +906,10 @@ function recompute_shoppingcart_on_history_back()
 $(document).ready(function() {
     //console.log("*** Away to call solref_dom_ready()");
     solref_dom_ready();
-    //recompute_shoppingcart_on_history_back();
-    solref_home_pathname = document.location.pathname; // ** consider changing variable name of _pathname
+
+    // The following was planned, but was in the end found not to be
+    // needed, given how JS calls to browser history replace/push/pop was used
+    //recompute_shoppingcart_on_history_back(); // **** 
+    solref_home_pathname = document.location.pathname; 
 });
 

@@ -358,6 +358,11 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	    dataType: "text",
 	    success: function(textData) {
 		console.log("Deleted Shopping id:" + item_id);
+
+		// **** consider wrapping up the following two lines in a more ADT-flavours method
+		store_shoppingcart_ids=arrayRemoveItem(store_shoppingcart_ids,item_id);
+		delete store_shoppingcart_ids_hash[item_id];
+		update_shoppingcart_count();
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
@@ -427,7 +432,7 @@ function mark_shoppingcart_items_in_resultset()
 
 function update_shoppingcart_count()
 {
-    console.log("**** update_shoppingcart_count()");
+    // console.log("**** update_shoppingcart_count()"); // ****
     
     var shoppingcart_len = store_shoppingcart_ids.length;
     if (shoppingcart_len == 1) {
@@ -688,7 +693,17 @@ function empty_shoppingcart()
 	success: function(textData) {
 	    console.log("Deleting Shopping:" + textData);
 	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
-	    setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want
+
+	    var empty_shoppingcart_search = window.location.search;
+	    empty_shoppingcart_search = empty_shoppingcart_search.replace(/shoppingcart-q=.*?(&|$)/,"shoppingcart-q=$1");
+	    var empty_shoppingcart_url = window.location.pathname + empty_shoppingcart_search + window.location.hash;
+	    window.history.replaceState(null,"Empty Shopping Cart",empty_shoppingcart_url);
+	    // **** consider wrapping up the following two lines in a more ADT-flavours method
+	    store_shoppingcart_ids = [];
+	    store_shoppingcart_ids_hash = {};
+	    load_solr_q(""); // trigger display of empty shopping cart page
+	    
+	    //setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want // **** no longer want
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******

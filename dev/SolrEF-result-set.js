@@ -458,6 +458,25 @@ var store_id;
 
 var store_result_page_starts = [];
 
+function showing_matches_delta_adjustment(delta)
+{
+    // delta can be +ve (adding in next chunk of results to pgae)
+    // or else -ve (deleting items from result set)
+    
+    var to_int = $('#sm-to').data('raw-num');
+    var from_int = $('#sm-from').data('raw-num');
+    
+    var updated_to_int = to_int + delta;
+    if (updated_to_int < from_int) {
+	// e.g. no items left to display
+	$('#sm-from-to').hide();
+    }
+    // ... but still worth keeping values represented up to date
+    $('#sm-to').data('raw-num',updated_to_int);
+    $('#sm-to').text(updated_to_int.toLocaleString());
+}
+
+
 function show_results(jsonData,newSearch,newResultPage)
 {
     var response = jsonData.response;
@@ -610,7 +629,8 @@ function show_results(jsonData,newSearch,newResultPage)
 		to = num_found;
 	    }
 	    
-	    var showing_matches = "<div>";
+	    var showing_matches = (to >= from) ? '<div id="sm-from-to">' : '<div id="sm-from-to" style="display:none">'
+
 	    showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
@@ -621,6 +641,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    showing_matches += "</div>";
 	    
 	    $('#search-showing').html(showing_matches);
+	    $('#sm-from').data('raw-num',from);
 	    $('#sm-to').data('raw-num',to);
 	    
 	}
@@ -939,10 +960,24 @@ scrollToElement(pageElement);
     }
     
     // Showing matches to ...
+    var to = $('#sm-to').data('raw-num');
     var new_to = search_start + num_pages;
+    var delta = new_to - to;
+    showing_matches_delta_adjustment(delta)
+    // ****
+/*
+    
+    var from = $('#sm-from').data('raw-num');
+    console.log("**** new_to="+new_to+", from="+from);
+    if (new_to < from) {
+	// e.g. no items left to display
+	$('#sm-from-to').hide();
+    }
+    // ... but still worth keeping values represented up to date
     $('#sm-to').data('raw-num',new_to);
     $('#sm-to').html(new_to.toLocaleString());
-
+*/
+    
     // Now setup and invoke ajax call to add title metadta (etc) into result set page
 
     // This previously used to be done with the HT API:

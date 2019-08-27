@@ -5,6 +5,16 @@ String.prototype.capitalize = function()
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+// Based on https://love2dev.com/blog/javascript-remove-from-array/
+function arrayRemoveItem(arr, value) {
+
+    var filtered_arr = arr.filter(function(ele) {
+	return ele != value;
+    });
+
+    return filtered_arr;
+}
+
 function escapeRegExp(string)
 {
     // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex

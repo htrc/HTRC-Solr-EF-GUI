@@ -31,6 +31,28 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
     });
 }
 
+function trigger_shoppingcart_key_search(shoppingcart_key_q) {
+    // ajax call to get query specified by key		
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'key-value-storage',
+	    'key': encodeURI(shoppingcart_key_q)
+	},
+	dataType: "text",
+	success: function(textData) {
+	    var text_q = textData.trim();
+	    select_optimal_query_tab(text_q);
+	    $('#search-submit').click();			
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    console.error("Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "'");
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}		
+    });
+}
+
 function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
@@ -897,7 +919,10 @@ function result_set_delete_item(line_num) {
     var di_id = "result-set-delete-"+line_num;
 
     $('#'+di_id).on("click.deleteitem", function (event) {
-	event.stopImmediatePropagation(); // ****
+	// not sure why this is not the more usual stopPropagation()
+	// perhaps there was a test in one of the browsers that proved
+	// problematic, needing the move to stopImmediatePropagation()
+	event.stopImmediatePropagation(); // **** 
 	//event.stopPropagation();
 	
 	var $close_div = $(this).parent();
@@ -943,12 +968,22 @@ function result_set_delete_item(line_num) {
 	    $results_total_num.text(results_total_int.toLocaleString());
 
 	    // 2. decrease 'showing page-level matches ... to' by 1
-	    var $sm_to_num = $('#sm-to');		
-	    var sm_to_int = parseInt($sm_to_num.text());
-	    sm_to_int--;
-	    $sm_to_num.data('raw-num',sm_to_int);
-	    $sm_to_num.text(sm_to_int.toLocaleString());
-
+	    showing_matches_delta_adjustment(-1);
+	    // ****
+	    /*
+	    var sm_to_int = $('#sm_to').data('raw-num');
+	    var sm_from_int = $('#sm-from').data('raw-num');
+	    //var sm_to_int = parseInt($sm_to_num.text());
+	    var sm_new_to_int = sm_to_int-1;
+	    console.log("**** new_to="+sm_new_to_int+", from="+sm_from_int);
+	    if (sm_new_to_int < sm_from_int) {
+		// e.g. no items left to display
+		$('#sm-from-to').hide();
+	    }
+	    // ... but still worth keeping values represented up to date
+	    $('#sm-to').data('raw-num',sm_new_to_int);
+	    $('#sm-to').text(sm_new_to_int.toLocaleString());
+*/
 	}
 	else {
 	    // Page level
@@ -969,11 +1004,15 @@ function result_set_delete_item(line_num) {
 		$vol_count_num.text(vol_count_int.toLocaleString());
 
 		// 3. decrease 'showing page-level matches ... to' by num_deleted
+		showing_matches_delta_adjustment(-num_deleted);
+		// ****
+		/*
 		var $sm_to_num = $('#sm-to');		
 		var sm_to_int = parseInt($sm_to_num.text());
 		sm_to_int -= num_deleted;
 		$sm_to_num.data('raw-num',sm_to_int);
 		$sm_to_num.text(sm_to_int.toLocaleString());
+*/
 	    }
 	    else {
 		// 1. decrease num results by 1
@@ -986,11 +1025,15 @@ function result_set_delete_item(line_num) {
 		ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 
 		// 3. decrease 'showing page-level matches ... to' by 1
+		showing_matches_delta_adjustment(-1);
+		// ****
+		/*
 		var $sm_to_num = $('#sm-to');		
 		var sm_to_int = parseInt($sm_to_num.text());
 		sm_to_int--;
 		$sm_to_num.data('raw-num',sm_to_int);
 		$sm_to_num.text(sm_to_int.toLocaleString());		
+*/
 	    }
 	}
 
