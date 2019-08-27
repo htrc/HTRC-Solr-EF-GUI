@@ -58,6 +58,21 @@ function setURLParameter(sParam,sVal)
     window.location.search = '?' + sURLVariables.join('&');
 }
 
+// https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
+function scrollToElement(pageElement)
+{
+    var positionX = 0;
+    var positionY = 0;    
+
+    while (pageElement != null) {
+        positionX += pageElement.offsetLeft;        
+        positionY += pageElement.offsetTop;        
+        pageElement = pageElement.offsetParent;        
+        window.scrollTo(positionX, positionY);    
+    }
+}
+
+
 // From: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
 function uuidv4()
 {

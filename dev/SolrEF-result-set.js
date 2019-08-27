@@ -872,30 +872,14 @@ function show_results(jsonData,newSearch,newResultPage)
     var progressbar_bot = $( "#search-lm-progressbar-bot" );
 
     if (newResultPage) {
-	console.log("***!!! supressing browser nav to top of search results");
+	// ****
 	//var starting_search_page_url = document.location.href;
 	//console.log("*** Navigating browser to #search-results-anchor as replaceState history operation");
 	//document.location.href = "#search-results-anchor";
 	//window.history.replaceState({key: null},"Starting Search Page",starting_search_page_url);
-
-		// https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
-		/*
-function scrollToElement(pageElement) {    
-    var positionX = 0,         
-        positionY = 0;    
-
-    while(pageElement != null){        
-        positionX += pageElement.offsetLeft;        
-        positionY += pageElement.offsetTop;        
-        pageElement = pageElement.offsetParent;        
-        window.scrollTo(positionX, positionY);    
-    }
-}
-
-var pageElement = document.getElementById("insideNYTimesHeader");
-scrollToElement(pageElement);
-		*/
-		
+	
+	var search_results_anchor = document.getElementById("search-results-anchor");
+	scrollToElement(search_results_anchor);		
     }
     
     var search_end = search_start + num_pages;
