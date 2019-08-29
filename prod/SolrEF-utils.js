@@ -5,6 +5,16 @@ String.prototype.capitalize = function()
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+// Based on https://love2dev.com/blog/javascript-remove-from-array/
+function arrayRemoveItem(arr, value) {
+
+    var filtered_arr = arr.filter(function(ele) {
+	return ele != value;
+    });
+
+    return filtered_arr;
+}
+
 function escapeRegExp(string)
 {
     // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
@@ -47,6 +57,21 @@ function setURLParameter(sParam,sVal)
 
     window.location.search = '?' + sURLVariables.join('&');
 }
+
+// https://stackoverflow.com/questions/824349/modify-the-url-without-reloading-the-page
+function scrollToElement(pageElement)
+{
+    var positionX = 0;
+    var positionY = 0;    
+
+    while (pageElement != null) {
+        positionX += pageElement.offsetLeft;        
+        positionY += pageElement.offsetTop;        
+        pageElement = pageElement.offsetParent;        
+        window.scrollTo(positionX, positionY);    
+    }
+}
+
 
 // From: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
 function uuidv4()
@@ -193,6 +218,18 @@ function escape_solr_query(query)
 
 
 
+function ajax_error_console(jqXHR, textStatus, errorThrown)
+{        
+    console.log('====');
+    console.log('Detected Network AJAX Error/Abort');
+    console.log('====');
+    console.log('textStatus:' + textStatus);
+    console.log('errorThrown:' + errorThrown);
+    console.log('responseText:' + jqXHR.responseText);
+    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
+
+}
+
 function ajax_error(jqXHR, textStatus, errorThrown)
 {
     
@@ -206,15 +243,8 @@ function ajax_error(jqXHR, textStatus, errorThrown)
 
 	htrc_alert(mess);
     }
-    
-    console.log('====');
-    console.log('Detected Network AJAX Error/Abort');
-    console.log('====');
-    console.log('textStatus:' + textStatus);
-    console.log('errorThrown:' + errorThrown);
-    console.log('responseText:' + jqXHR.responseText);
-    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
 
+    ajax_error_console(jqXHR, textStatus, errorThrown);
 }
 
 function load_async_scripts(async_script_urls, on_complete_callback) {

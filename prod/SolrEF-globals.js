@@ -25,3 +25,5 @@ var store_search_xhr = null;
 var group_by_vol_checked = 0;
 var doc_unit  = "";
 var doc_units = "";
+
+var solref_home_pathname = null;

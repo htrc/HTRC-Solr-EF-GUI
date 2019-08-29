@@ -1,5 +1,7 @@
 //"use strict";
 
+var resultset_debug = false;
+    
 var InteractionStyleEnum = {
     DragAndDrop: 1,
     Checkboxes: 2,
@@ -36,7 +38,9 @@ function add_titles_ht_DEPRECATED(json_data)
 	    $("[name='" + htid + "']").each(function () {
 		$(this).html(title)
 	    });
-	    console.log(htid + ", title = " + metadata.titles[0]);
+	    if (resultset_debug) {
+		console.log(htid + ", title = " + metadata.titles[0]);
+	    }
 	});
 	
 	$.each(htid_val.items, function (item_index, item_val) {
@@ -124,7 +128,9 @@ function add_titles_and_authors_solr(jsonData) {
 	    });
 	    $(this).html($tooltip_tanda_clone)
 	});
-	console.log(htid + ", title = " + title);
+	if (resultset_debug) {
+	    console.log(htid + ", title = " + title);
+	}
 
 	// Change any non-public domain seq links to view internal JSON EF-POS volume
 	var $result_line = $("[name='" + htid + "']").parent();
@@ -273,7 +279,7 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
     	&& (store_interaction_style != InteractionStyleEnum.Hybrid)) {
 	opt_dnd_style = " style-hidden";
     }
-    console.log("**** store_interaction_style = " + store_interaction_style);
+    //console.log("**** store_interaction_style = " + store_interaction_style);
     
     var delete_div_classes = "ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close";
     var delete_div = '<div class="htrc-delete-container drag-and-drop-style'+opt_dnd_style+'" style="float: right;">';
@@ -452,9 +458,27 @@ var store_id;
 
 var store_result_page_starts = [];
 
+function showing_matches_delta_adjustment(delta)
+{
+    // delta can be +ve (adding in next chunk of results to pgae)
+    // or else -ve (deleting items from result set)
+    
+    var to_int = $('#sm-to').data('raw-num');
+    var from_int = $('#sm-from').data('raw-num');
+    
+    var updated_to_int = to_int + delta;
+    if (updated_to_int < from_int) {
+	// e.g. no items left to display
+	$('#sm-from-to').hide();
+    }
+    // ... but still worth keeping values represented up to date
+    $('#sm-to').data('raw-num',updated_to_int);
+    $('#sm-to').text(updated_to_int.toLocaleString());
+}
+
+
 function show_results(jsonData,newSearch,newResultPage)
 {
-	 
     var response = jsonData.response;
     var num_found = response.numFound;
     var docs = response.docs;
@@ -509,7 +533,7 @@ function show_results(jsonData,newSearch,newResultPage)
     }
 
     if (newResultPage) {
-	    
+
 	var explain_html = show_results_explain_html(store_query_level_mix,store_search_url)
 	
 	if (num_docs > 0) {
@@ -531,7 +555,8 @@ function show_results(jsonData,newSearch,newResultPage)
 		.append($num_found_span)
 		.append(doc_units_label + "matched");
 
-	    if (search_start == 0) {
+	    //if (search_start == 0) { // no longer true with jump start URLS 
+	    if (newResultPage) {
 
 		if (facet_filter.getFacetLevel() == FacetLevelEnum.Page) {
 		    if (num_found < num_found_page_limit) {
@@ -604,7 +629,8 @@ function show_results(jsonData,newSearch,newResultPage)
 		to = num_found;
 	    }
 	    
-	    var showing_matches = "<div>";
+	    var showing_matches = (to >= from) ? '<div id="sm-from-to">' : '<div id="sm-from-to" style="display:none">'
+
 	    showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
 		? "Showing page-level matches: "
 		: "Showing volume matches:";
@@ -615,6 +641,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    showing_matches += "</div>";
 	    
 	    $('#search-showing').html(showing_matches);
+	    $('#sm-from').data('raw-num',from);
 	    $('#sm-to').data('raw-num',to);
 	    
 	}
@@ -788,7 +815,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	    if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
 		update_select_all_none_buttons();
-		console.log("*** in checkbox only mode => returning (having updated count)");
+		//console.log("*** in checkbox only mode => returning (having updated count)");
 		return;
 	    }
 		
@@ -809,7 +836,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    else {
 		//console.log("*** checkbox id " + $this_checkbox.attr("id") + " checked OFF"); // ****
 		if ($my_selected_item.hasClass("ui-draggable")) {
-		    console.log("*** removing draggable");
+		    //console.log("*** removing draggable");
 		    $my_selected_item.draggable("destroy");
 		    $my_selected_item.find(".ui-selected").removeClass("ui-selected"); // in case an inner element selected from a rubber-band drag
 		    $my_selected_item.removeClass("ui-selected");
@@ -828,7 +855,7 @@ function show_results(jsonData,newSearch,newResultPage)
 
 //	if (jQuery.inArray(id,store_shoppingcart_ids) >= 0) { // ****
 	if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
-	    console.log("**** updating icon to be shopping cart!!");
+	    //console.log("**** updating icon to be shopping cart!!");
 	    convert_close_to_shoppingcart_action($close_button);
 	}
     });
@@ -845,7 +872,14 @@ function show_results(jsonData,newSearch,newResultPage)
     var progressbar_bot = $( "#search-lm-progressbar-bot" );
 
     if (newResultPage) {
-	document.location.href = "#search-results-anchor";
+	// ****
+	//var starting_search_page_url = document.location.href;
+	//console.log("*** Navigating browser to #search-results-anchor as replaceState history operation");
+	//document.location.href = "#search-results-anchor";
+	//window.history.replaceState({key: null},"Starting Search Page",starting_search_page_url);
+	
+	var search_results_anchor = document.getElementById("search-results-anchor");
+	scrollToElement(search_results_anchor);		
     }
     
     var search_end = search_start + num_pages;
@@ -910,10 +944,24 @@ function show_results(jsonData,newSearch,newResultPage)
     }
     
     // Showing matches to ...
+    var to = $('#sm-to').data('raw-num');
     var new_to = search_start + num_pages;
+    var delta = new_to - to;
+    showing_matches_delta_adjustment(delta)
+    // ****
+/*
+    
+    var from = $('#sm-from').data('raw-num');
+    console.log("**** new_to="+new_to+", from="+from);
+    if (new_to < from) {
+	// e.g. no items left to display
+	$('#sm-from-to').hide();
+    }
+    // ... but still worth keeping values represented up to date
     $('#sm-to').data('raw-num',new_to);
     $('#sm-to').html(new_to.toLocaleString());
-
+*/
+    
     // Now setup and invoke ajax call to add title metadta (etc) into result set page
 
     // This previously used to be done with the HT API:

@@ -1,5 +1,58 @@
 //"use strict";
 
+// ****
+var solr_add_to_history = true; // by default want solr-key-q expressed quiry URLs added to browser history
+
+function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
+{
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, // change this global variable to something more sutiable???
+	data: {
+	    'action': 'url-shortener',
+	    'key': encodeURI(solr_key_q)
+	},
+	dataType: "text",
+	success: function(textData) {	    
+	    var text_q = textData.trim();
+	    select_optimal_query_tab(text_q);
+	    solr_add_to_history = add_to_history;
+	    initialize_new_solr_search();
+	    advanced_query_set_explain_fields(text_q);
+
+	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked); // group_by_vol_checked
+	    //$('#search-submit').click(); // ****
+	    
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}		
+    });
+}
+
+function trigger_shoppingcart_key_search(shoppingcart_key_q) {
+    // ajax call to get query specified by key		
+    $.ajax({
+	type: "POST",
+	url: ef_download_url, 
+	data: {
+	    'action': 'key-value-storage',
+	    'key': encodeURI(shoppingcart_key_q)
+	},
+	dataType: "text",
+	success: function(textData) {
+	    var text_q = textData.trim();
+	    select_optimal_query_tab(text_q);
+	    $('#search-submit').click();			
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    console.error("Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "'");
+	    ajax_error(jqXHR, textStatus, errorThrown)
+	}		
+    });
+}
+
 function ajax_solr_text_search(newSearch,newResultPage)
 {
     var url_args = [];
@@ -33,7 +86,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	xhr : function() {
 	    return store_search_xhr;
 	},
-	success: function(jsonData) { 
+	success: function(jsonData) {
 	    if (group_by_vol_checked) {
 		// Possible merging of items in search results means
 		// page-bar next pages not directly computable
@@ -51,14 +104,17 @@ function ajax_solr_text_search(newSearch,newResultPage)
 
 			$('#next-prev').hide();
 			$('#page-bar').show();
-			
+
+			var start = (store_search_args.start>0) ? store_search_args.start : 0;
+
 			$('#page-bar').Paging({
 			    pagesize: num_results_per_page,
 			    count: num_found,
+			    current: Math.floor(store_search_args.start / num_results_per_page) +1,
 			    toolbar: true ,changePagesize: function(ps) {
 				num_results_per_page=ps;
 				store_search_args.rows=ps;
-				store_search_args.start =0;
+				//store_search_args.start=start; // **** jump-start
 				num_found=0;
 				$('#page-bar').html('');
 				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
@@ -424,33 +480,7 @@ function submit_action(event) {
 	    }
 	    arg_q = advanced_q_text;
 
-
-	    if (arg_q.match(/volume[^_]+_txt:/) || arg_q.match(/htrctokentext:/)) {
-		doc_unit  = " page ";
-		doc_units = " pages ";
-		facet_filter.setFacetLevel(FacetLevelEnum.Page);
-		
-		if (arg_q.match(/volume[^_]+_txt:/)) {
-	    	    explain_search.volume_level_desc  = "[Volume: Terms]";
-		}
-		if (arg_q.match(/htrctokentext:/)) {		
-		    explain_search.page_level_desc   = "[Page-level: POS-Terms]";
-		}
-		
-		if (group_by_vol_checked) {
-		    explain_search.group_by_vol = "Search results sorted by volume ID";
-		}
-		
-		if (arg_q.match(/[^_]+_t:/)) {
-		    doc_unit  = " page/volume mix ";
-		    doc_units = " page/volume mix ";
-		}
-	    }
-	    else {
-		doc_unit  = " volume ";
-		doc_units = " volumes ";
-		explain_search.volume_level_desc  = "[Volume: TERMS]";	    
-	    }
+	    advanced_query_set_explain_fields(arg_q);
 	    
 	}
 	else {
@@ -459,8 +489,7 @@ function submit_action(event) {
 		htrc_alert("No query term(s) entered");
 		return;
 	    }
-	    
-	    
+	    	    
 	    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
 	    
 	    if (arg_q == "") {
@@ -890,7 +919,11 @@ function result_set_delete_item(line_num) {
     var di_id = "result-set-delete-"+line_num;
 
     $('#'+di_id).on("click.deleteitem", function (event) {
-	event.stopImmediatePropagation()
+	// not sure why this is not the more usual stopPropagation()
+	// perhaps there was a test in one of the browsers that proved
+	// problematic, needing the move to stopImmediatePropagation()
+	event.stopImmediatePropagation(); // **** 
+	//event.stopPropagation();
 	
 	var $close_div = $(this).parent();
 	var $wrapper_line_div = $close_div.parent();
@@ -935,12 +968,22 @@ function result_set_delete_item(line_num) {
 	    $results_total_num.text(results_total_int.toLocaleString());
 
 	    // 2. decrease 'showing page-level matches ... to' by 1
-	    var $sm_to_num = $('#sm-to');		
-	    var sm_to_int = parseInt($sm_to_num.text());
-	    sm_to_int--;
-	    $sm_to_num.data('raw-num',sm_to_int);
-	    $sm_to_num.text(sm_to_int.toLocaleString());
-
+	    showing_matches_delta_adjustment(-1);
+	    // ****
+	    /*
+	    var sm_to_int = $('#sm_to').data('raw-num');
+	    var sm_from_int = $('#sm-from').data('raw-num');
+	    //var sm_to_int = parseInt($sm_to_num.text());
+	    var sm_new_to_int = sm_to_int-1;
+	    console.log("**** new_to="+sm_new_to_int+", from="+sm_from_int);
+	    if (sm_new_to_int < sm_from_int) {
+		// e.g. no items left to display
+		$('#sm-from-to').hide();
+	    }
+	    // ... but still worth keeping values represented up to date
+	    $('#sm-to').data('raw-num',sm_new_to_int);
+	    $('#sm-to').text(sm_new_to_int.toLocaleString());
+*/
 	}
 	else {
 	    // Page level
@@ -961,11 +1004,15 @@ function result_set_delete_item(line_num) {
 		$vol_count_num.text(vol_count_int.toLocaleString());
 
 		// 3. decrease 'showing page-level matches ... to' by num_deleted
+		showing_matches_delta_adjustment(-num_deleted);
+		// ****
+		/*
 		var $sm_to_num = $('#sm-to');		
 		var sm_to_int = parseInt($sm_to_num.text());
 		sm_to_int -= num_deleted;
 		$sm_to_num.data('raw-num',sm_to_int);
 		$sm_to_num.text(sm_to_int.toLocaleString());
+*/
 	    }
 	    else {
 		// 1. decrease num results by 1
@@ -978,11 +1025,15 @@ function result_set_delete_item(line_num) {
 		ajax_solr_stream_volume_count(store_search_args.q,true,show_volume_count); // doRollup=true
 
 		// 3. decrease 'showing page-level matches ... to' by 1
+		showing_matches_delta_adjustment(-1);
+		// ****
+		/*
 		var $sm_to_num = $('#sm-to');		
 		var sm_to_int = parseInt($sm_to_num.text());
 		sm_to_int--;
 		$sm_to_num.data('raw-num',sm_to_int);
 		$sm_to_num.text(sm_to_int.toLocaleString());		
+*/
 	    }
 	}
 

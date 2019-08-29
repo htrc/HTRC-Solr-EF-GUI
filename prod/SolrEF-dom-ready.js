@@ -610,34 +610,21 @@ function solref_dom_ready() {
 	var solr_key_q = getURLParameter("solr-key-q");
 	if (solr_key_q != null) {
 	    // ajax call to get query specified by key
-	
-	    $.ajax({
-		type: "POST",
-		url: ef_download_url, // change this global variable to something more sutiable???
-		data: {
-		    'action': 'url-shortener',
-		    'key': encodeURI(solr_key_q)
-		},
-		dataType: "text",
-		success: function(textData) {
-		    var text_q = textData;
-		    select_optimal_query_tab(text_q);
-		    $('#search-submit').click();
 
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
-		    ajax_error(jqXHR, textStatus, errorThrown)
-		}		
-	    });
+	    var arg_start = getURLParameter("start") || 1;
+	    var start = parseInt(arg_start)-1; // 'start' value and cgi-arg version work 'off by one' to each other
+	    var group_by_vol_checked_arg = getURLParameter("group-by-vol") || "0";
+	    group_by_vol_checked = parseInt(group_by_vol_checked_arg);	   
+	    trigger_solr_key_search(solr_key_q,start,false); // want this query added to browser history
 	}
 	else {
 
 	    // see if there is a shoppingcart-key-q
 	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
 	    if (shoppingcart_key_q != null) {
-		// ajax call to get query specified by key
-		
+		trigger_shoppingcart_key_search(shoppingcart_key_q);
+		/*
+		// ajax call to get query specified by key		
 		$.ajax({
 		    type: "POST",
 		    url: ef_download_url, 
@@ -656,6 +643,7 @@ function solref_dom_ready() {
 			ajax_error(jqXHR, textStatus, errorThrown)
 		    }		
 		});
+*/
 	    }
 	}
 	
@@ -897,8 +885,31 @@ function solref_dom_ready() {
     
 }
 
+function recompute_shoppingcart_on_history_back()
+{
+    // Based on:
+    //   https://stackoverflow.com/questions/43043113/how-to-force-reloading-a-page-when-using-browser-back-button
+    
+    window.addEventListener( "pageshow", function ( event ) {
+	var historyTraversal = event.persisted ||
+	    ( typeof window.performance != "undefined" &&
+	      window.performance.navigation.type === 2 );
+	if ( historyTraversal ) {
+	    // Handle page restore.
+	    //window.location.reload();
+	    retrieve_shoppingcart()
+	}
+    });
+}
+
+
 $(document).ready(function() {
-    console.log("*** Away to call solref_dom_ready()");
+    //console.log("*** Away to call solref_dom_ready()");
     solref_dom_ready();
+
+    // The following was planned, but was in the end found not to be
+    // needed, given how JS calls to browser history replace/push/pop was used
+    //recompute_shoppingcart_on_history_back(); // **** 
+    solref_home_pathname = document.location.pathname; 
 });
 
