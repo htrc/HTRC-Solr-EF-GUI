@@ -97,12 +97,40 @@
 	</h2>
 
 	<div id="solr-ef-description">
-	<p>This experimental tool allows you to build worksets from unigram queries over the <a href="http://dx.doi.org/10.13012/J8X63JT3">HTRC Extracted Features</a> dataset.</p>
-	<p>This dataset contains data and metadata extracted from volumes in HathiTrust. Add entire volumes or single pages from your search results to your selection basket. If you want more full-text search flexibility, <a href="https://www.hathitrust.org/">use the HathiTrust Digital Library</a>. Create an HTRC workset from your selection or download the associated metadata.</p>
+	  <p>This experimental tool allows you to build worksets from unigram queries over
+	    the <a href="http://dx.doi.org/10.13012/J8X63JT3">HTRC Extracted Features</a> dataset.</p>
+	  
+	  <p>
+	    This dataset contains data and metadata extracted fromvolumes in HathiTrust.
+	    Add entire volumes or single pages from your search results to your selection basket.
+	    If you want more full-text search flexibility,
+	    <a href="https://www.hathitrust.org/">use the HathiTrust Digital Library</a>.
+	    Create an HTRC workset from your selection or download the associated metadata.
+	  </p>
 
-<p>This tool is still in development and we anticipate that it will change through 2019-2020.</p>
+	  <p>This tool is still in development and we anticipate that it will change through 2019-2020.</p>
+	
+	  <p>Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
 
-<p>Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
+	  <p>For the steps necessary to build a workset, see Help for more information.
+	    <span id="buildaworkset-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
+
+	    <div id="buildaworkset-help-dialog"
+		 title="Help: Build a Workset"
+		 style="height: 300px;">
+	    
+	      <div id="buildaworkset-help-body">
+		
+		<ul>
+		  <li><p>Step 0: Decide what to search;</p></li>
+		  <li><p>Step 1: Perform a unigram full text or metadata (using field tags) search at the desired level (page or volume);</p></li>
+		  <li><p>Step 2: Filter through the results and select desired items to add to your workset;</p></li>
+		  <li><p>Step 3: Repeat steps 1 and 2 as necessary until your workset is ready;</p></li>
+		  <li><p>Step 4: "Export as workset" to HTRC Analytics or download workset metadata.</p></li>
+		</ul>
+	      </div>
+	    </div>
+	  </p>
 	</div>
 	
 	<div id="tabs-search">
@@ -164,15 +192,20 @@
 			 
 			  <p>Volume-level metadata searching is not case-sensitive.</p>
 
-			  <p>Unless you specify a metadata field to search, the default is to search the title field.</p>
+			  <p>The metadata field to search by is controlled through the drop-down menu.  By
+			    default this is set to <i>All Fields</i>.</p>
 
 			  <p>To search for a phrase, use quotes around your search (“like this”).</p>
-		
+
+			  <!-- ****
 			  <p>To search all metadata fields, tick the Search all metadata fields below the search box.</p>
+			  -->
+			  
+			  <p>You can also search for specific volume metadata fields use the field:term form, such as <i>names_t:Austen</i>
+			    or <i>names_t:"Austen, Jane"</i> for a phrase-based search.</p>
 	
-			  <p>To search specific volume metadata fields use the field:term form, such as names_t:Austen or names_t:"Austen, Jane" for a phrase-based search.</p>
-	
-			  <p>Wildcard matching includes using '?' for a single character and '*' for multiple characters. For example 'canad?' and '*land'.</p>
+			  <p>Wildcard matching includes using '?' for a single character and '*' for multiple characters.
+			    For example 'canad?' and '*land'.</p>
  
 			  <p>
 			    In alphabetical order, the indexed codes are:

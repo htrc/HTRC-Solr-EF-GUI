@@ -257,6 +257,29 @@ function fields_help_text(arr,div_id,num_cols)
 
 function domready_help_dialogs()
 {
+        $("#buildaworkset-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 650,
+	height: 300,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+    $("#buildaworkset-help").click(function () {
+	$("#buildaworkset-help-dialog").dialog( "open" );
+    });
+
+
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
