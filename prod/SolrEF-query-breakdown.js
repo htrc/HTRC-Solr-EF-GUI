@@ -377,6 +377,62 @@ function query_breakdown_volume_title_simplification(volume_monitor)
     return { 'simplifies': simplifies, 'simplified_query_str': simplified_query_str };
 }
 
+
+
+function query_breakdown_volume_specific_allonefield_simplification(volume_monitor,one_field)
+{
+    var simplified_query_str = "";
+    var simplifies = true;
+    
+    for (var i=0; i<volume_monitor.length; i++) {
+	var or_terms = volume_monitor[i];
+	var or_keys = Object.keys(or_terms);
+	
+	for (var orkey_pos=0; orkey_pos<or_keys.length; orkey_pos++) {
+	    var orkey = or_keys[orkey_pos];
+	    
+	    var field_lookup = or_terms[orkey];
+	    var field_keys = Object.keys(field_lookup);
+	    
+	    if (field_keys.length == 1) {
+		if (one_field in field_lookup) {
+		    simplified_query_str += " " + orkey;
+		}
+		else {
+		    simplifies = false;
+		    break;
+		}
+	    }
+	    else {
+		simplifies = false;
+		break;
+	    }
+	}
+    }
+
+    return { 'simplifies': simplifies, 'simplified_query_str': simplified_query_str };
+}
+
+function query_breakdown_volume_allonefield_simplification(volume_monitor)
+{
+    var metadata_fields = Object.keys(volume_metadata_fields);
+
+    for (var i = 0; i < metadata_fields.length; i++) {
+	var vm_field = metadata_fields[i];
+
+    	var vm_field_simplified_info = query_breakdown_volume_specific_allonefield_simplification(volume_monitor,vm_field);
+	
+	if (vm_field_simplified_info.simplifies) {
+	    vm_field_simplified_info.field = vm_field;
+	    return vm_field_simplified_info;
+	}
+    }
+
+    // Got through all the fields, and no one field was used uniformly in the query
+    return { 'simplifies': false, 'simplifield_query_str': "" };
+    
+}
+
 function query_breakdown_volume_allfields_simplification(volume_monitor)
 {
     var simplified_query_str = "";
@@ -426,18 +482,34 @@ function query_breakdown_volume_simplification(parse_tree)
 	console.log("**** volume is in Sum-of-Prods format");
 	console.log("*** monitor = " + JSON.stringify(volume_monitor));
 
+	/*
+	  The following, which works only for 'title_t', deprecated when the drop-down menu
+	  for volume metadata introducted 
+
 	var title_simplified_info = query_breakdown_volume_title_simplification(volume_monitor);
 	
 	if (title_simplified_info.simplifies) {
 	    console.log("**** volume expression simplifies as only specifies title_t terms");
 	    parse_tree = lucenequeryparser.parse(title_simplified_info.simplified_query_str);
 	}
+*/
+	var vm_field_simplified_info = query_breakdown_volume_allonefield_simplification(volume_monitor);
+	
+	if (vm_field_simplified_info.simplifies) {
+	    var vm_field = vm_field_simplified_info.field;
+	    console.log("**** volume expression simplifies as only specifies '"+vm_field+"' terms");
+	    parse_tree = lucenequeryparser.parse(vm_field_simplified_info.simplified_query_str);
+	    $('#vqf-menu').val(vm_field);
+	    $('#vqf-menu').selectmenu("refresh");
+	}
 	else {
 	    var allfields_simplified_info = query_breakdown_volume_allfields_simplification(volume_monitor);
 	    if (allfields_simplified_info.simplifies) {
 		console.log("**** volume expression simplifies as only specifies all fields present");
 		parse_tree = lucenequeryparser.parse(allfields_simplified_info.simplified_query_str);
-		$('#search-all-vfields').prop("checked",true);
+		//$('#search-all-vfields').prop("checked",true); // ****
+		$('#vqf-menu').val("all-fields");
+		$('#vqf-menu').selectmenu("refresh");
 	    }	    
 	}
 	

@@ -1,4 +1,38 @@
 
+function generate_query_field_menu()
+{
+
+    var $select = $("<select>");
+    $select.attr("id","vqf-menu");
+
+    var $option = $("<option>");
+    $option.attr("value","all-fields");
+    $option.text("All Fields");
+    $option.attr("selected","selected");
+    $select.append($option);
+
+    var metadata_fields = Object.keys(volume_metadata_fields);
+
+    for (var i = 0; i < metadata_fields.length; i++) {
+	var field = metadata_fields[i];
+
+	var label = camelCaseToDisplayLabel(field);
+	label = label.replace(/_t$/,"");
+	label = label.replace(/_(dcc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
+	label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
+
+	var $option = $("<option>");
+	$option.attr("value",field);
+	$option.text(label);
+
+	$select.append($option);
+    }
+    
+    $('#volume-query-field').append($select);
+    $select.selectmenu({ width : '170px', padding: "0px" });
+
+}
+
 function lang_pos_toggle(event) {
 	var $this = $(this);
 	var checked_state = $this.prop("checked");
@@ -530,6 +564,7 @@ function solref_dom_ready() {
     });
 
 
+    generate_query_field_menu();
     generate_pos_langs();
     generate_other_langs();
 
