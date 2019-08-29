@@ -10,7 +10,7 @@ var langs_without_pos = [
 var volume_metadata_fields = {
     "accessProfile_t": null,
     "bibliographicFormat_t": null,
-    "classification_dcc_t": null,
+    "classification_ddc_t": null,
     "classification_lcc_t": null,
     "dateCreated_t": null,              
     "genre_t": null,
@@ -40,7 +40,7 @@ var volume_metadata_fields = {
 var volume_metadata_dic = {
     "accessProfile_t": "The original source of a volume.",
     "bibliographicFormat_t": "The format of a volume's bibliography.",
-    "classification_dcc_t": "The DCC call number supplied by the originating library.",
+    "classification_ddc_t": "The DDC call number supplied by the originating library.",
     "classification_lcc_t": "The LCC call number supplied by the originating library.",
     "dateCreated_t": "The time this metadata object was processed.",
     "genre_t": "The genre of the volume.",

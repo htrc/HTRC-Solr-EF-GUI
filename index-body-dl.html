@@ -90,7 +90,8 @@
       <div class="col-md-12">
 	
 	<h2 id="solr-ef-title" style="font-size: 125%;">
-	  <i>Workset Builder 2.0 (Beta)</i> <br/>
+	  
+	  <i>HTRC Workset Builder 2.0 (Beta)</i> <br/>
 	  Search the Extracted Features Dataset
 	  
 	  <span id="solr-col-name" style="font-size: 40%;"></span>
@@ -130,6 +131,9 @@
 		</ul>
 	      </div>
 	    </div>
+	  </p>
+	  <p>
+	    For additional help, contact <a href="mailto:htrc-help@hathitrust.org">htrc-help@hathitrust.org</a>.
 	  </p>
 	</div>
 	
@@ -208,47 +212,83 @@
 			    For example 'canad?' and '*land'.</p>
  
 			  <p>
-			    In alphabetical order, the indexed codes are:
+			    In alphabetical order, searchable fields are:
 			  </p>
 			  
 			  <div id="volume-help-fields" class="help-dialog-inset">
 			  </div>
-			  
+
 			  <p>
-			    A similar situation exists for the volume format field <i>format_t</i>.
-			    The mnemonics used for this are:			    
+			    The Bibliographic Format field <i>bibliographicFormat_t</i> is mnemonically
+			    coded, for example using <i>BK</i> to represent a <i>Book</i>.
+			    So, to search for volumes that are books, you
+			    would enter the term <i>BK</i> in the Volume Metadata
+			    search box, and select Bibliographic Format from
+			    the drop-down menu.  Alternatively, using
+			    field-prefix query syntax, you can enter
+			    <i>bibliographicFormat_t:BK</i> directly into the
+			    Volume Metadata search box to achieve the
+			    same query.
+			  </p>
+			  <p>
+			    The codes used for this field are:
+			  </p>
+<!--
+			  <p>
+			    A similar situation exists for the volume format field <i>bibliographicFormat_t</i>.
+			    The codes used for this are:			    
  			  </p>
-			  
+-->			  
 			  <div id="volume-help-format" class="help-dialog-inset">
 			  </div>
 			  
-			  
+			  <!--
 			  <p>
 			    The field <i>pubPlace_t</i> is mnemonically coded, for
 			    example using <i>nyu</i> to represent <i>New York (State)</i>.
 			    So, to search for volumes published in this state, you
 			    would enter the term <i>pubPlace_t:nyu</i>.
 			  </p>
+			  -->
 			  
 			  <p>
-			    The full set of mnemonics used are:			    
+			    The set of codes used for the Place of Publication field <i>pubPlace_t</i> are:
  			  </p>
 			  
 			  <div id="volume-help-pubplace" class="help-dialog-inset" style="font-size: 80%;">
 			  </div>
-			  
+
+			  <p>
+			    Deprecated Place of Publication codes are:
+			  </p>
+			  <div id="volume-help-pubplace-discontinued" class="help-dialog-inset" style="font-size: 80%;">
+			  </div>
+
 			  
 			  <p>
+			    The set of codes used for the Language field <i>language_t</i> are:
+			    <!--
 			    A similar situation exists for the language field <i>language_t</i>.
 			    The mnemonics used for this are:			    
+			      -->
  			  </p>
 			  
 			  <div id="volume-help-language" class="help-dialog-inset" style="font-size: 80%;">
 			  </div>
-			  
+
 			  <p>
+			    Deprecated language codes are:
+ 			  </p>
+			  
+			  <div id="volume-help-language-discontinued" class="help-dialog-inset" style="font-size: 80%;">
+			  </div>
+
+			  <p>
+			    The set of codes used for the Copyright field <i>rights_t</i> are:
+			    <!--
 			    A similar situation exists for the copyright field <i>rights_t</i>.
 			    The mnemonics used for this are:			    
+			      -->
  			  </p>
 			  
 			  <div id="volume-help-rights" class="help-dialog-inset" style="font-size: 80%;">
@@ -658,8 +698,15 @@
      
     </div>
     <!-- end of search-results-area -->
+
+    <div style="text-align: center; padding: 0px 0px 8px 0px;">
+	Alternatively: Search the <a href="https://www.hathitrust.org/">HathiTrust Digital Library</a>.
+	Build a collection with the <a href="https://babel.hathitrust.org/cgi/mb">HathiTrust Collection Builder</a>.
+    </div>
+    
   </div>
   <!-- **solr-ef-container:end** -->
+
   
 </div>
 

@@ -18,7 +18,7 @@ function generate_query_field_menu()
 
 	var label = camelCaseToDisplayLabel(field);
 	label = label.replace(/_t$/,"");
-	label = label.replace(/_(dcc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
+	label = label.replace(/_(ddc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
 	label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
 
 	var $option = $("<option>");
@@ -218,8 +218,33 @@ function activate_tab_id(tab_id)
 }
 
 
+function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols)
+{
+    var mnemonic_keys = Object.keys(dic).sort();
+    
+    var mnemonic_keys_str = "<table width=\"100%\"><tr>";
+    var pos = 0;
+    $.each(mnemonic_keys, function(index,key) {
+	var val = dic[key]
+	// if filter_re is null, always want to append key:label entry
+	if ((filter_re == null) || (key.match(filter_re))) {
+	    mnemonic_keys_str += "<td><i><nobr>"+key + "</nobr></i>:</td><td> " + val + "</td>";
+	    pos++;
+	    if ((pos % num_cols) == 0) {
+		mnemonic_keys_str += '</tr><tr>';
+	    }
+	}
+    });
+    mnemonic_keys_str += "</tr></table>";
+    
+    $('#'+div_id).html(mnemonic_keys_str);
+}
+
+
 function mnemonic_help_text(dic,div_id,num_cols)
 {
+    mnemonic_help_text_filtered(dic,null,div_id,num_cols); // ****
+/*    
     var mnemonic_keys = Object.keys(dic).sort();
     
     var mnemonic_keys_str = "<table width=\"100%\"><tr>";
@@ -235,6 +260,7 @@ function mnemonic_help_text(dic,div_id,num_cols)
     mnemonic_keys_str += "</tr></table>";
     
     $('#'+div_id).html(mnemonic_keys_str);
+*/
 }
 
 function fields_help_text(arr,div_id,num_cols)
@@ -311,8 +337,10 @@ function domready_help_dialogs()
     mnemonic_help_text(volume_metadata_dic,'volume-help-fields',1);
     
     mnemonic_help_text(format_dic,'volume-help-format',4);
-    mnemonic_help_text(place_dic,'volume-help-pubplace',4);
-    mnemonic_help_text(language_dic,'volume-help-language',4);
+    mnemonic_help_text_filtered(place_dic,/^[^-]/,'volume-help-pubplace',4);
+    mnemonic_help_text_filtered(place_dic,/^\-/,'volume-help-pubplace-discontinued',4);
+    mnemonic_help_text_filtered(language_dic,/^[^-]/,'volume-help-language',4);
+    mnemonic_help_text_filtered(language_dic,/^\-/,'volume-help-language-discontinued',4);
     mnemonic_help_text(rights_dic,'volume-help-rights',3);
     
 
