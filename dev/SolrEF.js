@@ -172,8 +172,10 @@ var volume_metadata_fields_common =
      "pubPlace_t", "pubDate_t", "rightsAttributes_t", "title_t", "typeOfResource_t"
     ];
 
-function expand_vfield(q_term, all_vfields, query_level) {
+function expand_vfield(q_term, search_vfield, query_level) {
     var vfields = [];
+
+    var all_vfields = (search_vfield == "all-fields");
     
     if (all_vfields) {
 	if (q_term.match(/:/)) {
@@ -195,8 +197,13 @@ function expand_vfield(q_term, all_vfields, query_level) {
 	    vfields.push(q_term);
 	}
 	else {
-	    // make searching by title the default
-	    var vfield = "title_t";
+	    // (now deprecated) before the drop-down menu this part of
+	    // the code default to searching by title_t
+	    // var vfield = "title_t"; // ****
+
+	    // See which volume metadata field is specified in 'search_vfield'
+	    // and prefix that to the term
+	    var vfield = search_vfield;
 	    if (query_level == FacetLevelEnum.Page) {
 		vfield = "volume"+ vfield + "xt";
 	    }
@@ -205,13 +212,12 @@ function expand_vfield(q_term, all_vfields, query_level) {
 	}
     }
 
-
     var vfields_str = vfields.join(" OR ");
     
     return vfields_str;
 }
 
-function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
+function expand_vquery_field_and_boolean(query, search_vfield, query_level) {
     // boolean terms
     //  => pos and lang field
     if (query === "") {
@@ -256,7 +262,7 @@ function expand_vquery_field_and_boolean(query, all_vfields, query_level) {
 		}
 	    }
 	    
-	    var expanded_term = expand_vfield(term, all_vfields, query_level); // **** only difference to POS version
+	    var expanded_term = expand_vfield(term, search_vfield, query_level); // **** only difference to POS version
 	    
 	    term = "(" + expanded_term + ")";
 	    
@@ -468,8 +474,10 @@ function submit_action(event) {
 	group_by_vol_checked = $('#group-results-by-vol:checked').length;
 	
 	var search_all_langs_checked = $('#search-all-langs:checked').length;
-	var search_all_vfields_checked = $('#search-all-vfields:checked').length;
-
+	//var search_all_vfields_checked = $('#search-all-vfields:checked').length; // ****
+	//var search_all_vfields_checked = ($('#vqf-menu').val() == "all-fields");
+	var search_vfield = $('#vqf-menu').val();
+	
 	if (store_query_tab_selected == QueryTabEnum.Advanced) {
 	    // **** first part of this now dulilcates some of the same code below
 	    var advanced_q_text = $('#advanced-q').val().trim();
@@ -501,7 +509,7 @@ function submit_action(event) {
 	    }
 
 	    var query_level = facet_filter.getFacetLevel();
-	    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_all_vfields_checked, query_level);
+	    var arg_vq = expand_vquery_field_and_boolean(vq_text, search_vfield, query_level);
 	    
 	    if (arg_q == "") {
 		if (arg_vq == "") {

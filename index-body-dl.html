@@ -131,15 +131,22 @@
 	      <table class="query-table">
 		<tbody>
 		  <tr class="volume-query-row">
-		    <td>Volume Metadata:</td>
-		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
+		    <td style="padding-top: 8px;" >Volume Metadata:</td>
+		    <td style="width: 610px;">
+		      <input type="text"   class="search-in-progress" id="vq" name="vq"
 			       placeholder="field:term e.g., title_t:shakespeare"
-			       style="width: 600px;"/>
+			       style="width: 425px; padding: 3px;"/>
+		      <fieldset id="volume-query-field" style="display: inline">
+		      </fieldset>
+		      <!-- ****
+			   The following part of the interface is now depricated in favour of a pull-down menu 
+			   for specifying volume field to search by (including search all volume fields)
 		      <br />
 		      <nobr>
 			<input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on" />
 			Search all volume fields
 		      </nobr>
+		      -->		      
 		    </td>
 		    
 		    <td>
@@ -221,10 +228,10 @@
 		  </tr>
 		  
 		  <tr class="page-query-row">
-		    <td>Page-level Text:</td>
+		    <td style="padding-top: 8px;">Page-level Text:</td>
 		    <td>
 		      <input type="text"   class="search-in-progress" id="q" name="q"
-			     style="width: 600px;"/>
+			     style="width: 600px; padding: 3px;"/>
 		    </td>
 		    <td>
 		      <span id="page-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
@@ -617,7 +624,7 @@
 
      
     </div>
-    <!-- send of earch-results-area -->
+    <!-- end of search-results-area -->
   </div>
   <!-- **solr-ef-container:end** -->
   

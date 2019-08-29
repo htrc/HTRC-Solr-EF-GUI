@@ -219,7 +219,8 @@
     <!-- ****** -->
     <!-- The following div (id=solr-ef-container) should be directly copied from index-body-dl.html -->
     <!-- marked as **solr-ef-container:start** to **solr-ef-container:end** -->
-    
+
+
   <!-- **solr-ef-container:start -->
   <div id="solr-ef-container" class="container container-panel">
 
@@ -338,10 +339,14 @@
 	      <table class="query-table">
 		<tbody>
 		  <tr class="volume-query-row">
-		    <td>Volume Metadata:</td>
-		    <td><input type="text"   class="search-in-progress" id="vq" name="vq"
+		    <td style="padding-top: 8px;" >Volume Metadata:</td>
+		    <td style="width: 610px;">
+		      <input type="text"   class="search-in-progress" id="vq" name="vq"
 			       placeholder="field:term e.g., title_t:shakespeare"
-			       style="width: 600px;"/>
+			       style="width: 425px; padding: 3px;"/>
+		      <fieldset id="volume-query-field" style="display: inline">
+		      </fieldset>
+		      
 		      <br />
 		      <nobr>
 			<input type="checkbox" id="search-all-vfields" name="search-all-vfields" value="on" />
@@ -428,10 +433,10 @@
 		  </tr>
 		  
 		  <tr class="page-query-row">
-		    <td>Page-level Text:</td>
+		    <td style="padding-top: 8px;">Page-level Text:</td>
 		    <td>
 		      <input type="text"   class="search-in-progress" id="q" name="q"
-			     style="width: 600px;"/>
+			     style="width: 600px; padding: 3px;"/>
 		    </td>
 		    <td>
 		      <span id="page-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
@@ -827,7 +832,6 @@
     <!-- send of earch-results-area -->
   </div>
   <!-- **solr-ef-container:end** -->
-  
 
     <!-- ****** -->
     <!-- Copy and paste from index-dev.html -->

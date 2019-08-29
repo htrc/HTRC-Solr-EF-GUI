@@ -1,4 +1,13 @@
 
+/* Select menu in Chrome renders with padding */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    #volume-query-field .ui-selectmenu-button {
+    padding: 0px;
+}
+*/
+
 .disabled-div {
     pointer-events: none;
     opacity: 0.6;
