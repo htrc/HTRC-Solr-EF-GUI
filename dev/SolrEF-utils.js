@@ -258,6 +258,38 @@ function ajax_error(jqXHR, textStatus, errorThrown)
     ajax_error_console(jqXHR, textStatus, errorThrown);
 }
 
+function ajax_message_error_console(mess,jqXHR, textStatus, errorThrown)
+{        
+    console.error(mess);
+
+    console.log('====');
+    console.log('Detected Network AJAX Error/Abort');
+    console.log('====');
+    console.log('textStatus:' + textStatus);
+    console.log('errorThrown:' + errorThrown);
+    console.log('responseText:' + jqXHR.responseText);
+    console.log('Full jqXHR:' + JSON.stringify(jqXHR));
+
+}
+
+function ajax_message_error(mess, jqXHR, textStatus, errorThrown)
+{    
+    if (errorThrown != "") {
+	var full_mess = mess;
+	full_mess += 'Network AJAX Error: An error occurred...<br />';
+	full_mess += '<pre>';
+	full_mess += '  Status: ' + textStatus + '\n';
+	full_mess += '  Error: ' + errorThrown + '\n';
+	full_mess += '</pre>';
+	full_mess += '<hr />View the web console (F12 or Ctrl+Shift+I, Console tab) for more information.';
+
+	htrc_alert(full_mess);
+    }
+
+    ajax_message_error_console(mess,jqXHR, textStatus, errorThrown);
+}
+
+
 function load_async_scripts(async_script_urls, on_complete_callback) {
 
     var num_scripts = async_script_urls.length;

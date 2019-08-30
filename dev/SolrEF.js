@@ -135,6 +135,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
+	    console.error("Failed to perform Solr-EF query: '" + store_search_args.q + "'");
 	    ajax_error(jqXHR, textStatus, errorThrown)
 	}
     });

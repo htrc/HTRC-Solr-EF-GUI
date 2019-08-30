@@ -89,20 +89,27 @@
     <div class="row" style="padding-top: 10px; font-size: 17px; line-height: 27px;">
       <div class="col-md-12">
 	
-	<h2 id="solr-ef-title" style="font-size: 125%;">
+	<h2 id="solr-ef-title" styleXXXX="font-size: 125%;">
+
+	  <a class="navbar-brand" href="https://analytics.hathitrust.org/">
+	    <img src="assets/hathi_medium.png" alt="Goto the HTRC Portal" style="vertical-align:top; height: 70px; width: auto;" />
+	  </a>
+	  <div style="display: inline-block;">
+	    <i>HTRC Workset Builder 2.0 (Beta)</i> <br/>
+	    Search the Extracted Features Dataset
 	  
-	  <i>HTRC Workset Builder 2.0 (Beta)</i> <br/>
-	  Search the Extracted Features Dataset
-	  
-	  <span id="solr-col-name" style="font-size: 40%;"></span>
+	    <span id="solr-col-name" style="font-size: 60%;"></span>
+	  </div>
+	  <img src="assets/icons/htrc-beta-sticker120.png" alt="beta" height="64" width="104" style="vertical-align:top; float: right;"/>
+
 	</h2>
 
 	<div id="solr-ef-description">
-	  <p>This experimental tool allows you to build worksets from unigram queries over
+	  <p>This experimental tool allows you to build worksets from unigram (single term) queries over
 	    the <a href="http://dx.doi.org/10.13012/J8X63JT3">HTRC Extracted Features</a> dataset.</p>
 	  
 	  <p>
-	    This dataset contains data and metadata extracted fromvolumes in HathiTrust.
+	    The Extracted Features Dataset contains data and metadata extracted from volumes in HathiTrust.
 	    Add entire volumes or single pages from your search results to your selection basket.
 	    If you want more full-text search flexibility,
 	    <a href="https://www.hathitrust.org/">use the HathiTrust Digital Library</a>.
@@ -124,7 +131,7 @@
 		
 		<ul>
 		  <li><p>Step 0: Decide what to search;</p></li>
-		  <li><p>Step 1: Perform a unigram full text or metadata (using field tags) search at the desired level (page or volume);</p></li>
+		  <li><p>Step 1: Perform a unigram (single term) full text or metadata (using field tags) search at the desired level (page or volume);</p></li>
 		  <li><p>Step 2: Filter through the results and select desired items to add to your workset;</p></li>
 		  <li><p>Step 3: Repeat steps 1 and 2 as necessary until your workset is ready;</p></li>
 		  <li><p>Step 4: "Export as workset" to HTRC Analytics or download workset metadata.</p></li>
