@@ -1,7 +1,7 @@
 //"use strict";
 
 // ****
-var solr_add_to_history = true; // by default want solr-key-q expressed quiry URLs added to browser history
+var solr_add_to_history = true; // by default want solr-key-q expressed query URLs added to browser history
 
 function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 {
@@ -20,7 +20,7 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 	    initialize_new_solr_search();
 	    advanced_query_set_explain_fields(text_q);
 
-	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked); // group_by_vol_checked
+	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked); 
 	    //$('#search-submit').click(); // ****
 	    
 	},
@@ -135,6 +135,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
+	    console.error("Failed to perform Solr-EF query: '" + store_search_args.q + "'");
 	    ajax_error(jqXHR, textStatus, errorThrown)
 	}
     });

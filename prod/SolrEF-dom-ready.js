@@ -243,24 +243,7 @@ function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols)
 
 function mnemonic_help_text(dic,div_id,num_cols)
 {
-    mnemonic_help_text_filtered(dic,null,div_id,num_cols); // ****
-/*    
-    var mnemonic_keys = Object.keys(dic).sort();
-    
-    var mnemonic_keys_str = "<table width=\"100%\"><tr>";
-    var pos = 0;
-    $.each(mnemonic_keys, function(index,key) {
-	var val = dic[key]
-	mnemonic_keys_str += "<td><i><nobr>"+key + "</nobr></i>:</td><td> " + val + "</td>";
-	pos++;
-	if ((pos % num_cols) == 0) {
-	    mnemonic_keys_str += '</tr><tr>';
-	}
-    });
-    mnemonic_keys_str += "</tr></table>";
-    
-    $('#'+div_id).html(mnemonic_keys_str);
-*/
+    mnemonic_help_text_filtered(dic,null,div_id,num_cols);
 }
 
 function fields_help_text(arr,div_id,num_cols)
@@ -709,27 +692,6 @@ function solref_dom_ready() {
 	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
 	    if (shoppingcart_key_q != null) {
 		trigger_shoppingcart_key_search(shoppingcart_key_q);
-		/*
-		// ajax call to get query specified by key		
-		$.ajax({
-		    type: "POST",
-		    url: ef_download_url, 
-		    data: {
-			'action': 'key-value-storage',
-			'key': encodeURI(shoppingcart_key_q)
-		    },
-		    dataType: "text",
-		    success: function(textData) {
-			var text_q = textData;
-			select_optimal_query_tab(text_q);
-			$('#search-submit').click();			
-		    },
-		    error: function(jqXHR, textStatus, errorThrown) {
-			console.error("Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "'");
-			ajax_error(jqXHR, textStatus, errorThrown)
-		    }		
-		});
-*/
 	    }
 	}
 	
