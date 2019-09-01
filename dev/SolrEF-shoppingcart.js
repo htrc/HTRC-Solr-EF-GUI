@@ -40,9 +40,11 @@ function retrieve_shoppingcart()
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    htrc_alert("Failed to retrieve shopping-cart information.<br/>"
-		       +"Items currently unavailable.");
-	    ajax_error_console(jqXHR, textStatus, errorThrown)
+	    var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
+	    mess +=    '<div style="margin: 0 0 0 10px">' + ef_download_url + '</div>';
+	    mess +=    'Items in shopping-cart currently unavailable.</b>';
+
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	}
     });
 }
@@ -357,7 +359,7 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	    },
 	    dataType: "text",
 	    success: function(textData) {
-		console.log("Deleted Shopping id:" + item_id);
+		console.log("Deleted Shopping item id:" + item_id);
 
 		// **** consider wrapping up the following two lines in a more ADT-flavours method
 		store_shoppingcart_ids=arrayRemoveItem(store_shoppingcart_ids,item_id);
@@ -366,7 +368,9 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		ajax_error(jqXHR, textStatus, errorThrown)
+		var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	    }
 	});		    
     }
@@ -522,7 +526,9 @@ function do_shoppingcart_drop_action()
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		ajax_error(jqXHR, textStatus, errorThrown)
+		var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
+		mess += '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	    }
 	});
 	
@@ -656,32 +662,7 @@ function empty_shoppingcart()
     var raw_fielded_ids = shoppingcart_q.split("%20OR%20");
     var del_shoppingcart_ids = raw_fielded_ids.map(function(fielded_id){return fielded_id.match(/\(id:(.*)\)/)});
 
-    //console.log("**** deleting the followig items to the shopping cart" + del_shoppingcart_ids.join(","));
-
-    // Fire off Ajax call to delete all the IDs on the server
-    /*
     $.ajax({
-	type: "POST",
-	url: ef_download_url, 
-	data: {
-	    'action': 'shoppingcart',
-	    'mode': 'del-ids',
-	    'key': shoppingcart_key,
-	    'ids': del_shoppingcart_ids.join(",")
-	},
-	dataType: "text",
-	success: function(textData) {
-	    console.log("Deleting Shopping:" + textData);
-	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
-	    setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}
-    });
-*/
-        $.ajax({
 	type: "POST",
 	url: ef_download_url, 
 	data: {
@@ -707,7 +688,9 @@ function empty_shoppingcart()
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+	    ajax_message_error(jqXHR, textStatus, errorThrown);
 	}
     });
 

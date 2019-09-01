@@ -243,7 +243,12 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
 	//processData: false,
 	//enctype: 'multipart/form-data',
 	success: published_workset_success,
-	error: ajax_error
+	error: function(jqXHR, textStatus, errorThrown) {
+	    var mess = "<b>Failed to save workset to triplesore.  An error occurred accessing URL:";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + publish_workset_url +'</div></b>';
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	}
+
     });
 }
 

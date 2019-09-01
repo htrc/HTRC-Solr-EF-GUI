@@ -160,14 +160,26 @@ function getSelectedText()
 
 function htrc_alert(message)
 {
-    $('#htrc-alert-body').html(message)
+    var curr_alert_mess = $('#htrc-alert-body').html()
+    if (curr_alert_mess != "") {
+	var appended_message = curr_alert_mess + "\n<hr />\n" + message;
+	$('#htrc-alert-body').html(appended_message);
+    }
+    else {
 
+    }
+
+    $('#htrc-alert-body').html(message);
+    
     $("#htrc-alert-dialog").dialog({
+	modal: true,
         buttons : {
 	    "OK" : function() {
+		$('#htrc-alert-body').html("");
 		$(this).dialog("close");
 	    }
-	}
+	},
+	close: function() { $('#htrc-alert-body').html(""); }
     });
     
     $("#htrc-alert-dialog").dialog( "open" );
@@ -178,6 +190,7 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
     $('#htrc-alert-body').html(message)
     
     $("#htrc-alert-dialog").dialog({
+	modal: true,
 	buttons : {
 	    "Confirm" : confirm_callback,
 	    "Cancel" : cancel_callback
@@ -193,6 +206,7 @@ function htrc_continue(message,continue_callback,cancel_callback)
     $('#htrc-alert-body').html(message)
     
     $("#htrc-alert-dialog").dialog({
+	modal: true,
 	buttons : {
 	    "Continue" : continue_callback,
 	    "Cancel" : cancel_callback
@@ -228,8 +242,8 @@ function escape_solr_query(query)
 }
 
 
-
-function ajax_error_console(jqXHR, textStatus, errorThrown)
+/*
+function __ajax_error_console(jqXHR, textStatus, errorThrown)
 {        
     console.log('====');
     console.log('Detected Network AJAX Error/Abort');
@@ -241,7 +255,7 @@ function ajax_error_console(jqXHR, textStatus, errorThrown)
 
 }
 
-function ajax_error(jqXHR, textStatus, errorThrown)
+function __ajax_error(jqXHR, textStatus, errorThrown)
 {
     
     if (errorThrown != "") {
@@ -255,8 +269,9 @@ function ajax_error(jqXHR, textStatus, errorThrown)
 	htrc_alert(mess);
     }
 
-    ajax_error_console(jqXHR, textStatus, errorThrown);
+    __ajax_error_console(jqXHR, textStatus, errorThrown);
 }
+*/
 
 function ajax_message_error_console(mess,jqXHR, textStatus, errorThrown)
 {        
@@ -274,19 +289,36 @@ function ajax_message_error_console(mess,jqXHR, textStatus, errorThrown)
 
 function ajax_message_error(mess, jqXHR, textStatus, errorThrown)
 {    
+    var full_mess = mess + "<br />";
+
     if (errorThrown != "") {
-	var full_mess = mess;
 	full_mess += 'Network AJAX Error: An error occurred...<br />';
 	full_mess += '<pre>';
 	full_mess += '  Status: ' + textStatus + '\n';
 	full_mess += '  Error: ' + errorThrown + '\n';
 	full_mess += '</pre>';
-	full_mess += '<hr />View the web console (F12 or Ctrl+Shift+I, Console tab) for more information.';
 
-	htrc_alert(full_mess);
     }
 
-    ajax_message_error_console(mess,jqXHR, textStatus, errorThrown);
+    // Check to see if the alert dialog is already displaying a message
+    // and if it is, then append the new message into the existing one
+    
+    if ($('#htrc-alert-footer').length > 0) {
+	// In the situation where we already have a footer
+	$('#htrc-alert-footer').remove();
+    }
+    
+    var curr_alert_mess = $('#htrc-alert-body').html();
+    if (curr_alert_mess != "") {
+	full_mess = curr_alert_mess + "\n<hr />\n" + full_mess;
+    }
+
+    var footer = '<div id="htrc-alert-footer"><hr />View the web console (F12 or Ctrl+Shift+I, Console tab) for more information.</div>';
+    full_mess += footer;
+
+    htrc_alert(full_mess);
+
+    ajax_message_error_console(mess,jqXHR,textStatus,errorThrown);
 }
 
 
@@ -298,8 +330,9 @@ function load_async_scripts(async_script_urls, on_complete_callback) {
     for (var i=0; i<num_scripts; i++) {
 	
 	var script_url = async_script_urls[i];
+	var full_url = script_prefix+script_url;
 	$.ajax({
-	    url: script_prefix+script_url,
+	    url: full_url,
 	    dataType: "script",
 	    success: function() {
 		num_loaded_scripts++;
@@ -307,7 +340,10 @@ function load_async_scripts(async_script_urls, on_complete_callback) {
 		    on_complete_callback();
 		}
 	    },
-	    error: ajax_error
+	    error: function(jqXHR, textStatus, errorThrown) {
+		var mess = "Failed to dynamically load JavaScript file: " + full_url;
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
         });
 	
     }    

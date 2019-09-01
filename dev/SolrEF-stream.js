@@ -86,7 +86,11 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 	data: data_str,
 	dataType: "json",
 	success: callback,
-	error: ajax_error
+	error: function(jqXHR, textStatus, errorThrown) {
+	    var mess = "<b>Failed to retreive volume count when accessing URL: ";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + solr_stream_action +'</div></b>';
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	}
     });
 
     

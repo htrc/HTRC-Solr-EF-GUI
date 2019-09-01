@@ -153,6 +153,11 @@ hr {
     margin: 5px 0;
 }
 
+#htrc-alert-body hr {
+    height: 1px;
+    background-color: #b5b5b5;
+}
+
 select[focus], select:focus {
     outline: none;
 }

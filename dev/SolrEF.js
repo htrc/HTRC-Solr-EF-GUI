@@ -20,14 +20,12 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 	    initialize_new_solr_search();
 	    advanced_query_set_explain_fields(text_q);
 
-	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked); 
-	    //$('#search-submit').click(); // ****
-	    
+	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked);
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    console.error("Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'");
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}		
+	    var mess = "Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'";
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	}
     });
 }
 
@@ -47,9 +45,10 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 	    $('#search-submit').click();			
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    console.error("Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "'");
-	    ajax_error(jqXHR, textStatus, errorThrown)
-	}		
+	    var mess = "<b>Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "' when accessing the URL:";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	}
     });
 }
 
@@ -135,8 +134,9 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    console.error("Failed to perform Solr-EF query: '" + store_search_args.q + "'");
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    var mess = "<b>Failed to perform Solr-EF query: '" + store_search_args.q + "' when accessing the URL:";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + store_search_action +"</div></b>";
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	}
     });
 }
@@ -711,7 +711,7 @@ function submit_action(event) {
 	
 	if (!search_all_langs_checked && json_data.length>0) {
 
-	    // Check to see if guess lang aligned with what the user has selected
+	    // Check to see if guess-lang aligned with what the user has selected
 
 	    // => Count how many guessed languages are switched on in the query form
 	    //    and make sure > 0
@@ -740,7 +740,11 @@ function submit_action(event) {
 			"text-in": q_text },
 		dataType: "json",
 		success: submit_action_tokenized,
-		error: ajax_error
+		error: function(jqXHR, textStatus, errorThrown) {
+		    var mess = "<b>ICU tokenize query: '" + q_text + "' failed when accessing URL: ";
+		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		}
 	    });
 	}
 	else {
@@ -751,6 +755,8 @@ function submit_action(event) {
 
     submit_action_tokenized_confirmed({"text_out":q_text});
 
+    // The following block of code includes an example of using the
+    // 'guess-language' API action
     /*
     if (store_query_tab_selected == QueryTabEnum.Advanced) {
 	var advanced_q_text = $('#advanced-q').val().trim();
@@ -785,7 +791,7 @@ function submit_action(event) {
 			"text-in": lang_text },
 		dataType: "json",
 		success: submit_action_check_language,
-		error: ajax_error
+		error: __ajax_error // needs to be changed to ajax_message_error() // ****
 	    });
 	}
 	else {
@@ -798,7 +804,7 @@ function submit_action(event) {
 			    "text-in": q_text },
 		    dataType: "json",
 		    success: submit_action_tokenized,
-		    error: ajax_error
+		    error: __ajax_error // needs to be changed to ajax_message_error() // ****
 		});
 	    }
 	    else {

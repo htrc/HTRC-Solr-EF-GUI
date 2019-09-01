@@ -106,6 +106,7 @@ function explain_add2any_dom(store_value)
 	value = "https:" + value;
     }
 
+    // **** Is this really the best place for this AJAX triggered call?
     if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
 	value = value.trim();
 	
@@ -235,7 +236,14 @@ function explain_add2any_dom(store_value)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto");
 	    //iprogressbar.cancel();
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    var mess = '<b>Failed to convert query string:';
+	    mess += '<div style="margin: 0 0 0 10px"><i>'+value+'</i></div>';
+	    mess += 'to Solr query-key form. ';
+	    mess += 'Unable to access URL: ';
+	    mess += '<div style="margin: 0 0 0 10px">' + ef_download_url +'</div>';
+	    mess += 'Unable to retain query in browser history</b>';
+	    
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	}
     });
 	
