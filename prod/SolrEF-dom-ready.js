@@ -442,7 +442,7 @@ function solref_dom_ready() {
 	modal: true,
 	autoOpen: false,
 	resizable: true,
-	width: 450,
+	width: 550,
 	buttons: {
 	    "OK": function() {
 		$( this ).dialog( "close" );

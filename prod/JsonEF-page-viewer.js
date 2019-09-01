@@ -558,7 +558,9 @@ $(document).ready(function() {
 		iprogressbar.cancel();
 		$('#json-page-viewer-container-loading').hide(); // ****
 		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
-		ajax_error(jqXHR, textStatus, errorThrown)
+		var mess = "<b>Download HathiTrust ID '"+htid+"' failed to access URL:";
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +'</div></b>';
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown)
 	    }
 	});
     }

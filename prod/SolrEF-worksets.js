@@ -122,7 +122,10 @@ function load_workset_id_old_api(workset_id)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    var mess = '<b>Loading Workset ID failed to access URL:';
+	    mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
+
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown)
 	}
     });
 }
@@ -150,7 +153,10 @@ function load_workset_id(workset_id_url)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    ajax_error(jqXHR, textStatus, errorThrown)
+	    var mess = '<b>Loading Workset ID failed to access URL:';
+	    mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
+
+	    ajax_message_error(mess,jqXHR,textStatus,errorThrown)
 	}
     });    
 }
