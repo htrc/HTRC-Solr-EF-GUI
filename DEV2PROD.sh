@@ -2,11 +2,11 @@
 
 run_cmd=0;
 
-if [ "x$1" = "-f" ] ; then
+if [ "x$1" = "x-f" ] ; then
     run_cmd=1
-elif [ "x$1" = "-force" ] ; then
+elif [ "x$1" = "x-force" ] ; then
     run_cmd=1
-elif [ "x$1" = "--force" ] ; then
+elif [ "x$1" = "x--force" ] ; then
     run_cmd=1
 fi
 
@@ -17,12 +17,14 @@ cmd3='/bin/cp index-dev.html index.html'
 cmd4='/bin/cp json-page-viewer-dev.html json-page-viewer.html'
 
 if [ $run_cmd = 1 ] ; then
+    echo "******"
     echo "Updating production version to be the same as the development version"
+    echo ""
     $cmd1 && $cmd2 && $cmd3 && $cmd4
     if [ $? != 0 ] ; then
 	echo -e "Error encountered running:\n   $cmd1 && $cmd2 && $cmd3 && $cmd4" 1>&2
 	exit 1
-    fi
+    fi    
 else
 
     echo "******"
