@@ -36,8 +36,10 @@
     <script type="text/javascript">
       var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
       $(document).ready(function() {
-        var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
-        $.get(abs_url_prefix+"index-body-dl.html", function(data,status) {
+      var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
+      var abs_url_suffix = (runtime_mode=="dev") ? "-dev.html" : ".html";
+      var abs_url = abs_url_prefix+"index-body-dl"+abs_url_suffix;
+        $.get(abs_url, function(data,status) {
   	  $.ajax({
 	        url: abs_url_prefix+"index-body-dl.js",
 	        dataType: "script",
