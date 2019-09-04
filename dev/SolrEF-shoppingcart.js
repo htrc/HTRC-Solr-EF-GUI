@@ -15,7 +15,7 @@ function retrieve_shoppingcart()
 
     $.ajax({
 	type: "POST",
-	url: ef_download_url, 
+	url: ef_accessapi_url, 
 	data: {
 	    'action': 'shoppingcart',
 	    'mode': 'get',
@@ -41,7 +41,7 @@ function retrieve_shoppingcart()
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
 	    var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
-	    mess +=    '<div style="margin: 0 0 0 10px">' + ef_download_url + '</div>';
+	    mess +=    '<div style="margin: 0 0 0 10px">' + ef_accessapi_url + '</div>';
 	    mess +=    'Items in shopping-cart currently unavailable.</b>';
 
 	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
@@ -350,7 +350,7 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	
 	$.ajax({
 	    type: "POST",
-	    url: ef_download_url, 
+	    url: ef_accessapi_url, 
 	    data: {
 		'action': 'shoppingcart',
 		'mode': 'del-ids',
@@ -369,7 +369,7 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
 		var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
-		mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
 		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	    }
 	});		    
@@ -512,7 +512,7 @@ function do_shoppingcart_drop_action()
 	// Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
 	$.ajax({
 	    type: "POST",
-	    url: ef_download_url, 
+	    url: ef_accessapi_url, 
 	    data: {
 		'action': 'shoppingcart',
 		'mode': 'add-ids',
@@ -527,7 +527,7 @@ function do_shoppingcart_drop_action()
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
 		var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
-		mess += '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
 		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	    }
 	});
@@ -664,7 +664,7 @@ function empty_shoppingcart()
 
     $.ajax({
 	type: "POST",
-	url: ef_download_url, 
+	url: ef_accessapi_url, 
 	data: {
 	    'action': 'shoppingcart',
 	    'mode': 'del',
@@ -689,7 +689,7 @@ function empty_shoppingcart()
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
 	    var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
 	    ajax_message_error(jqXHR, textStatus, errorThrown);
 	}
     });

@@ -7,7 +7,7 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 {
     $.ajax({
 	type: "POST",
-	url: ef_download_url, // change this global variable to something more sutiable???
+	url: ef_accessapi_url, // change this global variable to something more sutiable???
 	data: {
 	    'action': 'url-shortener',
 	    'key': encodeURI(solr_key_q)
@@ -33,7 +33,7 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
     // ajax call to get query specified by key		
     $.ajax({
 	type: "POST",
-	url: ef_download_url, 
+	url: ef_accessapi_url, 
 	data: {
 	    'action': 'key-value-storage',
 	    'key': encodeURI(shoppingcart_key_q)
@@ -46,7 +46,7 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    var mess = "<b>Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "' when accessing the URL:";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
 	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	}
     });
@@ -78,7 +78,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
-	type: "POST", // used to be "GET" // ****
+	type: "POST", 
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
@@ -735,14 +735,14 @@ function submit_action(event) {
 	if (tokenize_mode == "tokenize-on") {
 	    $.ajax({
 	    type: "POST",
-		url: ef_download_url,
+		url: ef_accessapi_url,
 		data: { "action": "icu-tokenize",
 			"text-in": q_text },
 		dataType: "json",
 		success: submit_action_tokenized,
 		error: function(jqXHR, textStatus, errorThrown) {
 		    var mess = "<b>ICU tokenize query: '" + q_text + "' failed when accessing URL: ";
-		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +"</div></b>";
+		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
 		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 		}
 	    });
@@ -786,7 +786,7 @@ function submit_action(event) {
 	if (lang_text != "") {
 	    $.ajax({
 		type: "POST",
-		url: ef_download_url,
+		url: ef_accessapi_url,
 		data: { "action": "guess-language",
 			"text-in": lang_text },
 		dataType: "json",
@@ -799,7 +799,7 @@ function submit_action(event) {
 	    if (tokenize_mode == "tokenize-on") {
 		$.ajax({
 		    type: "POST",
-		    url: ef_download_url,
+		    url: ef_accessapi_url,
 		    data: { "action": "icu-tokenize",
 			    "text-in": q_text },
 		    dataType: "json",

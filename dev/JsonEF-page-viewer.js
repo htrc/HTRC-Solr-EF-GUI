@@ -506,14 +506,14 @@ $(document).ready(function() {
 
     if (htid != null) {
 	
-	var ef_download_args = { "download-id": htid };
+	var ef_accessapi_args = { "download-id": htid };
 
 	store_search_xhr = new window.XMLHttpRequest();
 	
 	$.ajax({
 	    type: "GET",
-	    url: ef_download_url,
-	    data: ef_download_args,
+	    url: ef_accessapi_url,
+	    data: ef_accessapi_args,
 	    dataType: "json",
 	    xhr : function() {
 		return store_search_xhr;
@@ -540,7 +540,7 @@ $(document).ready(function() {
 
 		ef_page_viewer.display_ef_page_text(seq_num);
 
-		var download_ef_href = ef_download_url+'?download-id='+ef_page_viewer.getHTID();
+		var download_ef_href = ef_accessapi_url+'?download-id='+ef_page_viewer.getHTID();
 		$('#download-json-ef').attr('href',download_ef_href);
 
 		download_ef_href += "-seq-" + ef_page_viewer.getPaddedSeqNum();
@@ -559,7 +559,7 @@ $(document).ready(function() {
 		$('#json-page-viewer-container-loading').hide(); // ****
 		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
 		var mess = "<b>Download HathiTrust ID '"+htid+"' failed to access URL:";
-		mess +=  '<div style="margin: 0 0 0 10px">' + ef_download_url +'</div></b>';
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div></b>';
 		ajax_message_error(mess,jqXHR,textStatus,errorThrown)
 	    }
 	});

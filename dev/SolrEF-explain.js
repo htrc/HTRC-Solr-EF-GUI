@@ -112,7 +112,7 @@ function explain_add2any_dom(store_value)
 	
     $.ajax({
 	type: "POST",
-	url: ef_download_url, // change this global variable to something more sutiable???
+	url: ef_accessapi_url, // change this global variable to something more sutiable???
 	data: {
 	    'action': 'url-shortener',
 	    'value': encodeURI(value)
@@ -188,7 +188,7 @@ function explain_add2any_dom(store_value)
 	    var retrieve_store_search_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
 	    retrieve_store_search_url += "?solr-key-q="+key;
 	    /*
-	    var retrieve_store_search_url = ef_download_url
+	    var retrieve_store_search_url = ef_accessapi_url
 		+ '?action=url-shortener'
 		+ '&key='+key;
 		// + '&redirect=true'; // ****
@@ -240,7 +240,7 @@ function explain_add2any_dom(store_value)
 	    mess += '<div style="margin: 0 0 0 10px"><i>'+value+'</i></div>';
 	    mess += 'to Solr query-key form. ';
 	    mess += 'Unable to access URL: ';
-	    mess += '<div style="margin: 0 0 0 10px">' + ef_download_url +'</div>';
+	    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div>';
 	    mess += 'Unable to retain query in browser history</b>';
 	    
 	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
