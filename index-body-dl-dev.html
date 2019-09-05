@@ -103,7 +103,7 @@
 	  
 	    <span id="solr-col-name" style="font-size: 60%;"></span>
 	  </div>
-	  <img src="assets/icons/htrc-beta-sticker105.png" alt="beta" height="64" width="105" style="vertical-align:top; float: right;"/>
+	  <img src="assets/icons/htrc-beta-sticker104.png" alt="beta" height="64" width="104" style="vertical-align:top; float: right;"/>
 
 	</h2>
 
@@ -123,6 +123,10 @@
 	
 	  <p>Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
 
+	  <p>For help with building a workset,
+	    <a href="https://wiki.htrc.illinois.edu">
+	      see the Workset Builder 2 Wiki page</a>.
+	    <!-- // ****
 	  <p>For the steps necessary to build a workset, see Help for more information.
 	    <span id="buildaworkset-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
 
@@ -142,6 +146,7 @@
 	      </div>
 	    </div>
 	  </p>
+-->
 	  <p>
 	    For additional help, contact <a href="mailto:htrc-help@hathitrust.org">htrc-help@hathitrust.org</a>.
 	  </p>
@@ -176,10 +181,14 @@
 		    <td style="padding-top: 8px;" >Volume Metadata:</td>
 		    <td style="width: 610px;">
 		      <input type="text"   class="search-in-progress" id="vq" name="vq"
-			       placeholder="field:term e.g., title_t:shakespeare"
 			       style="width: 425px; padding: 3px;"/>
 		      <fieldset id="volume-query-field" style="display: inline">
 		      </fieldset>
+		      <br />
+		      <span id="volume-help" class="helplink" style="font-size:90%">
+			Searchable fields
+		      </span>
+		      <!--  placeholder="field:term e.g., title_t:shakespeare" -->
 		      <!-- ****
 			   The following part of the interface is now depricated in favour of a pull-down menu 
 			   for specifying volume field to search by (including search all volume fields)
@@ -190,10 +199,12 @@
 		      </nobr>
 		      -->		      
 		    </td>
-		    
 		    <td>
-		      <span id="volume-help" style="cursor: help"><span class="ui-icon ui-icon-info"></span> Help</span>
-		    </td>		      
+		      <span id="volume-advanced-help" class="helplink" style="font-size:85%;">
+			Search multiple fields
+		      </span>
+		    </td>
+		    
 		  </tr>
 		  <tr class="volume-query-row">
 		    <td></td>
@@ -203,24 +214,27 @@
 			   title="Help: Query Volume Metadata"
 			   style="height: 500px;">
 			<div id="volume-help-body">
-			 
+
+			  <!--
 			  <p>Volume-level metadata searching is not case-sensitive.</p>
 
 			  <p>The metadata field to search by is controlled through the drop-down menu.  By
 			    default this is set to <i>All Fields</i>.</p>
 
 			  <p>To search for a phrase, use quotes around your search (“like this”).</p>
-
+			  -->
+			  
 			  <!-- ****
 			  <p>To search all metadata fields, tick the Search all metadata fields below the search box.</p>
 			  -->
-			  
+			  <!-- ****
 			  <p>You can also search for specific volume metadata fields use the field:term form, such as <i>names_t:Austen</i>
 			    or <i>names_t:"Austen, Jane"</i> for a phrase-based search.</p>
 	
 			  <p>Wildcard matching includes using '?' for a single character and '*' for multiple characters.
 			    For example 'canad?' and '*land'.</p>
- 
+			  -->
+			  
 			  <p>
 			    In alphabetical order, searchable fields are:
 			  </p>
@@ -228,6 +242,48 @@
 			  <div id="volume-help-fields" class="help-dialog-inset">
 			  </div>
 
+			  <p>
+			    You can search for unigrams (single terms)
+			    in a specific metadata field by choosing
+			    it from the drop-down menu. You can search
+			    for a unigram across all metadata fields
+			    by choosing “All Fields” from the
+			    drop-down.
+			  </p>
+			  
+			  <p>
+			    To search multiple metadata fields, enter
+			    your search query in a format called Solr
+			    syntax. For example, a search for
+			    “title_t:hamlet AND names_t:shakespeare”
+			    will return all volumes with “hamlet” in
+			    the title field and “shakespeare” in the
+			    names field. The same search can be used
+			    with an “OR” operand to return volumes
+			    that satisfy either condition. Note that
+			    there is no space between the colon and
+			    the search term. For more information, see
+			    this
+			    <!-- To stop scrolling to the bottom of the dialog, as a workaround
+				 tabindex="-1" used on anchor links.
+				 For more details, see:
+				    https://stackoverflow.com/questions/19038346/jquery-dialog-box-auto-scrolling-to-bottom
+			      -->
+			    <a href="http://www.solrtutorial.com/solr-query-syntax.html"
+			       tabindex="-1"
+			       target="_blank">Solr query syntax guide</a>.
+			  </p>
+
+			  <p>
+			    Some metadata fields have standardized or
+			    coded values. For a full list of the
+			    metadata fields and their possible values,
+			    visit this
+			    <a href="https://wiki.htrc.illinois.edu" tabindex="-1">
+			      Workset Builder 2 Wiki page</a>.
+			  </p>
+
+			  <!--
 			  <p>
 			    The Bibliographic Format field <i>bibliographicFormat_t</i> is mnemonically
 			    coded, for example using <i>BK</i> to represent a <i>Book</i>.
@@ -243,24 +299,9 @@
 			  <p>
 			    The codes used for this field are:
 			  </p>
-<!--
-			  <p>
-			    A similar situation exists for the volume format field <i>bibliographicFormat_t</i>.
-			    The codes used for this are:			    
- 			  </p>
--->			  
 			  <div id="volume-help-format" class="help-dialog-inset">
 			  </div>
-			  
-			  <!--
-			  <p>
-			    The field <i>pubPlace_t</i> is mnemonically coded, for
-			    example using <i>nyu</i> to represent <i>New York (State)</i>.
-			    So, to search for volumes published in this state, you
-			    would enter the term <i>pubPlace_t:nyu</i>.
-			  </p>
-			  -->
-			  
+			  			  
 			  <p>
 			    The set of codes used for the Place of Publication field <i>pubPlace_t</i> are:
  			  </p>
@@ -277,10 +318,6 @@
 			  
 			  <p>
 			    The set of codes used for the Language field <i>language_t</i> are:
-			    <!--
-			    A similar situation exists for the language field <i>language_t</i>.
-			    The mnemonics used for this are:			    
-			      -->
  			  </p>
 			  
 			  <div id="volume-help-language" class="help-dialog-inset" style="font-size: 80%;">
@@ -295,18 +332,49 @@
 
 			  <p>
 			    The set of codes used for the Copyright field <i>rights_t</i> are:
-			    <!--
-			    A similar situation exists for the copyright field <i>rights_t</i>.
-			    The mnemonics used for this are:			    
-			      -->
  			  </p>
 			  
 			  <div id="volume-help-rights" class="help-dialog-inset" style="font-size: 80%;">
 			  </div>
-			  
+			  -->
 			  
 			</div>
-		      </div>		      
+		      </div>
+
+
+		      <div id="volume-advanced-help-dialog"
+			   title="Help: Advanced Query Volume Metadata"
+			   style="height: 500px;">
+			<div id="volume-advanced-help-body">
+			  <p>
+			    To search multiple metadata fields, enter
+			    your search query in a format called Solr
+			    syntax. For example, a search for
+			    “title_t:hamlet AND names_t:shakespeare”
+			    will return all volumes with “hamlet” in
+			    the title field and “shakespeare” in the
+			    names field. The same search can be used
+			    with an “OR” operand to return volumes
+			    that satisfy either condition. Note that
+			    there is no space between the colon and
+			    the search term. For more information, see
+			    this
+			    <a href="http://www.solrtutorial.com/solr-query-syntax.html"
+			       tabindex="-1"
+			       target="_blank">Solr query syntax guide</a>.
+			  </p>
+			  <p>
+			    Some metadata fields have standardized or
+			    coded values. For a full list of the
+			    metadata fields and their possible values,
+			    visit this
+			    <a href="https://wiki.htrc.illinois.edu" tabindex="-1">
+			      Workset Builder 2 Wiki page</a>.			    
+			  </p>
+
+			</div>
+		      </div>
+		      
 		    </td>
 		  </tr>
 		  

@@ -844,20 +844,58 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
     var num_pages_bil = solr_total_num_pages / 1000000000;
     var num_pages_bil_str = Math.round( num_pages_bil * 10) / 10;
 
-    var iprogressbar_message = "Searching " + num_vols_mil_str + " million volumes/" + num_pages_bil_str + " billion pages"; 
+    var iprogressbar_message = "Searching ...";
     
-    if (store_search_args != null) {
-	count_terms = (store_search_args.q.match(/:/g) || []).length;
+    if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+	iprogressbar_message = "Retrieving items from shopping-cart";
     }
+    else {
+	iprogressbar_message = "Searching " + num_vols_mil_str + " million volumes/" + num_pages_bil_str + " billion pages";
 
-    if (count_terms>1) {
-	iprogressbar_message += " for " + count_terms + " fields/terms";
+	if (store_search_args != null) {
+	    count_terms = (store_search_args.q.match(/:/g) || []).length;
+	}
+
+	if (count_terms>1) {
+	    iprogressbar_message += " for " + count_terms + " fields/terms";
+	}
     }
-
-    iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,
-					 iprogressbar_message);
     
-    ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
+
+    var launch_query = function() {
+        iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,iprogressbar_message);
+	ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
+    }
+    
+
+    // Ping the Solr-EF-Access API to make sure it's working
+    // If not, some features of the result-set will need to be disabled
+    // Give the user the choice of whether they want to continue or not
+    
+    $.ajax({
+	type: "POST",
+	url: ef_accessapi_url, // With no data arguments, prints out a usage message
+	dataType: "text",
+	success: function(unusedTextData) {	    
+	    // The act of reaching the success function is enough evidence the server is alive
+	    launch_query();
+	    
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    ef_accessapi_failed = true;
+	    
+	    var mess = '<div>Searching the Extracted Features Dataset is still operational,'
+	    mess += ' however some supporting services such as';
+	    mess += ' the shopping-cart, exporting IDs, and downloading';
+	    mess += ' are extracted-feature JSON files are currently offline.</div><hr />';
+	    
+	    mess += '<div>Failed to access URL:</div>';
+	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div><hr />";
+	    mess += '<div><b>Do you wish to proceed with the query?</b></div>';
+
+	    htrc_continue(mess,launch_query);
+	}
+    });
 }
 
 

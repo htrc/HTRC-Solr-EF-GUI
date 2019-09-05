@@ -40,11 +40,17 @@ function retrieve_shoppingcart()
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
-	    mess +=    '<div style="margin: 0 0 0 10px">' + ef_accessapi_url + '</div>';
-	    mess +=    'Items in shopping-cart currently unavailable.</b>';
+	    if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
+		ef_accessapit_failed = true;
+		var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
+		mess +=    '<div style="margin: 0 0 0 10px">' + ef_accessapi_url + '</div>';
+		mess +=    'Items in shopping-cart currently unavailable.</b>';
 
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
+	    else {
+		ajax_message_error_console("Failed to retrieve shopping-cart information",jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 }
@@ -368,9 +374,15 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
-		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
+		    ef_accessapi_failed = true;
+		    var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
+		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		}
+		else {
+		    ajax_message_error_console("Failed to delete item",jqXHR,textStatus,errorThrown);
+		}
 	    }
 	});		    
     }
@@ -526,9 +538,17 @@ function do_shoppingcart_drop_action()
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
-		mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
+		    ef_accessapi_failed = true;
+
+		    var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
+		    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		}
+		else {
+		    ajax_message_error_console("Failed to add item",jqXHR,textStatus,errorThrown);
+		}
+		
 	    }
 	});
 	
@@ -688,9 +708,16 @@ function empty_shoppingcart()
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-	    ajax_message_error(jqXHR, textStatus, errorThrown);
+	    if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
+		ef_accessapi_failed = true;
+
+		var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+		ajax_message_error(jqXHR, textStatus, errorThrown);
+	    }
+	    else {
+		ajax_message_error_console("Failed to delete all items",jqXHR, textStatus, errorThrown);
+	    }
 	}
     });
 
