@@ -1,7 +1,15 @@
+function volumeFieldToLabel(field)
+{
+    var label = camelCaseToDisplayLabel(field);
+    label = label.replace(/_t$/,"");
+    label = label.replace(/_(ddc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
+    label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
+
+    return label;
+}
 
 function generate_query_field_menu()
 {
-
     var $select = $("<select>");
     $select.attr("id","vqf-menu");
 
@@ -16,11 +24,14 @@ function generate_query_field_menu()
     for (var i = 0; i < metadata_fields.length; i++) {
 	var field = metadata_fields[i];
 
+	var label = volumeFieldToLabel(field);
+	/*
 	var label = camelCaseToDisplayLabel(field);
 	label = label.replace(/_t$/,"");
 	label = label.replace(/_(ddc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
 	label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
-
+	*/
+	
 	var $option = $("<option>");
 	$option.attr("value",field);
 	$option.text(label);
@@ -31,6 +42,17 @@ function generate_query_field_menu()
     $('#volume-query-field').append($select);
     $select.selectmenu({ width : '170px', padding: "0px" });
 
+}
+
+function generate_volume_field_help_dic()
+{
+    var restructured_dict = {}
+    $.each(volume_metadata_dic, function(field,help_text) {
+	var label = volumeFieldToLabel(field);
+	restructured_dict[label] = "("+field+")</td><td>"+help_text ;
+    });
+    
+    return restructured_dict;	   
 }
 
 function lang_pos_toggle(event) {
@@ -266,6 +288,8 @@ function fields_help_text(arr,div_id,num_cols)
 
 function domready_help_dialogs()
 {
+    // ****
+    /*
         $("#buildaworkset-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
@@ -287,12 +311,14 @@ function domready_help_dialogs()
     $("#buildaworkset-help").click(function () {
 	$("#buildaworkset-help-dialog").dialog( "open" );
     });
+*/
 
+    volume_metadata_help_dict = generate_volume_field_help_dic();
 
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
-	width: 790,
+	width: 890,
 	height: 600,
 	modal: true,
 	buttons: {
@@ -317,18 +343,48 @@ function domready_help_dialogs()
     $('#volume-help-fields').html(vol_md_keys_str);
 */
     //fields_help_text(Object.keys(volume_metadata_fields),'volume-help-fields',4);
-    mnemonic_help_text(volume_metadata_dic,'volume-help-fields',1);
+    //mnemonic_help_text(volume_metadata_dic,'volume-help-fields',1); //numCols=1
+
+    // ****
+    // Entries in following hashmap have <td>'s spliced into them to cause an extra
+    // column in the table to be produced
+    mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1); //numCols=1
     
-    mnemonic_help_text(format_dic,'volume-help-format',4);
-    mnemonic_help_text_filtered(place_dic,/^[^-]/,'volume-help-pubplace',4);
-    mnemonic_help_text_filtered(place_dic,/^\-/,'volume-help-pubplace-discontinued',4);
-    mnemonic_help_text_filtered(language_dic,/^[^-]/,'volume-help-language',4);
-    mnemonic_help_text_filtered(language_dic,/^\-/,'volume-help-language-discontinued',4);
-    mnemonic_help_text(rights_dic,'volume-help-rights',3);
+    
+    //mnemonic_help_text(format_dic,'volume-help-format',4);
+    //mnemonic_help_text_filtered(place_dic,/^[^-]/,'volume-help-pubplace',4);
+    //mnemonic_help_text_filtered(place_dic,/^\-/,'volume-help-pubplace-discontinued',4);
+    //mnemonic_help_text_filtered(language_dic,/^[^-]/,'volume-help-language',4);
+    //mnemonic_help_text_filtered(language_dic,/^\-/,'volume-help-language-discontinued',4);
+    //mnemonic_help_text(rights_dic,'volume-help-rights',3);
     
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
+    });
+
+    
+    $("#volume-advanced-help-dialog").dialog({
+	autoOpen: false,
+	resizable: true,
+	width: 790,
+	height: 280,
+	modal: true,
+	buttons: {
+	    "OK": function () {
+		$(this).dialog("close");
+	    }
+	},
+	hide: { effect: "fadeOut" },
+	show: { effect: "fadeIn" }
+    }).keypress(function (e) {
+	if (e.keycode == $.ui.keyCode.ENTER) {
+	    $(this).dialog("close");
+	}
+    });
+
+    $("#volume-advanced-help").click(function () {
+	$("#volume-advanced-help-dialog").dialog( "open" );
     });
 
     

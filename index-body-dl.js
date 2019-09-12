@@ -35,6 +35,7 @@ var solr_ef_async_script_urls = [
     runtime_mode+"/SolrEF-globals.js",
     runtime_mode+"/SolrEF-settings.js",
     runtime_mode+"/SolrEF-utils.js",
+    runtime_mode+"/SolrEF-dialog-utils.js",
     runtime_mode+"/SolrEF-authentication.js",
     runtime_mode+"/SolrEF-iprogressbar.js",
     runtime_mode+"/SolrEF-worksets.js",

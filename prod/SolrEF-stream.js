@@ -138,7 +138,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 
     $.ajax({
 	type: "POST",
-	url: ef_download_url, 
+	url: ef_accessapi_url, 
 	data: {
 	    'action': 'url-shortener',
 	    'value': encodeURI(ids_str)
@@ -146,7 +146,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	dataType: "text",
 	success: function(textData) {
 	    var key = textData;
-	    var url = ef_download_url + '?action=download-ids&key='+key + "&output="+output_format;;
+	    var url = ef_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
 
 	    if (solref_verbosity >= 2) {
 		console.log("SolrEF-Stream::stream_export_ef(): download url = " + url);

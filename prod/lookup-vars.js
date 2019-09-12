@@ -67,6 +67,8 @@ var volume_metadata_dic = {
     "volumeIdentifier_t": "A unique identifier for the current volume. This is the same identifier used in the HathiTrust and HathiTrust Research Center corpora."
 };
 
+var volume_metadata_help_dict = {}; // initialized in Solr-dom-ready.js
+
 /*
 volumeIdentifier: 
 schemaVersion: 

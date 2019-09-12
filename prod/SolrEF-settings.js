@@ -13,7 +13,7 @@ var solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
 var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
-var ef_download_url  = base_domain_url+"/htrc-ef-access/get";
+var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
 
 var workset_base_url    = base_domain_url+"/dcWSfetch/";
 var publish_workset_url = base_domain_url+"/fetchCollection";

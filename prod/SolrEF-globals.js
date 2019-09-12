@@ -27,3 +27,5 @@ var doc_unit  = "";
 var doc_units = "";
 
 var solref_home_pathname = null;
+
+var ef_accessapi_failed = false;
