@@ -38,10 +38,10 @@ var volume_metadata_fields = {
 };
 
 var volume_metadata_dic = {
-    "accessProfile_t": "The original source of a volume.",
+    "accessProfile_t": "A code that indicates full-text access level (open, deny, Google).",
     "bibliographicFormat_t": "The format of a volume's bibliography.",
-    "classification_ddc_t": "The DDC call number supplied by the originating library.",
-    "classification_lcc_t": "The LCC call number supplied by the originating library.",
+    "classification_ddc_t": "The Dewey Decimal Classification call number supplied by the originating library.",
+    "classification_lcc_t": "The Library of Congress Classification call number supplied by the originating library.",
     "dateCreated_t": "The time this metadata object was processed.",
     "genre_t": "The genre of the volume.",
     "handleUrl_t": "The persistent identifier for the given volume.",
@@ -55,7 +55,7 @@ var volume_metadata_dic = {
     "lastUpdateDate_t": "The date this page was last updated.",
     "lccn_t": "The Library of Congress Call Number for a volume.",
     "names_t": "The personal and corporate names associated with a volume.",
-    "oclc_t": "The array of OCLC number(s).",
+    "oclc_t": "Control number(s) assigned to each bibliographic record by the Online Computer Library Center (OCLC).",
     "pubDate_t": "The publication year.",
     "pubPlace_t": "The publication location.",
     "rightsAttributes_t": "The rights attributes for a volume.",

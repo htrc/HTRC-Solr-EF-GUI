@@ -318,7 +318,7 @@ function domready_help_dialogs()
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
-	width: 890,
+	width: 1000,
 	height: 600,
 	modal: true,
 	buttons: {
