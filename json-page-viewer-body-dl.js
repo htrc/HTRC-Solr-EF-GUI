@@ -31,6 +31,7 @@ var page_viewer_async_script_urls = [
     runtime_mode+"/lookup-vars.js",
     runtime_mode+"/SolrEF-settings.js",
     runtime_mode+"/SolrEF-utils.js",
+    runtime_mode+"/SolrEF-dialog-utils.js",
     runtime_mode+"/SolrEF-authentication.js",
     runtime_mode+"/SolrEF-iprogressbar.js",
     runtime_mode+"/SolrEF-facet-filter.js"
