@@ -887,7 +887,7 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 	    var mess = '<div>Searching the Extracted Features Dataset is still operational,'
 	    mess += ' however some supporting services such as';
 	    mess += ' the shopping-cart, exporting IDs, and downloading';
-	    mess += ' are extracted-feature JSON files are currently offline.</div><hr />';
+	    mess += ' extracted-feature JSON files are currently offline.</div><hr />';
 	    
 	    mess += '<div>Failed to access URL:</div>';
 	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div><hr />";
