@@ -49,7 +49,7 @@ function generate_volume_field_help_dic()
     var restructured_dict = {}
     $.each(volume_metadata_dic, function(field,help_text) {
 	var label = volumeFieldToLabel(field);
-	restructured_dict[label] = "("+field+")</td><td>"+help_text ;
+	restructured_dict[label] = field+"</td><td>"+help_text ;
     });
     
     return restructured_dict;	   
@@ -240,11 +240,16 @@ function activate_tab_id(tab_id)
 }
 
 
-function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols)
+function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols,opt_header_row)
 {
     var mnemonic_keys = Object.keys(dic).sort();
     
-    var mnemonic_keys_str = "<table width=\"100%\"><tr>";
+    var mnemonic_keys_str = "<table width=\"100%\">";
+    if (opt_header_row) {
+	mnemonic_keys_str += opt_header_row;
+    }
+    mnemonic_keys_str += "<tr>";
+    
     var pos = 0;
     $.each(mnemonic_keys, function(index,key) {
 	var val = dic[key]
@@ -263,9 +268,9 @@ function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols)
 }
 
 
-function mnemonic_help_text(dic,div_id,num_cols)
+function mnemonic_help_text(dic,div_id,num_cols,opt_header_row)
 {
-    mnemonic_help_text_filtered(dic,null,div_id,num_cols);
+    mnemonic_help_text_filtered(dic,null,div_id,num_cols,opt_header_row);
 }
 
 function fields_help_text(arr,div_id,num_cols)
@@ -318,7 +323,7 @@ function domready_help_dialogs()
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
 	resizable: true,
-	width: 890,
+	width: 1000,
 	height: 600,
 	modal: true,
 	buttons: {
@@ -334,30 +339,10 @@ function domready_help_dialogs()
 	}
     });
     
-/*
-    var vol_md_keys = [];
-    for (var key in volume_metadata_fields) {
-	vol_md_keys.push(key);
-    }
-    var vol_md_keys_str = vol_md_keys.sort().join(", ");
-    $('#volume-help-fields').html(vol_md_keys_str);
-*/
-    //fields_help_text(Object.keys(volume_metadata_fields),'volume-help-fields',4);
-    //mnemonic_help_text(volume_metadata_dic,'volume-help-fields',1); //numCols=1
-
-    // ****
     // Entries in following hashmap have <td>'s spliced into them to cause an extra
     // column in the table to be produced
-    mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1); //numCols=1
-    
-    
-    //mnemonic_help_text(format_dic,'volume-help-format',4);
-    //mnemonic_help_text_filtered(place_dic,/^[^-]/,'volume-help-pubplace',4);
-    //mnemonic_help_text_filtered(place_dic,/^\-/,'volume-help-pubplace-discontinued',4);
-    //mnemonic_help_text_filtered(language_dic,/^[^-]/,'volume-help-language',4);
-    //mnemonic_help_text_filtered(language_dic,/^\-/,'volume-help-language-discontinued',4);
-    //mnemonic_help_text(rights_dic,'volume-help-rights',3);
-    
+    var header_row = '<tr class="help-table-header"><td style="min-width:220px;">Name</td><td style="min-width:220px;">Field</td><td>Description</td></tr>';
+    mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
