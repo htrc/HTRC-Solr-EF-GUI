@@ -102,6 +102,10 @@ label.interaction-radio-style {
     font-style: italic;
 }
 
+tr.help-table-header {
+    font-weight: bold;
+}
+
 /*
 .ui-widget-content a {
     color: #428bca;

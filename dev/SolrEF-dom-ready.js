@@ -341,7 +341,7 @@ function domready_help_dialogs()
     
     // Entries in following hashmap have <td>'s spliced into them to cause an extra
     // column in the table to be produced
-    var header_row = '<tr class="help-table-header"><td style="min-width:220px;">Name</td><td style="min-width:220px;">Field</td><td>Description</td></tr>';
+    var header_row = '<tr class="help-table-header"><td style="min-width:220px;">Field name</td><td style="min-width:220px;">Field name in Solr syntax</td><td>Field description</td></tr>';
     mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
 
     $("#volume-help").click(function () {
