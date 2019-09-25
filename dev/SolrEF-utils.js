@@ -126,6 +126,10 @@ function getShoppingcartId()
 	    else {
 		xsid = xsid.substring(11);
 	    }
+	    if (xsid.startsWith("node")) {
+		xsid = xsid.replace(/\.node\d+$/,"");
+	    }
+	    
 	    shoppingcart_id = "session-xsid-" + xsid;
 	}
 	else {
