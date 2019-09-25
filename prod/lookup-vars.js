@@ -38,8 +38,9 @@ var volume_metadata_fields = {
 };
 
 var volume_metadata_dic = {
-    "accessProfile_t": "A code that indicates full-text access level (open, deny, Google).",
-    "bibliographicFormat_t": "The format of a volume's bibliography.",
+    //"accessProfile_t": "A code that indicates full-text access level (open, deny, Google).",
+    "accessProfile_t": "The code that indicates full-text access level (open, deny, google, page).",
+    "bibliographicFormat_t": "Bibliographic format of the work.",
     "classification_ddc_t": "The Dewey Decimal Classification call number supplied by the originating library.",
     "classification_lcc_t": "The Library of Congress Classification call number supplied by the originating library.",
     "dateCreated_t": "The time this metadata object was processed.",
