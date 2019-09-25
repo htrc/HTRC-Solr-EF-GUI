@@ -200,7 +200,15 @@ function activate_tab_id(tab_id)
 
     store_query_tab_selected = tab_id;
     if (typeof(Storage) !== "undefined") {
-	localStorage.setItem("htrc-ef-query-tab-selected",store_query_tab_selected);
+	try {
+	    localStorage.setItem("htrc-ef-query-tab-selected",store_query_tab_selected);
+	}
+	catch (err) {
+	    console.error("Issue detected trying to store value in localStorage.");
+	    //console.error("Issue detected trying to store value in localStorage.  Clearing all values!");
+	    //sessionStorage.clear();
+	    //localStorage.clear();
+	}
     }
 	    
     if (tab_id == QueryTabEnum.Advanced) {
@@ -452,9 +460,16 @@ function solref_dom_ready() {
 
     store_query_tab_selected = QueryTabEnum.Page;
     if (typeof(Storage) !== "undefined") {
-	var ls_qts = localStorage.getItem("htrc-ef-query-tab-selected");
-	if (ls_qts != null) {
-	    store_query_tab_selected = ls_qts;
+	try {
+	    var ls_qts = localStorage.getItem("htrc-ef-query-tab-selected");
+	    if (ls_qts != null) {
+		store_query_tab_selected = ls_qts;
+	    }
+	}
+	catch (err) {
+	    console.error("Issue detected in trying to load value from localStorage.  Clearing all values!");
+	    //sessionStorage.clear();
+	    localStorage.clear();
 	}
     }
         
@@ -683,15 +698,16 @@ function solref_dom_ready() {
 	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
 	$('#shoppingcart-info-id').val(shoppingcart_key);
 
-	if (window.location.hostname.match(/^solr1\./)) {
-	    // public facing machine => message that this not available
-	    $("#shoppingcart-info-id-export-as-workset").attr("disabled", "disabled")
-	    $('#shoppingcart-info-id-export-as-workset-clarification').html('&nbsp;(htrc-admin only)');
-	}
-	else {
-	    // development machine => allow export
-	    $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
-	}
+	// ****
+	//if (window.location.hostname.match(/^solr1\./)) {
+	//    // public facing machine => message that this not available
+	//    $("#shoppingcart-info-id-export-as-workset").attr("disabled", "disabled")
+	//    $('#shoppingcart-info-id-export-as-workset-clarification').html('&nbsp;(htrc-admin only)');
+	//}
+	//else {
+	//    // development machine => allow export
+	//    $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
+	//}
 	$('#shoppingcart-info-area').show();
 
 	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
