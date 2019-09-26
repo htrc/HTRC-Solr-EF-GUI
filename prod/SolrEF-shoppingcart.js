@@ -18,7 +18,7 @@ function retrieve_shoppingcart()
 	url: ef_accessapi_url, 
 	data: {
 	    'action': 'shoppingcart',
-	    'mode': 'get',
+	    'mode': 'get-silentfail',
 	    'key': shoppingcart_key
 	},
 	dataType: "text",
