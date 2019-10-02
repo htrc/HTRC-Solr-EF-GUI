@@ -53,143 +53,34 @@
 
   </head>
   <body>
-        <nav class="navbar navbar-default navbar-fixed-top navbar-htrc" role="navigation">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="https://analytics.hathitrust.org/">
-		      <img src="assets/hathi_small.png" style="padding-right : 5 px ; margin-top : - 1 px ;" alt=" " height="32" width="36">
-                        HTRC Portal
-                    </a>
-                </div>
-
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li><a href="https://analytics.hathitrust.org/">Home</a></li>
-                        
-
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                Worksets <b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                
-                                    <li><a href="#" onclick="loggingRequiredWarning('/listuserworksets')">View my worksets</a></li>
-                                
-                                <li class="divider"></li>
-                                
-                                    <li><a href="#" onclick="loggingRequiredWarning('/listallworksets')">View all worksets</a></li>
-                                
-                                <li class="divider"></li>
-                                
-                                    <li><a href="#" onclick="loggingRequiredWarning('/uploadworkset')">Upload workset</a></li>
-                                
-                                <li class="divider"></li>
-                                <li>
-                                    <a href="#" onclick="blacklightLoggingWarning ( '      https://analytics.hathitrust.org/blacklight ')">
-                                        Create workset</a>
-                                </li>
-                            </ul>
-                        </li>
-                        
-                            <li><a href="#" onclick="loggingRequiredWarning('/listalgorithms')">Algorithms</a></li>
-                        
-                        
-                            <li><a href="#" onclick="loggingRequiredWarning('/listjobs')">Results</a></li>
-                        
-                        
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    Capsule<b class="caret"></b></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+Data+Capsule">
-                                        Documentation</a>
-                                    </li>
-                                    <li class="divider"></li>
-                                    
-                                        <li><a href="#" onclick="loggingRequiredWarning('/listvms')">
-                                            Show Capsules</a></li>
-                                    
-                                    <li class="divider"></li>
-                                    
-                                        <li><a href="#" onclick="loggingRequiredWarning('/createvms')">
-                                            Create Capsule</a></li>
-                                    
-                                </ul>
-                            </li>
-                        
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                Data<b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="https://analytics.hathitrust.org/features">
-                                    Extracted Features Dataset</a>
-                                </li>
-                                <li><a href="https://analytics.hathitrust.org/genre">
-                                    Word Frequencies in English-Language Literature, 1700-1922</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                Help<b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="https://wiki.htrc.illinois.edu/display/COM/HTRC+User+Getting+Started+FAQ">
-                                    Knowledge Base</a>
-                                </li>
-                                <li class="divider"></li>
-                                <li><a href="mailto:htrc-help@hathitrust.org?Subject=Contact">
-                                    Contact</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a href="https://analytics.hathitrust.org/about">About</a>
-                    </li></ul>
-                    
-                        <ul class="nav pull-right navbar-nav" id="navbar-login">
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    Sign In<b class="caret"></b></a>
-                                <ul class="dropdown-menu">
-                                  <li><a onclick="solr_ef_login()">Sign In</a></li>
-<!--				  
-				  <li><a href="https://analytics.hathitrust.org/login">Sign In</a></li>
--->
-                                  <li class="divider"></li>
-                                  <li><a href="https://analytics.hathitrust.org/passwordresetmail">
-                                        Forgot Password?</a></li>
-                                </ul>
-                            </li>
-
-                            <li><a href="https://analytics.hathitrust.org/signup"><span>Sign Up</span></a></li>
-                        </ul>
-
-			<ul class="nav pull-right" id="navbar-logout" style="display: none">
-			  <li class="dropdown">
-			    <a href="#" class="dropdown-toggle loggedin-user" data-toggle="dropdown" style="color : #FF9933 ;" id="navbar-username"><b class="caret"></b></a>
-			    <ul class="dropdown-menu">
-			      <li><a onclick="solr_ef_logout()">Logout</a></li>
-			      <!--
-				  <li><a href="/logout">Logout</a></li>
-				  -->
-			    </ul>
-			  </li>
-			</ul>
-
-                    
-                </div>
-                    <!--/.nav-collapse -->
-            </div>
-        </nav>
-        
         
 
     <div class="container container-panel" style="padding-top: 15px; padding-bottom: 15px;">
 
+      
+      <div>	
+	<h2 id="solr-ef-title">
+
+	  <a class="navbar-brand" href="https://analytics.hathitrust.org/">
+	    <img src="assets/HTRC_AlignLogo_Vctr_SansSerif.png" alt="Goto the HTRC Portal" style="vertical-align:top; height: 70px; width: auto;" />
+	  </a>
+	  <div style="display: inline-block;">
+	    <!--
+	    <i>HTRC Workset Builder 2.0 (Beta)</i> <br/>
+	    -->
+	    <i>Workset Builder 2.0</i> <br/>
+	    Extracted Feature Part-of-Speech Page Viewer
+	  
+	    <span id="solr-col-name" style="font-size: 60%;"></span>
+	  </div>
+	  <img src="assets/icons/htrc-beta-sticker104.png" alt="beta" height="64" width="104" style="vertical-align:top; float: right;"/>
+
+	</h2> 
+      </div>
+      
+
+
+      
       <div id="htrc-alert-dialog" title="Alert">
 	<p id="htrc-alert-body">
 	</p>
@@ -200,27 +91,6 @@
 	</p>
       </div>
 
-      
-      <div class="row">
-        <div style="float:left;">
-          <a href="index-dev.html">
-	    <img class="img-responsive" src="assets/hathi_medium.png" alt=" " width="100"
-		 title="Return to the Extract Features Solr Search Page">
-	  </a>
-        </div>
-        <div style="margin-left: 20px; float: left; width: 88%">
-          <h1 style="font-weight:bold; font-size: 22px; margin-top:4px;">HTRC Extracted Feature Part-of-Speech Page Viewer</h1>
-	  <h2 style="font-size: 20px" id="ht-title"></h2>
-	  <div>
-	    <div id="show-hide-metadata" class="show-hide-label">
-	      Show metadata <span class="ui-icon ui-icon-triangle-1-e">
-	    </div>
-	    </span>
-	    <div id="show-hide-metadata-block" style="display:none;"></div>
-	  </div>      
-
-        </div>
-      </div>
 
       <hr />
       <div class="row" style="padding: 16px; font-size : 15px; line-height : 22px; position: relative">
