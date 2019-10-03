@@ -48,7 +48,8 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 
 	    for (var i=0; i<vol_ids.length; i++) {
 		var vol_id = vol_ids[i];
-		shoppingcart_q_terms.push('id:'+vol_id);
+		var escaped_vol_id = vol_id.replace(/:/g,"\\:");
+		shoppingcart_q_terms.push('id:'+escaped_vol_id);
 	    }
 	    var shoppingcart_q = shoppingcart_q_terms.join(" OR ");
 	    
