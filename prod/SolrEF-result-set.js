@@ -500,7 +500,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    // The very beginning of the search results
 	    iprogressbar.cancel();
 
-	    retrieve_shoppingcart();
+	    retrieve_shoppingcart(0);
 
 	    $('#export-by').hide(); // hide until volume count is in
 
