@@ -15,6 +15,26 @@ var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
 var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
 
+// Although the shopping-cart is mananaged through the HTRC Access API
+// we give it its own named variable to make it easier to manage the
+// special behaviour on solr1 and solr2 that are kept in lock-step
+// over the details they store about shopping baskets
+var ef_shoppingcart_url = [ ef_accessapi_url ];
+var shoppingcart_primary_machine = null;
+// Some specialized code for just 'solr1' and 'solr2'
+if (window.location.hostname == "solr1.htrc.illinois.edu") {
+    var alt_base_domain_url= window.location.protocol + "//" + "solr2.htrc.illinois.edu";
+    var alt_ef_accessapi_url  = alt_base_domain_url+"/htrc-ef-access/get";
+    ef_shoppingcart_url.push(alt_ef_accessapi_url);
+    shoppingcart_primary_machine = "solr1";
+}
+else if (window.location.hostname == "solr2.htrc.illinois.edu") {
+    var alt_base_domain_url=window.location.protocol + "//" + "solr1.htrc.illinois.edu";
+    var alt_ef_accessapi_url  = alt_base_domain_url+"/htrc-ef-access/get";
+    ef_shoppingcart_url.push(alt_ef_accessapi_url);
+    shoppingcart_primary_machine = "solr2";
+}
+    
 var workset_base_url    = base_domain_url+"/dcWSfetch/";
 var publish_workset_url = base_domain_url+"/fetchCollection";
 

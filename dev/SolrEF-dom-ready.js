@@ -684,39 +684,7 @@ function solref_dom_ready() {
     if (shoppingcart_q != null) {
 	store_query_display_mode = QueryDisplayModeEnum.ShoppingCart;
 
-	// hide query input area
-	$('#droppable-targets').hide();
-	$('#select-for-shoppingcart').hide();
-	$('#sr-add-delete-wrapper').hide();
-	$('#tabs-search').hide();
-	$('#search-explain').hide();
-
-	$('#solr-ef-title').hide();
-	
-	// Show shoppingcartId
-	var shoppingcart_key = getShoppingcartId();
-	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
-	$('#shoppingcart-info-id').val(shoppingcart_key);
-
-	// ****
-	//if (window.location.hostname.match(/^solr1\./)) {
-	//    // public facing machine => message that this not available
-	//    $("#shoppingcart-info-id-export-as-workset").attr("disabled", "disabled")
-	//    $('#shoppingcart-info-id-export-as-workset-clarification').html('&nbsp;(htrc-admin only)');
-	//}
-	//else {
-	//    // development machine => allow export
-	//    $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
-	//}
-	$('#shoppingcart-info-area').show();
-
-	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
-	$("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
-
-	console.log("*** changing export header label");
-	$('#export-header').html("Export Selection Cart");
-	
-	load_solr_q(shoppingcart_q);
+	trigger_shoppingcart_q_search(shoppingcart_q);
     }
     else {
 	store_query_display_mode = QueryDisplayModeEnum.GeneralQuery;
@@ -749,6 +717,7 @@ function solref_dom_ready() {
 	    // see if there is a shoppingcart-key-q
 	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
 	    if (shoppingcart_key_q != null) {
+		store_query_display_mode = QueryDisplayModeEnum.ShoppingCart;
 		trigger_shoppingcart_key_search(shoppingcart_key_q);
 	    }
 	}
@@ -1003,7 +972,7 @@ function recompute_shoppingcart_on_history_back()
 	if ( historyTraversal ) {
 	    // Handle page restore.
 	    //window.location.reload();
-	    retrieve_shoppingcart()
+	    retrieve_shoppingcart(0)
 	}
     });
 }

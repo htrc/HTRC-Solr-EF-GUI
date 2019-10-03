@@ -35,14 +35,28 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 	type: "POST",
 	url: ef_accessapi_url, 
 	data: {
-	    'action': 'key-value-storage',
-	    'key': encodeURI(shoppingcart_key_q)
+	    //'action': 'key-value-storage', // ****
+	    'action': 'shoppingcart',
+	    'key': encodeURI(shoppingcart_key_q),
+	    'mode': 'get'
 	},
 	dataType: "text",
 	success: function(textData) {
-	    var text_q = textData.trim();
-	    select_optimal_query_tab(text_q);
-	    $('#search-submit').click();			
+	    var cart_json = JSON.parse(textData);
+	    var shoppingcart_q_terms = [];
+	    var vol_ids = cart_json.cart.vol_ids_;
+
+	    for (var i=0; i<vol_ids.length; i++) {
+		var vol_id = vol_ids[i];
+		shoppingcart_q_terms.push('id:'+vol_id);
+	    }
+	    var shoppingcart_q = shoppingcart_q_terms.join(" OR ");
+	    
+	    trigger_shoppingcart_q_search(shoppingcart_q);
+
+	    // ****
+	    //select_optimal_query_tab(text_q);
+	    //$('#search-submit').click();			
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    var mess = "<b>Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "' when accessing the URL:";
@@ -50,6 +64,33 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
 	}
     });
+}
+
+function trigger_shoppingcart_q_search(shoppingcart_q)
+{
+    	// hide query input area
+	$('#droppable-targets').hide();
+	$('#select-for-shoppingcart').hide();
+	$('#sr-add-delete-wrapper').hide();
+	$('#tabs-search').hide();
+	$('#search-explain').hide();
+
+	$('#solr-ef-title').hide();
+	
+	// Show shoppingcartId
+	var shoppingcart_key = getShoppingcartId();
+	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
+	$('#shoppingcart-info-id').val(shoppingcart_key);
+
+	$('#shoppingcart-info-area').show();
+
+	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
+	$("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
+
+	console.log("*** changing export header label");
+	$('#export-header').html("Export Selection Cart");
+	
+	load_solr_q(shoppingcart_q);
 }
 
 function ajax_solr_text_search(newSearch,newResultPage)
