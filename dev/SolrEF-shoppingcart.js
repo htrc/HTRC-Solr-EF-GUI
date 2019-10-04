@@ -28,8 +28,9 @@ function retrieve_shoppingcart(url_pos)
 	    console.log("Retrieved shopping cart '" + shoppingcart_key + "': " + textData);
 	    if (textData != "") {
 		var cart = JSON.parse(textData);
-		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ******
-
+		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ****** wrap up in ADT?
+		store_shoppingcart_ids.map(function(id){store_shoppingcart_ids_hash[id] = id});
+		
 		if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
 		    mark_shoppingcart_items_in_resultset();
 		}
@@ -620,6 +621,7 @@ function do_shoppingcart_drop_action()
 	    var $this = $(this);
 	    
 	    var item_id = $this.find('span[name]').attr("name");
+	    
 	    if (!store_shoppingcart_ids_hash.hasOwnProperty(item_id)) {
 		store_shoppingcart_ids.push(item_id);
 		store_shoppingcart_ids_hash[item_id] = item_id;
