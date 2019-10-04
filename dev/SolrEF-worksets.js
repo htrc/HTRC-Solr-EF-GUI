@@ -241,6 +241,7 @@ function workset_enrich_results(itemURLs)
 {
     if (runtime_mode != "dev") {
 	console.log("Not in Dev mode: Supressing workset results");
+	return;
     }
     
     // prefix dcterms: <http://purl.org/dc/terms/>
