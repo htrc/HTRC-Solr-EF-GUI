@@ -48,7 +48,8 @@ function add_titles_ht_DEPRECATED(json_data)
 		var itemURL = item_val.itemURL;
 		itemURL = itemURL.replace(/^https:/, "http:");
 		
-		var ws_span = '<span class="workset" style="display: none;"><br />[Workset: <span name="' + itemURL + '"></span>]</span>';
+		var ws_span = '<span class="workset" style="display: none;"><br />';
+		ws_span += '[Workset: <span name="' + itemURL + '"></span>]</span>';
 		$("[name='" + htid + "']").each(function () {
 		    $(this).append(ws_span)
 		});
