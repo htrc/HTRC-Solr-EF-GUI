@@ -263,7 +263,7 @@ function mnemonic_help_text_filtered(dic,filter_re,div_id,num_cols,opt_header_ro
 	var val = dic[key]
 	// if filter_re is null, always want to append key:label entry
 	if ((filter_re == null) || (key.match(filter_re))) {
-	    mnemonic_keys_str += "<td><i><nobr>"+key + "</nobr></i>:</td><td> " + val + "</td>";
+	    mnemonic_keys_str += "<td><i><nobr>"+key + "</nobr></i></td><td> " + val + "</td>";
 	    pos++;
 	    if ((pos % num_cols) == 0) {
 		mnemonic_keys_str += '</tr><tr>';

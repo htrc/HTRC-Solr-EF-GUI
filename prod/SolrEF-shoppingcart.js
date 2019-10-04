@@ -485,7 +485,7 @@ function do_delete_drop_action()
 	    else {
 		delete_list.push($close_div);
 		$close_div.trigger("click");		
-		//delete_item_if_shoppingcart(item_id,$close_div);
+		//delete_item_if_shoppingcart(item_id,$close_div); // **** looks like this can be removed now
 	    }	    
 	});
     }
