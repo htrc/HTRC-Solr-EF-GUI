@@ -157,6 +157,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 				store_search_args.rows=ps;
 				//store_search_args.start=start; // **** jump-start
 				num_found=0;
+				$('.search-in-progress').css("cursor","wait");
 				$('#page-bar').html('');
 				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 			    },
