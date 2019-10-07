@@ -196,7 +196,9 @@ function explain_add2any_dom(store_value)
 
 	    //var email_mess = "Generate the query directly in JSON format:\n  " + retrieve_store_search_url;
 	    var email_mess = retrieve_store_search_url;
-	    
+
+	    // ****
+	    /*
 	    //console.log("*** store_search_url = " + store_search_url);
 	    // //var escaped_store_search_url = store_search_url.replace(/\"/g,'&amp;quot;');
 	    // var escaped_store_search_url = store_search_url.replace(/\"/g,'&quot;').replace(/ /g,'+');
@@ -213,7 +215,7 @@ function explain_add2any_dom(store_value)
 	    a2a_html += '  <div class="a2a_kit a2a_kit_size_32 a2a_default_style"' + data_a2a + '>\n';
 	    a2a_html += '    <a class="a2a_button_email"></a>\n';
 	    a2a_html += '    <a class="a2a_button_facebook"></a>\n';
-	    a2a_html += '    <a class="a2a_button_google_plus"></a>\n';
+	    //a2a_html += '    <a class="a2a_button_google_plus"></a>\n';
 	    //a2a_html += '  <a class="a2a_button_twitter"></a>\n';
 	    a2a_html += '    <a class="a2a_dd" href="https://www.addtoany.com/share"></a>\n';
 	    //a2a_html += '  <a class="a2a_dd" href="https://www.addtoany.com/share_save"></a>\n';
@@ -230,7 +232,7 @@ function explain_add2any_dom(store_value)
 	    a2a_html += '<script type="text/javascript" async="" src="//static.addtoany.com/menu/page.js"></script>\n';
 
 	    $('#add2any-shortener').html(a2a_html);
-
+	    */
 	    
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
