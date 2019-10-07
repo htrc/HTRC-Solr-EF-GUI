@@ -718,6 +718,7 @@ function solref_dom_ready() {
 	    var shoppingcart_key_q = getURLParameter("shoppingcart-key-q");
 	    if (shoppingcart_key_q != null) {
 		store_query_display_mode = QueryDisplayModeEnum.ShoppingCart;
+		setShoppingcartId(shoppingcart_key_q);
 		trigger_shoppingcart_key_search(shoppingcart_key_q);
 	    }
 	}
