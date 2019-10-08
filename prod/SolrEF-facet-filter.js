@@ -418,12 +418,15 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 		
 		htrc_confirm(message,
 			     function() {
-				 $(this).dialog("close");
+				 //$(this).dialog("close"); // ****
+				 $('#htrc-alert-dialog').dialog("close");
 				 facet_filter.applyMultiFilter(facet_key);
 			     },
+			     null, // trigger default, which is to reset alert message and close
+			     /*
 			     function() {
-				 $(this).dialog("close");
-			     }
+				 //$(this).dialog("close"); // ****
+			     }*/
 			    );
 	    }
 	    else {

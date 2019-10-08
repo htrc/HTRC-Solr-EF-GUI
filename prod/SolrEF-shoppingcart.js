@@ -726,23 +726,28 @@ function make_selectable_and_draggable($search_results)
 
 function open_shoppingcart()
 {
-    // (id:inu.32000009471279)+OR+(id:mdp.39015001149007)
+    // shoppingcart-q takes the form: (id:inu.32000009471279)+OR+(id:mdp.39015001149007)
 
     if (store_shoppingcart_ids.length==0) {
 	console.log("Shopping-cart is empty. Nothing to view.");
 	return
     }
-
-    // ****
-    //var ids_escaped = store_shoppingcart_ids.map(escape_solr_query).map(function(id){return "(id:"+id+")"});	
-    //var ids_or_str = ids_escaped.join(" OR ");	
-    //var load_shoppingcart_url = window.location.pathname + "?shoppingcart-q=" + ids_or_str;
     
     var shoppingcart_key = getShoppingcartId();
     var load_shoppingcart_url = window.location.pathname + "?shoppingcart-key-q=" + shoppingcart_key;    
 
     window.location.href = load_shoppingcart_url;
-    //var win = window.open(load_shoppingcart_url);
+
+    // The following used to open the shoppingcart in a separate window
+    // however, depending on how the user interactc with the shoppingcart page
+    // this meant the original result page couuld become out-of-date
+    // in terms of the number of items shown in the cart displayed.
+    //
+    // Chaning the shopping-cart to open in the same window and using the
+    // JS history API allows for a smooth transition that ensures the
+    // the number of items in the cart shown on the search results page is
+    // kept up to date.
+    
 /*    
     var win = window.open(load_shoppingcart_url, '_blank');
     if (win) {
@@ -825,19 +830,21 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 		delete_items_from_shoppingcart(next_url_pos,del_shoppingcart_ids)
 	    }
 	    else {
-		console.log("Deleted Shopping:" + textData);
+		//console.log("Deleted Shopping:" + textData); // ****
 		console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
 		
 		var empty_shoppingcart_search = window.location.search;
-		empty_shoppingcart_search = empty_shoppingcart_search.replace(/shoppingcart-q=.*?(&|$)/,"shoppingcart-q=$1");
-		var empty_shoppingcart_url = window.location.pathname + empty_shoppingcart_search + window.location.hash;
-		window.history.replaceState(null,"Empty Shopping Cart",empty_shoppingcart_url);
-		// **** consider wrapping up the following two lines in a more ADT-flavours method
+		// Support the legacy way of specifying the content of the shoppingcart with 'shoppingcart-q'
+		if (empty_shoppingcart_search.includes("shoppingcart-q=")) {
+		    empty_shoppingcart_search = empty_shoppingcart_search.replace(/shoppingcart-q=.*?(&|$)/,"shoppingcart-q=$1");
+		    var empty_shoppingcart_url = window.location.pathname + empty_shoppingcart_search + window.location.hash;
+		    window.history.replaceState(null,"Empty Shopping Cart",empty_shoppingcart_url);
+		}
+		
+		// **** consider wrapping up the following two lines in a more ADT-flavoured method
 		store_shoppingcart_ids = [];
 		store_shoppingcart_ids_hash = {};
-		load_solr_q(""); // trigger display of empty shopping cart page
-	    
-		//setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want // **** no longer want
+		load_solr_q(""); // trigger display of empty shopping cart page	    
 	    }
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
@@ -868,57 +875,9 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 
 function empty_shoppingcart()
 {
-    var shoppingcart_key = getShoppingcartId();
-    //console.log("*** Shopping cart key = " + shoppingcart_key);
-
-    //var url = ef_shoppingcart_url[url_pos];
-    
-    var shoppingcart_q = getURLParameter("shoppingcart-q");
-    var raw_fielded_ids = shoppingcart_q.split("%20OR%20");
-    var del_shoppingcart_ids = raw_fielded_ids.map(function(fielded_id){return fielded_id.match(/\(id:(.*)\)/)});
+    var del_shoppingcart_ids = store_shoppingcart_ids.slice(); // effectively an array copy
 
     delete_items_from_shoppingcart(0,del_shoppingcart_ids);
-    /*
-    $.ajax({
-	type: "POST",
-	url: ef_accessapi_url, 
-	data: {
-	    'action': 'shoppingcart',
-	    'mode': 'del',
-	    'key': shoppingcart_key
-	},
-	dataType: "text",
-	success: function(textData) {
-	    console.log("Deleting Shopping:" + textData);
-	    console.log("Shopping cart: " + del_shoppingcart_ids.length + " item(s) successfully deleted");
-
-	    var empty_shoppingcart_search = window.location.search;
-	    empty_shoppingcart_search = empty_shoppingcart_search.replace(/shoppingcart-q=.*?(&|$)/,"shoppingcart-q=$1");
-	    var empty_shoppingcart_url = window.location.pathname + empty_shoppingcart_search + window.location.hash;
-	    window.history.replaceState(null,"Empty Shopping Cart",empty_shoppingcart_url);
-	    // **** consider wrapping up the following two lines in a more ADT-flavours method
-	    store_shoppingcart_ids = [];
-	    store_shoppingcart_ids_hash = {};
-	    load_solr_q(""); // trigger display of empty shopping cart page
-	    
-	    //setURLParameter("shoppingcart-q",""); // causes page reload, which is what we want // **** no longer want
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-	    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		ef_accessapi_failed = true;
-
-		var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
-		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		ajax_message_error(jqXHR, textStatus, errorThrown);
-	    }
-	    else {
-		ajax_message_error_console("Failed to delete all items",jqXHR, textStatus, errorThrown);
-	    }
-	}
-    });
-    */
-    
     update_shoppingcart_count();
     
     selectable_and_draggable_hard_reset();

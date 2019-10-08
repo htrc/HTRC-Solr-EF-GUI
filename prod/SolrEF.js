@@ -79,8 +79,9 @@ function trigger_shoppingcart_q_search(shoppingcart_q)
 	$('#solr-ef-title').hide();
 	
 	// Show shoppingcartId
-	var shoppingcart_key = getShoppingcartId();
-	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length);
+        var shoppingcart_key = getShoppingcartId();
+        // **** -2 fudge factor in following line helps Chrome keep export button on same line as textbox
+	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length-2); 
 	$('#shoppingcart-info-id').val(shoppingcart_key);
 
 	$('#shoppingcart-info-area').show();

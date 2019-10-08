@@ -93,9 +93,17 @@ function uuidv4()
   });
 }
 
+var store_shoppingcart_id = null; // **** // move to be with other store_.* vars, or wrap in with ShoppingCart API idea
+
 function getShoppingcartId()
 {
-    // First look to see if there is a logged in username that can be used
+    if (store_shoppingcart_id != null) {
+	return store_shoppingcart_id;
+    }
+
+    // Shoppingcart ID has not been explicitly set, or already
+    // initialized through an earlier call to getShoppingcartId()
+    // => First look to see if there is a logged in username that can be used
     var shoppingcart_id = null;
 
     if (typeof(Storage) !== "undefined") {
@@ -144,9 +152,27 @@ function getShoppingcartId()
     if (typeof(Storage) !== "undefined") {	
 	sessionStorage.setItem("shoppingcart-id",shoppingcart_id);
     }
+
+    store_shoppingcart_id = shoppingcart_id;
     
     return shoppingcart_id;
 }
+
+
+function setShoppingcartId(shoppingcart_id)
+{
+    if (typeof(Storage) !== "undefined") {
+
+	sessionStorage.setItem("shoppingcart-id",shoppingcart_id);
+    }
+    else {
+	console.log("Unable to use browser's sessionStorage API");
+	console.log("Shopping-cart ID '"+shopingcart_id+"' will be held in memory");	
+    }
+
+    store_shoppingcart_id = shoppingcart_id;
+}
+
 
 
 function getSelectedText()

@@ -323,13 +323,14 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	var checkbox_input = '<div class="sr-input-item checkbox-style'+opt_checkbox_style+'" style="position: absolute; left: -18px;">';
 	checkbox_input += '<input type="checkbox" class="sr-input-item-pending" name="checkbox-'+seqs_outer_div_id+'" id="checkbox-' + seqs_outer_div_id+'" />';
 	checkbox_input += '</div>';
-
 	
 	if (id_pages_len > 1) {
 	    
 	    if (pi == 0) {
 		html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-		html_item += checkbox_input;
+		if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		    html_item += checkbox_input;
+		}
 
 		html_item += delete_div;
 		
@@ -391,7 +392,10 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	}
 	else {
 	    html_item += '<div id="'+seqs_outer_div_id+'" ' + css_class + '>';
-	    html_item += checkbox_input;
+	    if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {		
+		html_item += checkbox_input;
+	    }
+	    
 	    html_item += delete_div;
 	    
 	    html_item += '<span style="font-style: italic;" name="' + id + '">';

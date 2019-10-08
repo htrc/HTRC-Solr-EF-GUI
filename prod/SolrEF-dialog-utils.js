@@ -29,6 +29,12 @@ function htrc_alert(message)
 
 function htrc_confirm(message,confirm_callback,cancel_callback)
 {
+    if (!cancel_callback) {
+    	cancel_callback = function() {
+	    $('#htrc-alert-dialog').dialog("close");
+	};
+    }
+
     $('#htrc-alert-body').html(message)
     
     $("#htrc-alert-dialog").dialog({
