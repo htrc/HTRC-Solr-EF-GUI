@@ -921,12 +921,15 @@ function solref_dom_ready() {
 		
 		htrc_confirm(message,
 			     function() {
-				 $(this).dialog("close");
+				 //$(this).dialog("close"); // ****
+				 $('#htrc-alert-dialog').dialog("close");
 				 facet_filter.applySingleFilter(clicked_elem,facet_key,term);
 			     },
+			     null, // trigger default, which is to reset alert message and close
+			     /*
 			     function() {
-				 $(this).dialog("close");
-			     }
+				 $(this).dialog("close"); // ****
+			     }*/
 			    );
 	    }
 	    else {
