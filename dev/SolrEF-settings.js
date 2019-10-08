@@ -18,7 +18,7 @@ var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
 // Although the shopping-cart is mananaged through the HTRC Access API
 // we give it its own named variable to make it easier to manage the
 // special behaviour on solr1 and solr2 that are kept in lock-step
-// over the details they store about shopping baskets
+// over the details they store about shopping-carts
 var ef_shoppingcart_url = [ ef_accessapi_url ];
 var shoppingcart_primary_machine = null;
 // Some specialized code for just 'solr1' and 'solr2'
