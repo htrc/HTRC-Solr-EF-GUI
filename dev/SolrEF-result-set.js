@@ -673,10 +673,17 @@ function show_results(jsonData,newSearch,newResultPage)
 	    show_hide_solr_q();
 	    // Clear out any export-item download links generated previously
 	    $('a.export-item').attr('href',null);
-	    $('#search-showing').html("<p>No pages matched your query</p>");
+	    if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+		$('#search-showing').html("<p>There are no items in your shopping-cart</p>");
+		$('#shoppingcart-info-id-export-as-workset').attr("disabled", true);
+		$('#shoppingcart-info-empty').attr("disabled", true);
+	    }
+	    else {
+		$('#search-showing').html("<p>No pages matched your query</p>");
+	    }
 	    
-	    //$('#next-prev').hide();
-		//$('#page-bar').hide();
+	    //$('#next-prev').hide(); // ****
+	    //$('#page-bar').hide();
 	}		
 
 	// Now explain_html has been added into page, figure out the shortened URL that
