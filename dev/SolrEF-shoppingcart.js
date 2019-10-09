@@ -724,6 +724,21 @@ function make_selectable_and_draggable($search_results)
     }
 }
 
+
+function back_to_search_navigation()
+{
+    window.history.back();
+    return false;
+}
+
+/* no longer used
+function goto_search_navigation()
+{
+    window.location.search = "";
+    return false;
+}
+*/
+
 function open_shoppingcart()
 {
     // shoppingcart-q takes the form: (id:inu.32000009471279)+OR+(id:mdp.39015001149007)
