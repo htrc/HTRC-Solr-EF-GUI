@@ -873,7 +873,7 @@ function solref_dom_ready() {
 	if (prev_url_is_search) {
 	    // There is a previous link, and it is to a search page within solr-ef
 	    $('#back-to-search-sidebar-href').attr("href",document.referrer);
-	    $('#back-to-search-sidebar').width("120px");
+	    $('#back-to-search-sidebar').width("140px");
 	    $('#back-to-search-sidebar').show();
 	}
 	else {
@@ -881,7 +881,7 @@ function solref_dom_ready() {
 	    // => offer a link to start a solr-ef search
 	    var new_search_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
 	    $('#goto-search-sidebar-href').attr("href",new_search_url);
-	    $('#goto-search-sidebar').width("120px");
+	    $('#goto-search-sidebar').width("140px");
 	    $('#goto-search-sidebar').show();
 	}
     }

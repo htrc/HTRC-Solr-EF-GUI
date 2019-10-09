@@ -555,10 +555,16 @@ function show_results(jsonData,newSearch,newResultPage)
 		.append(num_found.toLocaleString());
 
 	    var doc_units_label = (num_found==1) ? doc_unit : doc_units;
-	    $('#search-results-total-span')
-		.html("Results: ")
-		.append($num_found_span)
-		.append(doc_units_label + "matched");
+
+	    if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		// Display number of matches when *not* the shopping-cart
+		// No need to show this when in ShoppingCart view as the number
+		// of items is already displayed under the cart icon
+		$('#search-results-total-span')
+		    .html("Results: ")
+		    .append($num_found_span)
+		    .append(doc_units_label + "matched");
+	    }
 
 	    //if (search_start == 0) { // no longer true with jump start URLS 
 	    if (newResultPage) {
@@ -636,9 +642,14 @@ function show_results(jsonData,newSearch,newResultPage)
 	    
 	    var showing_matches = (to >= from) ? '<div id="sm-from-to">' : '<div id="sm-from-to" style="display:none">'
 
-	    showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
-		? "Showing page-level matches: "
-		: "Showing volume matches:";
+	    if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+		showing_matches += "Showing cart items: ";
+	    }
+	    else {
+		showing_matches += (facet_filter.getFacetLevel() == FacetLevelEnum.Page)
+		    ? "Showing page-level matches: "
+		    : "Showing volume matches:";
+	    }
 	    
 	    showing_matches += '<span id="sm-from">' + from.toLocaleString() + '</span>';
 	    showing_matches += "-";
