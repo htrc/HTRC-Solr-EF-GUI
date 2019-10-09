@@ -69,30 +69,31 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 
 function trigger_shoppingcart_q_search(shoppingcart_q)
 {
-    	// hide query input area
-	$('#droppable-targets').hide();
-	$('#select-for-shoppingcart').hide();
-	$('#sr-add-delete-wrapper').hide();
-	$('#tabs-search').hide();
-	$('#search-explain').hide();
+    // hide query input area
+    $('#droppable-targets').hide();
+    $('#select-for-shoppingcart').hide();
+    $('#sr-add-delete-wrapper').hide();
+    $('#tabs-search').hide();
+    $('#search-explain').hide();
 
-	$('#solr-ef-title').hide();
-	
-	// Show shoppingcartId
-        var shoppingcart_key = getShoppingcartId();
-        // **** -2 fudge factor in following line helps Chrome keep export button on same line as textbox
-	$('#shoppingcart-info-id').attr("size",shoppingcart_key.length-2); 
-	$('#shoppingcart-info-id').val(shoppingcart_key);
-
-	$('#shoppingcart-info-area').show();
-
-	$("#shoppingcart-info-empty").on('click',empty_shoppingcart);
-	$("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
-
-	console.log("*** changing export header label");
-	$('#export-header').html("Export Selection Cart");
-	
-	load_solr_q(shoppingcart_q);
+    $('#subtitle').html("Shopping Cart")
+    $('#solr-ef-description').hide();
+    
+    // Show shoppingcartId
+    var shoppingcart_key = getShoppingcartId();
+    // **** -2 fudge factor in following line helps Chrome keep export button on same line as textbox
+    $('#shoppingcart-info-id').attr("size",shoppingcart_key.length-2); 
+    $('#shoppingcart-info-id').val(shoppingcart_key);
+    
+    $('#shoppingcart-info-area').show();
+    
+    $("#shoppingcart-info-empty").on('click',empty_shoppingcart);
+    $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
+    
+    console.log("*** changing export header label");
+    $('#export-header').html("Export Selection Cart");
+    
+    load_solr_q(shoppingcart_q);
 }
 
 function ajax_solr_text_search(newSearch,newResultPage)

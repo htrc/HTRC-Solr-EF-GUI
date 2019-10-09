@@ -419,42 +419,6 @@ function delete_item_if_shoppingcart(item_id,$close_div)
 {
     if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
 	delete_item_from_shoppingcart(0,item_id)
-	/*
-	// Delete this id
-	var shoppingcart_key = getShoppingcartId();
-	
-	$.ajax({
-	    type: "POST",
-	    url: ef_accessapi_url, 
-	    data: {
-		'action': 'shoppingcart',
-		'mode': 'del-ids',
-		'key': shoppingcart_key,
-		'ids': item_id
-	    },
-	    dataType: "text",
-	    success: function(textData) {
-		console.log("Deleted Shopping item id:" + item_id);
-
-		// **** consider wrapping up the following two lines in a more ADT-flavours method
-		store_shoppingcart_ids=arrayRemoveItem(store_shoppingcart_ids,item_id);
-		delete store_shoppingcart_ids_hash[item_id];
-		update_shoppingcart_count();
-	    },
-	    error: function(jqXHR, textStatus, errorThrown) {
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapi_failed = true;
-		    var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
-		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
-		}
-		else {
-		    ajax_message_error_console("Failed to delete item",jqXHR,textStatus,errorThrown);
-		}
-	    }
-	});		    
-*/
     }
 }
     
@@ -645,40 +609,7 @@ function do_shoppingcart_drop_action()
 
 
     if (add_shoppingcart_ids.length>0) {
-	add_items_to_shoppingcart(0,add_shoppingcart_ids);
-	/*
-	// Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
-	$.ajax({
-	    type: "POST",
-	    url: ef_accessapi_url, 
-	    data: {
-		'action': 'shoppingcart',
-		'mode': 'add-ids',
-		'key': shoppingcart_key,
-		'ids': add_shoppingcart_ids.join(",")
-	    },
-	    dataType: "text",
-	    success: function(textData) {
-		console.log("Saving Shopping:" + textData);
-		console.log("Shopping cart: " + add_shoppingcart_ids.length + " item(s) successfully added");
-	    },
-	    error: function(jqXHR, textStatus, errorThrown) {
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapi_failed = true;
-
-		    var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
-		    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
-		}
-		else {
-		    ajax_message_error_console("Failed to add item",jqXHR,textStatus,errorThrown);
-		}
-		
-	    }
-	});
-	*/
-	
+	add_items_to_shoppingcart(0,add_shoppingcart_ids);	
 	update_shoppingcart_count();
     }
     
@@ -723,6 +654,21 @@ function make_selectable_and_draggable($search_results)
 	make_unselectable();
     }
 }
+
+
+function back_to_search_navigation()
+{
+    window.history.back();
+    return false;
+}
+
+/* no longer used
+function goto_search_navigation()
+{
+    window.location.search = "";
+    return false;
+}
+*/
 
 function open_shoppingcart()
 {
@@ -820,8 +766,10 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 	url: url, 
 	data: {
 	    'action': 'shoppingcart',
-	    'mode': 'del',
-	    'key': shoppingcart_key
+	    //'mode': 'del', // **** // used to delete entire key, now delete the individual items so the key is still valid, just empty
+	    'mode': 'del-ids',
+	    'key': shoppingcart_key,
+	    'ids': del_shoppingcart_ids.join(",")
 	},
 	dataType: "text",
 	success: function(textData) {

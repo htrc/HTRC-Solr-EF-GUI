@@ -562,7 +562,7 @@ function solref_dom_ready() {
     
     $( "#search-lm-progressbar-bot" ).progressbar({ value: 0 });
     $( "#search-lm-progressbar-top" ).progressbar({ value: 0 });
-
+    
     $('#export-by-vol').click(function (event) {
 	event.preventDefault();
 	$('.export-item').css("cursor","wait");
@@ -853,6 +853,39 @@ function solref_dom_ready() {
     //Facet related page setup
     //
     
+    if (store_query_display_mode == QueryDisplayModeEnum.ShoppingCart) {
+	$('#facets-sidebar').hide();
+	$('#resultset-main').width("95%");
+
+	var prev_url_is_search = false;
+
+	if (document.referrer != "") {
+
+	    var prev_url = new URL(document.referrer);
+	    
+	    if ((prev_url.host == document.location.host)
+		&& (prev_url.pathname == document.location.pathname)
+		&& (prev_url.search.match(/(solr-q)|(solr-key-q)=/))) {
+		prev_url_is_search = true;
+	    }
+	}
+	
+	if (prev_url_is_search) {
+	    // There is a previous link, and it is to a search page within solr-ef
+	    $('#back-to-search-sidebar-href').attr("href",document.referrer);
+	    $('#back-to-search-sidebar').width("140px");
+	    $('#back-to-search-sidebar').show();
+	}
+	else {
+	    // either no previous link, or else not to a solr-ef search URL
+	    // => offer a link to start a solr-ef search
+	    var new_search_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+	    $('#goto-search-sidebar-href').attr("href",new_search_url);
+	    $('#goto-search-sidebar').width("140px");
+	    $('#goto-search-sidebar').show();
+	}
+    }
+
     $("#facetlist").on("click","a",function() {
      
 	var $class = $(this).attr("class");
