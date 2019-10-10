@@ -30,7 +30,7 @@ function retrieve_shoppingcart(url_pos)
 		var cart = JSON.parse(textData);
 		store_shoppingcart_ids = cart.cart.vol_ids_;	 // ****** wrap up in ADT?
 		store_shoppingcart_ids.map(function(id){store_shoppingcart_ids_hash[id] = id});
-		
+
 		if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
 		    mark_shoppingcart_items_in_resultset();
 		}
@@ -461,7 +461,7 @@ function mark_shoppingcart_items_in_resultset()
 {
     // cross-check shoppingcart ids with those in the displayed resultset
     // and change 'x' to be a shoppingcart logo
-    
+
     for (var i=0; i<store_shoppingcart_ids.length; i++) {
 	var id = store_shoppingcart_ids[i];
 	
@@ -560,8 +560,6 @@ function do_shoppingcart_drop_action()
     var $my_selected_items = $("#search-results .ui-draggable");
     var shoppingcart_key = getShoppingcartId();
 
-    console.log("*** Shopping cart key = " + shoppingcart_key);
-	
     var add_shoppingcart_ids = [];
 
     if (store_interaction_style == InteractionStyleEnum.Checkboxes) {
