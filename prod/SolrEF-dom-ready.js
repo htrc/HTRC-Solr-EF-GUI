@@ -815,8 +815,9 @@ function solref_dom_ready() {
 
     });
 
+    $('#trashcan-drop').attr("title","Click on items in the result set and drag them to the trashcan to delete them");
 	/*
-    $('#trashcan-drop').tooltip();
+    $('#trashcan-drop').tooltip(); // ****
 	*/
 	
     $('.adi-delete').on("click",function(event) {

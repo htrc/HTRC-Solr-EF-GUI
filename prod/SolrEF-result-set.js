@@ -425,7 +425,6 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	}
 	
     }
-
 	
     if (id_pages_len > 1) {
 
@@ -870,26 +869,24 @@ function show_results(jsonData,newSearch,newResultPage)
 	$this_checkbox.attr("class","sr-input-item");
     });
 
-    // update display for any items that are already in the shoppingcart
-    $("#search-results .htrc-delete").each(function() {
-	var $close_button = $(this);
-	var $close_div = $close_button.parent();
-	var id = $close_div.next().attr("name");
-
-//	if (jQuery.inArray(id,store_shoppingcart_ids) >= 0) { // ****
-	if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
-	    //console.log("**** updating icon to be shopping cart!!");
-	    convert_close_to_shoppingcart_action($close_button);
-	}
-    });
+    if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+	// update display for any items that are already in the shoppingcart
+	$("#search-results .htrc-delete").each(function() {
+	    var $close_button = $(this);
+	    var $close_div = $close_button.parent();
+	    var id = $close_div.next().attr("name");
+	    
+	    if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
+		//console.log("**** updating icon to be shopping cart!!");
+		convert_close_to_shoppingcart_action($close_button);
+	    }
+	});
     
     
-    //var selectable_on = getURLParameter("selectable"); // ****
-    //if (parseInt(selectable_on)) {
 	$('#trashcan-drop').show();
 	$('#shoppingcart-drop-wrapper').show();
 	make_selectable_and_draggable($search_results);
-    //}
+    }
     
     var progressbar_top = $( "#search-lm-progressbar-top" );
     var progressbar_bot = $( "#search-lm-progressbar-bot" );
