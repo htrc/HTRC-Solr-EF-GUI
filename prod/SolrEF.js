@@ -52,7 +52,11 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 		shoppingcart_q_terms.push('id:'+escaped_vol_id);
 	    }
 	    var shoppingcart_q = shoppingcart_q_terms.join(" OR ");
-	    
+
+	    // need to enclose query in brackets so it can operate with the
+	    // 'not_ids' being added on, to keep manually deleted items from
+	    // being return
+	    shoppingcart_q = "(" + shoppingcart_q + ") "; 
 	    trigger_shoppingcart_q_search(shoppingcart_q);
 
 	    // ****
@@ -1046,11 +1050,20 @@ function result_set_delete_item(line_num) {
 		var page_str = "" + (seq-1); // solr page numbers in ID start at 0!!
 		var pad = "000000";
 		var seq_pad = pad.substring(0, pad.length - page_str.length) + page_str
-		store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad); // solr ID
+
+		// Don't need to use 'store_search_not_ids' for shoppingcart as its list
+		// of ids dynamically kept up to date
+		//if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		    store_search_not_ids.push("-id:"+escaped_id+".page-"+seq_pad); // solr ID
+		//}
 	    });
 	}
 	else {
-	    store_search_not_ids.push("-id:"+escaped_id);		
+	    // Don't need to use 'store_search_not_ids' for shoppingcart as its list
+	    // of ids dynamically kept up to date
+	    //if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
+		store_search_not_ids.push("-id:"+escaped_id);
+	    //}
 	}
 
 	var $results_total_num = $('#results-total-num');
