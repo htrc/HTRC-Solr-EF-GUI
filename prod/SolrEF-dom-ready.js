@@ -959,7 +959,7 @@ function solref_dom_ready() {
 				 $('#htrc-alert-dialog').dialog("close");
 				 facet_filter.applySingleFilter(clicked_elem,facet_key,term);
 			     },
-			     null, // trigger default, which is to reset alert message and close
+			     null // trigger default, which is to reset alert message and close
 			     /*
 			     function() {
 				 $(this).dialog("close"); // ****
