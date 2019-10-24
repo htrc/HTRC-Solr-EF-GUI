@@ -21,6 +21,11 @@ var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
 // over the details they store about shopping-carts
 var ef_shoppingcart_url = [ ef_accessapi_url ];
 var shoppingcart_primary_machine = null;
+
+// The following code sets up the necessary data-structures so shopping-cart
+// operations on solr1 are mirrored on solr2, and vice versa
+// Currently a deactivated
+/*
 // Some specialized code for just 'solr1' and 'solr2'
 if (window.location.hostname == "solr1.htrc.illinois.edu") {
     var alt_base_domain_url= window.location.protocol + "//" + "solr2.htrc.illinois.edu";
@@ -34,7 +39,8 @@ else if (window.location.hostname == "solr2.htrc.illinois.edu") {
     ef_shoppingcart_url.push(alt_ef_accessapi_url);
     shoppingcart_primary_machine = "solr2";
 }
-    
+*/
+
 var workset_base_url    = base_domain_url+"/dcWSfetch/";
 var publish_workset_url = base_domain_url+"/fetchCollection";
 
