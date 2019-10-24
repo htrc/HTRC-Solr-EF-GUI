@@ -862,12 +862,20 @@ function solref_dom_ready() {
 
 	if (document.referrer != "") {
 
-	    var prev_url = new URL(document.referrer);
+	    try {
+		var prev_url = new URL(document.referrer);
 	    
-	    if ((prev_url.host == document.location.host)
-		&& (prev_url.pathname == document.location.pathname)
-		&& (prev_url.search.match(/(solr-q)|(solr-key-q)=/))) {
+		if ((prev_url.host == document.location.host)
+		    && (prev_url.pathname == document.location.pathname)
+		    && (prev_url.search.match(/(solr-q)|(solr-key-q)=/))) {
+		    prev_url_is_search = true;
+		}
+	    }
+	    catch(err) {
+		// Older versions of Safari don't have URL class
+		// => safest to assume there is a valid previous page to gop back to
 		prev_url_is_search = true;
+		
 	    }
 	}
 	
