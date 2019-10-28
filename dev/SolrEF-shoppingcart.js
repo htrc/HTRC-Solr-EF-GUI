@@ -589,16 +589,18 @@ function do_shoppingcart_drop_action()
 		store_shoppingcart_ids_hash[item_id] = item_id;
 		add_shoppingcart_ids.push(item_id);
 
-		// Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
-		var $close_button = $this.find(".htrc-delete");
-		
-		convert_close_to_shoppingcart_action($close_button);
-	    
-		make_undraggable($this);
 	    }
 	    else {
 		console.log("Skipping add, as " + item_id + " is already in the shoppingcart");
 	    }
+
+	    // Regardless of whether or not the items is already in the data-structure for the shoppingcart
+	    // We still want this item in the list to visually change to show it is in the cart
+	    
+	    // Change delete (by clilcking on the cross) behaviour to open/view shoppingcart
+	    var $close_button = $this.find(".htrc-delete");
+	    convert_close_to_shoppingcart_action($close_button);
+	    make_undraggable($this);
 
 	});
     }
