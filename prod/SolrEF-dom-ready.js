@@ -707,7 +707,11 @@ function solref_dom_ready() {
 	    // ajax call to get query specified by key
 
 	    var arg_start = getURLParameter("start") || 1;
-	    var start = parseInt(arg_start)-1; // 'start' value and cgi-arg version work 'off by one' to each other
+	    var parsed_arg_start = parseInt(arg_start);
+	    if (isNaN(parsed_arg_start) || (parsed_arg_start<1)) {
+		parsed_arg_start = 1;
+	    }
+	    var start = parsed_arg_start-1; // 'start' value and cgi-arg version work 'off by one' to each other
 	    var group_by_vol_checked_arg = getURLParameter("group-by-vol") || "0";
 	    group_by_vol_checked = parseInt(group_by_vol_checked_arg);	   
 	    trigger_solr_key_search(solr_key_q,start,false); // want this query added to browser history

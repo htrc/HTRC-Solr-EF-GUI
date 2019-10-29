@@ -142,7 +142,7 @@ function explain_add2any_dom(store_value)
 		}
 
 		var start = parseInt(store_search_args.start)
-		if (start>0) {
+		if (start>=0) { // this can be simplified if it is guaranteed that start is valid value by this point
 		    var arg_start = parseInt(start)+1; // 'start' value and cgi-arg version work 'off by one' to each other
 
 		    if (update_search.match(/start=\d+/)) {
