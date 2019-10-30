@@ -17,6 +17,9 @@ function retrieve_shoppingcart(url_pos)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: url,
 	data: {
 	    'action': 'shoppingcart',
@@ -368,6 +371,9 @@ function delete_item_from_shoppingcart(url_pos,item_id)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
 	    'action': 'shoppingcart',
@@ -511,6 +517,9 @@ function add_items_to_shoppingcart(url_pos,add_shoppingcart_ids)
     // Fire off Ajax call to save these new IDs under the shoppingcart_id on the server
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
 	    'action': 'shoppingcart',
@@ -763,6 +772,9 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
 	    'action': 'shoppingcart',

@@ -52,6 +52,10 @@ function authentication_check_for_publish_workset()
     var react_component = $('#solr-ef-search-type').data("react-component");
     if (react_component) {
 	$.ajax({
+	    async: true,
+	    timeout: 60000,
+	    cache: false,
+	    headers: { "cache-control": "no-cache" },
 	    url: '/isauthenticated',
 	    dataType: "json",
 	    success: function() {}, // already logged in => nothing to do
@@ -79,6 +83,10 @@ function solr_ef_login_to_publish()
 function solr_ef_login_to_publish_react()
 {
     $.ajax({
+	async: true,
+	timeout: 60000,
+	cache: false,
+	headers: { "cache-control": "no-cache" },
 	url: '/isauthenticated',
 	dataType: "json",
 	success: function (json_data) {
@@ -230,6 +238,9 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: publish_workset_url,
 	data: url_args,
 	//data: source_data,

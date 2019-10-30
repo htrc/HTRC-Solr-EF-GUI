@@ -7,7 +7,10 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 {
     $.ajax({
 	type: "POST",
-	url: ef_accessapi_url, // change this global variable to something more sutiable???
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
+	url: ef_accessapi_url,
 	data: {
 	    'action': 'url-shortener',
 	    'key': encodeURI(solr_key_q)
@@ -33,6 +36,9 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
     // ajax call to get query specified by key		
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, 
 	data: {
 	    //'action': 'key-value-storage', // ****
@@ -127,6 +133,9 @@ function ajax_solr_text_search(newSearch,newResultPage)
     
     $.ajax({
 	type: "POST", 
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: store_search_action,
 	data: data_str,
 	dataType: "json",
@@ -783,7 +792,10 @@ function submit_action(event) {
 	
 	if (tokenize_mode == "tokenize-on") {
 	    $.ajax({
-	    type: "POST",
+		type: "POST",
+		async: true,
+		timeout: 60000,
+		headers: { "cache-control": "no-cache" },
 		url: ef_accessapi_url,
 		data: { "action": "icu-tokenize",
 			"text-in": q_text },
@@ -923,6 +935,9 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, // With no data arguments, prints out a usage message
 	dataType: "text",
 	success: function(unusedTextData) {	    

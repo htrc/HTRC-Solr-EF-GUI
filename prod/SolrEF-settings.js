@@ -78,6 +78,10 @@ var SolrEFSettings = {
 
 $.ajax({
     type: "GET", 
+    async: true,
+    timeout: 60000,
+    cache: false,
+    headers: { "cache-control": "no-cache" },
     url: worksets_api_url,
     data: 'vis=public',
     dataType: "json",
@@ -98,6 +102,10 @@ var solr_total_num_pages = 5700000000;
 
 $.ajax({
     type: "GET", 
+    async: true,
+    timeout: 60000,
+    cache: false,
+    headers: { "cache-control": "no-cache" },
     url: solr_search_action,
     //data: 'q=volumeid_s:*',
     data: 'q=*:*', // technically this works out total of pages *and* vols, but is quicker to return than strict volumeid_s count
@@ -116,6 +124,10 @@ $.ajax({
 
 $.ajax({
     type: "GET", 
+    async: true,
+    timeout: 60000,
+    cache: false,
+    headers: { "cache-control": "no-cache" },
     url: solr_search_action,
     data: 'q=schemaVersion_s:*',
     dataType: "json",
