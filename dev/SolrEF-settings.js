@@ -1,5 +1,5 @@
 
-var base_domain_url=window.location.protocol + "//" + window.location.hostname;
+var base_domain_url = window.location.protocol + "//" + window.location.hostname;
 
 var solr_prefix_url = base_domain_url+"/solr/";
 var robust_solr_prefix_url = base_domain_url+"/robust-solr/";
@@ -14,6 +14,7 @@ var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
 var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
+var ws_accessapi_url  = "wss://" + window.location.hostname +"/htrc-ef-access-ws/get";
 
 // Although the shopping-cart is mananaged through the HTRC Access API
 // we give it its own named variable to make it easier to manage the
