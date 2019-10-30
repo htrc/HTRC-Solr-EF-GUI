@@ -512,6 +512,10 @@ $(document).ready(function() {
 	
 	$.ajax({
 	    type: "GET",
+	    async: true,
+	    timeout: 60000,
+	    cache: false,
+	    headers: { "cache-control": "no-cache" },
 	    url: ef_accessapi_url,
 	    data: ef_accessapi_args,
 	    dataType: "json",

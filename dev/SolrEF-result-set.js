@@ -1030,6 +1030,9 @@ function show_results(jsonData,newSearch,newResultPage)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: solr_search_action,
 	data: url_args,
 	dataType: "json",

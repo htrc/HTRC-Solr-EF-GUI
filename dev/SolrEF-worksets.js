@@ -111,11 +111,15 @@ function load_workset_id_old_api(workset_id)
     iprogressbar.trigger_delayed_display(3,"Retrieving workset");
     
     $.ajax({
-	type: "GET", 
+	type: "GET",
+	async: true,
+	timeout: 60000,
+	cache: false,
+	headers: { "cache-control": "no-cache" },
 	url: workset_items_url,
 	data: data_str,
 	dataType: "json",
-	xhr : function() {
+	xhr: function() {
 	    return store_search_xhr;
 	},
 	success: function(jsonData) { parse_workset_results(jsonData); },
@@ -144,9 +148,13 @@ function load_workset_id(workset_id_url)
     
     $.ajax({
 	type: "GET", 
+	async: true,
+	timeout: 60000,
+	cache: false,
+	headers: { "cache-control": "no-cache" },
 	url: workset_items_url,
 	dataType: "json",
-	xhr : function() {
+	xhr: function() {
 	    return store_search_xhr;
 	},
 	success: function(jsonData) { parse_workset_results(jsonData); },
@@ -336,6 +344,10 @@ function workset_enrich_results(itemURLs)
 
     $.ajax({
 	type: "GET", 
+	async: true,
+	timeout: 60000,
+	cache: false,
+	headers: { "cache-control": "no-cache" },
 	url: worksets_api_url,
 	data: worksets_api_data,
 	dataType: "json",

@@ -112,7 +112,10 @@ function explain_add2any_dom(store_value)
 	
     $.ajax({
 	type: "POST",
-	url: ef_accessapi_url, // change this global variable to something more sutiable???
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
+	url: ef_accessapi_url,
 	data: {
 	    'action': 'url-shortener',
 	    'value': encodeURI(value)

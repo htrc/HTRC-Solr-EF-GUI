@@ -82,6 +82,9 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
     
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: solr_stream_action,
 	data: data_str,
 	dataType: "json",
@@ -138,6 +141,9 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 
     $.ajax({
 	type: "POST",
+	async: true,
+	timeout: 60000,
+	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, 
 	data: {
 	    'action': 'url-shortener',
