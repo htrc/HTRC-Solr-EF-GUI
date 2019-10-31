@@ -1029,6 +1029,28 @@ function recompute_shoppingcart_on_history_back()
 }
 
 
+function websocket_init()
+{
+    var ws = new WebSocket(ws_accessapi_url);
+
+    ws.onopen = function() {
+	alert("Opened!");
+	ws.send("Hello Server");
+    };
+
+    ws.onmessage = function (evt) {
+	alert("Message: " + evt.data);
+    };
+
+    ws.onclose = function() {
+	alert("Closed!");
+    };
+
+    ws.onerror = function(err) {
+	alert("Error: " + err);
+    };
+}
+
 $(document).ready(function() {
     //console.log("*** Away to call solref_dom_ready()");
     
@@ -1037,6 +1059,8 @@ $(document).ready(function() {
     // The following was planned, but was in the end found not to be
     // needed, given how JS calls to browser history replace/push/pop was used
     //recompute_shoppingcart_on_history_back(); // **** 
-    solref_home_pathname = document.location.pathname; 
+    solref_home_pathname = document.location.pathname;
+
+    websocket_init();
 });
 
