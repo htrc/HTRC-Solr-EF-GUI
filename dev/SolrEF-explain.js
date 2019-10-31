@@ -83,6 +83,16 @@ window.onpopstate = function(event) {
 	var state = event.state;
 
 	group_by_vol_checked = state.group_by_vol_checked;
+
+	// In Safari on a Mac, it appears that a history back operation retains the previous
+	// previous global values (cached somehow?), different to how the other browsers operate
+	// For most global variables in the SolrEF code these get correctcly overridden,
+	// but this is not the case for the shoppingcart, so we must do so explicitly here
+	console.log("History window.onpopstate() reseting store_shoppingcart_ids + hash to be empty");
+	store_shoppingcart_ids = []; 
+	store_shoppingcart_ids_hash = {}; 
+
+
 	trigger_solr_key_search(state.key,state.start,false); // don't want this query added to browser history
     }    
     else if ((event.state) && (event.state.key == null)) {
@@ -178,8 +188,8 @@ function explain_add2any_dom(store_value)
 
 		}
 		else {
-		    console.log("**** No need to record history as URL already matches current browser loaded URL:")
-		    console.log("**** " + document.location.href);
+		    console.log("No need to record history as URL already matches current browser loaded URL:")
+		    console.log("  " + document.location.href);
 		}
 
 	    }
