@@ -242,6 +242,8 @@ function show_volume_count(jsonData)
 				
 function generate_item(line_num, id, id_pages, merge_with_previous)
 {
+    //console.log("*** generate item: line_num=" + line_num + " id=" + id + " id_pages="+id_pages);
+    
     var css_class = 'class="oddevenline" style="position: relative;"';
     
     var html_item = "";
@@ -877,7 +879,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	    var id = $close_div.next().attr("name");
 	    
 	    if (store_shoppingcart_ids_hash.hasOwnProperty(id)) {
-		//console.log("**** updating icon to be shopping cart!!");
+		//console.log("**** updating icon to be shopping cart: id = " + id);
 		convert_close_to_shoppingcart_action($close_button);
 	    }
 	});

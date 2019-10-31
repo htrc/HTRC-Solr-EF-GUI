@@ -352,6 +352,8 @@ function make_clickable()
 
 function convert_close_to_shoppingcart_action($close_button)
 {
+    //console.log("*** covert_close_to_shoppingcart_action() called with $close_button = " + $close_button.html());
+    
     var $cart_marker = $('<div>')
 	.attr("class","shoppingcart-marker");
 		
@@ -566,6 +568,7 @@ function add_items_to_shoppingcart(url_pos,add_shoppingcart_ids)
 
 function do_shoppingcart_drop_action()
 {
+    //console.log("*** do_shoppingcart_drop_action()");
     var $my_selected_items = $("#search-results .ui-draggable");
     var shoppingcart_key = getShoppingcartId();
 
