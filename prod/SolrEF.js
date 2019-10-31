@@ -100,7 +100,7 @@ function trigger_shoppingcart_q_search(shoppingcart_q)
     $("#shoppingcart-info-empty").on('click',empty_shoppingcart);
     $("#shoppingcart-info-id-export-as-workset").on('click',export_shoppingcart);
     
-    console.log("*** changing export header label");
+    //console.log("*** changing export header label");
     $('#export-header').html("Export Selection Cart");
     
     load_solr_q(shoppingcart_q);

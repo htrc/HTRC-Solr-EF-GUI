@@ -79,20 +79,61 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
     var data_str = get_solr_stream_data_str(arg_q,doRollup);
 
     //console.log("***## data str = " + data_str);
+    //console.log("***## Away to call solr stream to count");
     
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: solr_stream_action,
 	data: data_str,
 	dataType: "json",
 	success: callback,
+	// ****
+	// Safari appears to react differently when a valid ajax request is interruped with a browser load action
+	// Curtailed URL request could be returning the empty string that Safari treats as an error, even though response status is 200
+	// Another StackOverflow article discussed that because the data returned isn't valid JSON, this causes an parsing error when
+	//   it try to turn it into an object
+	// ****
+	//success: function(jsonData) { console.log("vol count success"); return callback(jsonData) },
+	//dataType: "text",
+	//success: function(jsonData) { console.log("vol count success"); return callback(JSON.parse(jsonData)); },
+	    
+	//dataType: "text",
+	/*
+	success: function(textData) {
+	    console.log("**** stream count textDdata = " + textData);
+	    try {
+		var jsonData = JSON.parse(textData);
+		callback(jsonData)
+	    }
+	    catch(err) {
+		var mess = "ajax_solr_stream_volume_count() encountered an error/interruption when retreiving volume count from URL\n";
+		mess +=  "    " + solr_stream_action;
+		mess += "  ajax.success() was called but did not receive valid JSON data.\n";
+		mess += "  This can occur when, for example, a new page is loaded into the browser before the volume count has returned";
+
+		console.error(mess);
+	    }
+	},*/
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var mess = "<b>Failed to retreive volume count when accessing URL: ";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + solr_stream_action +'</div></b>';
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    //var mess = "<b>Failed to retreive volume count when accessing URL: ";
+	    //mess +=  '<div style="margin: 0 0 0 10px">' + solr_stream_action +'</div></b>';
+	    //ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		var mess = "ajax_solr_stream_volume_count() encountered an error/interruption (status=0) when retreiving volume count from URL\n";
+		mess +=  "    " + solr_stream_action;
+		//mess += "  ajax.success() was called but did not receive valid JSON data.\n";
+		mess += "  This can occur when, for example, a new page is loaded into the browser before the volume count has returned";
+
+		console.error(mess);
+	    }
+	    else {
+		var mess = "Failed to retreive volume count when accessing URL: ";
+		mess +=  "    " + solr_stream_action;
+		ajax_message_error_console(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 
