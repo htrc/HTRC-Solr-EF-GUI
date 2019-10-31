@@ -127,7 +127,7 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
 		//mess += "  ajax.success() was called but did not receive valid JSON data.\n";
 		mess += "  This can occur when, for example, a new page is loaded into the browser before the volume count has returned";
 
-		console.error(mess);
+		console.warn(mess);
 	    }
 	    else {
 		var mess = "Failed to retreive volume count when accessing URL: ";
@@ -183,7 +183,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, 
 	data: {

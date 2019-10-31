@@ -53,7 +53,7 @@ function authentication_check_for_publish_workset()
     if (react_component) {
 	$.ajax({
 	    async: true,
-	    timeout: 60000,
+	    //timeout: 60000,
 	    cache: false,
 	    headers: { "cache-control": "no-cache" },
 	    url: '/isauthenticated',
@@ -84,7 +84,7 @@ function solr_ef_login_to_publish_react()
 {
     $.ajax({
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	cache: false,
 	headers: { "cache-control": "no-cache" },
 	url: '/isauthenticated',
@@ -239,7 +239,7 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: publish_workset_url,
 	data: url_args,
@@ -255,9 +255,15 @@ function ajax_save_workset_to_triplestore($dialog,jsonData)
 	//enctype: 'multipart/form-data',
 	success: published_workset_success,
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var mess = "<b>Failed to save workset to triplesore.  An error occurred accessing URL:";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + publish_workset_url +'</div></b>';
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call to save workset to triplestore URL: " + publish_workset_url);
+	    }
+	    else {
+
+		var mess = "<b>Failed to save workset to triplestore.  An error occurred accessing URL:";
+		mess +=  '<div style="margin: 0 0 0 10px">' + publish_workset_url +'</div></b>';
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
 
     });

@@ -1033,17 +1033,23 @@ function show_results(jsonData,newSearch,newResultPage)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: solr_search_action,
 	data: url_args,
 	dataType: "json",
 	success: add_titles_and_authors_solr,
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var mess = "<b>Failed to retreive result-set titles and author metadata when accessing URL:";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + solr_search_action +'</div></b>';
-	    
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call retrieving result-set titles and author metadata from URL: " + solr_search_action);
+	    }
+	    else {
+
+		var mess = "<b>Failed to retreive result-set titles and author metadata when accessing URL:";
+		mess +=  '<div style="margin: 0 0 0 10px">' + solr_search_action +'</div></b>';
+		
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
 
     });    

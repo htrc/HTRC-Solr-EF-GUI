@@ -80,7 +80,7 @@ var SolrEFSettings = {
 $.ajax({
     type: "GET", 
     async: true,
-    timeout: 60000,
+    //timeout: 60000,
     cache: false,
     headers: { "cache-control": "no-cache" },
     url: worksets_api_url,
@@ -104,7 +104,7 @@ var solr_total_num_pages = 5700000000;
 $.ajax({
     type: "GET", 
     async: true,
-    timeout: 60000,
+    //timeout: 60000,
     cache: false,
     headers: { "cache-control": "no-cache" },
     url: solr_search_action,
@@ -126,7 +126,7 @@ $.ajax({
 $.ajax({
     type: "GET", 
     async: true,
-    timeout: 60000,
+    //timeout: 60000,
     cache: false,
     headers: { "cache-control": "no-cache" },
     url: solr_search_action,

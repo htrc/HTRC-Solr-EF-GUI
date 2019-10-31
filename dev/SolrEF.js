@@ -8,7 +8,7 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url,
 	data: {
@@ -26,8 +26,14 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 	    initiate_new_solr_search(text_q,row_start,group_by_vol_checked);
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var mess = "Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'";
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call when retrieving expanded form of solr query key: " + solr_key_q);
+	    }
+	    else {
+
+		var mess = "Failed to retrieve expanded form of solr query key: '" + solr_key_q + "'";
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 }
@@ -37,7 +43,7 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, 
 	data: {
@@ -70,9 +76,15 @@ function trigger_shoppingcart_key_search(shoppingcart_key_q) {
 	    //$('#search-submit').click();			
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var mess = "<b>Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "' when accessing the URL:";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call when retrieving expanded form of shoppingcart key: " + shoppingcart_key_q);
+	    }
+	    else {
+
+		var mess = "<b>Failed to retrieve expanded form of shoppingcart key: '" + shoppingcart_key_q + "' when accessing the URL:";
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 }
@@ -134,7 +146,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
     $.ajax({
 	type: "POST", 
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: store_search_action,
 	data: data_str,
@@ -192,9 +204,15 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    var mess = "<b>Failed to perform Solr-EF query: '" + store_search_args.q + "' when accessing the URL:";
-	    mess +=  '<div style="margin: 0 0 0 10px">' + store_search_action +"</div></b>";
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call when performing Solr-EF query: " + store_search_args.q);
+	    }
+	    else {
+		
+		var mess = "<b>Failed to perform Solr-EF query: '" + store_search_args.q + "' when accessing the URL:";
+		mess +=  '<div style="margin: 0 0 0 10px">' + store_search_action +"</div></b>";
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 }
@@ -794,7 +812,7 @@ function submit_action(event) {
 	    $.ajax({
 		type: "POST",
 		async: true,
-		timeout: 60000,
+		//timeout: 60000,
 		headers: { "cache-control": "no-cache" },
 		url: ef_accessapi_url,
 		data: { "action": "icu-tokenize",
@@ -802,9 +820,15 @@ function submit_action(event) {
 		dataType: "json",
 		success: submit_action_tokenized,
 		error: function(jqXHR, textStatus, errorThrown) {
-		    var mess = "<b>ICU tokenize query: '" + q_text + "' failed when accessing URL: ";
-		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+			console.warn("Interrupted call to ICU tokenize with query: " + q_text);
+		    }
+		    else {
+			
+			var mess = "<b>ICU tokenize query: '" + q_text + "' failed when accessing URL: ";
+			mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+			ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		    }
 		}
 	    });
 	}
@@ -936,7 +960,7 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, // With no data arguments, prints out a usage message
 	dataType: "text",
@@ -947,17 +971,23 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    ef_accessapi_failed = true;
-	    
-	    var mess = '<div>Searching the Extracted Features Dataset is still operational,'
-	    mess += ' however some supporting services such as';
-	    mess += ' the shopping-cart, exporting IDs, and downloading';
-	    mess += ' extracted-feature JSON files are currently offline.</div><hr />';
-	    
-	    mess += '<div>Failed to access URL:</div>';
-	    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div><hr />";
-	    mess += '<div><b>Do you wish to proceed with the query?</b></div>';
 
-	    htrc_continue(mess,launch_query);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call during 'ping' to htrc-access API through URL: " + ef_accessapi_url);
+	    }
+	    else {
+
+		var mess = '<div>Searching the Extracted Features Dataset is still operational,'
+		mess += ' however some supporting services such as';
+		mess += ' the shopping-cart, exporting IDs, and downloading';
+		mess += ' extracted-feature JSON files are currently offline.</div><hr />';
+		
+		mess += '<div>Failed to access URL:</div>';
+		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div><hr />";
+		mess += '<div><b>Do you wish to proceed with the query?</b></div>';
+
+		htrc_continue(mess,launch_query);
+	    }
 	}
     });
 }

@@ -513,7 +513,7 @@ $(document).ready(function() {
 	$.ajax({
 	    type: "GET",
 	    async: true,
-	    timeout: 60000,
+	    //timeout: 60000,
 	    cache: false,
 	    headers: { "cache-control": "no-cache" },
 	    url: ef_accessapi_url,
@@ -562,9 +562,16 @@ $(document).ready(function() {
 		iprogressbar.cancel();
 		$('#json-page-viewer-container-loading').hide(); // ****
 		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****
-		var mess = "<b>Download HathiTrust ID '"+htid+"' failed to access URL:";
-		mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div></b>';
-		ajax_message_error(mess,jqXHR,textStatus,errorThrown)
+
+		if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		    console.warn("Interrupted call to download HathiTrust ID: " + htid + " from URL: " + ef_accessapi_url);
+		}
+		else {
+		    
+		    var mess = "<b>Download HathiTrust ID '"+htid+"' failed to access URL:";
+		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div></b>';
+		    ajax_message_error(mess,jqXHR,textStatus,errorThrown)
+		}
 	    }
 	});
     }
