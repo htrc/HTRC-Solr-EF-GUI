@@ -18,7 +18,7 @@ function retrieve_shoppingcart(url_pos)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: url,
 	data: {
@@ -45,24 +45,30 @@ function retrieve_shoppingcart(url_pos)
 	    // if search results finished, set_shoppingcart_icons(); // ******
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var next_url_pos = url_pos +1;
-	    if (next_url_pos < ef_shoppingcart_url.length) {
-		console.log("Warning: failed to retrieve shopping-cart id="+shoppingcart_id+ " from: " + url);
-		console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
-		retrieve_shoppingcart(next_url_pos)
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call retrieving shopping-cart id: " + shoppingcart_id);
 	    }
 	    else {
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapit_failed = true;
-		    var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
-		    mess +=    '<div style="margin: 0 0 0 10px">' + ef_accessapi_url + '</div>';
-		    mess +=    'Items in shopping-cart currently unavailable.</b>';
-		    
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+
+		var next_url_pos = url_pos +1;
+		if (next_url_pos < ef_shoppingcart_url.length) {
+		    console.log("Warning: failed to retrieve shopping-cart id="+shoppingcart_id+ " from: " + url);
+		    console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
+		    retrieve_shoppingcart(next_url_pos)
 		}
 		else {
-		    ajax_message_error_console("Failed to retrieve shopping-cart information",jqXHR,textStatus,errorThrown);
+		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
+			ef_accessapit_failed = true;
+			var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
+			mess +=    '<div style="margin: 0 0 0 10px">' + ef_accessapi_url + '</div>';
+			mess +=    'Items in shopping-cart currently unavailable.</b>';
+			
+			ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		    }
+		    else {
+			ajax_message_error_console("Failed to retrieve shopping-cart information",jqXHR,textStatus,errorThrown);
+		    }
 		}
 	    }
 	}
@@ -374,7 +380,7 @@ function delete_item_from_shoppingcart(url_pos,item_id)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
@@ -400,23 +406,29 @@ function delete_item_from_shoppingcart(url_pos,item_id)
 	    }
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    var next_url_pos = url_pos +1;
-	    if (next_url_pos < ef_shoppingcart_url.length) {
-		console.log("Warning: failed to delete shopping-cart id="+shoppingcart_id+ " from: " + url);
-		console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
-		delete_item_from_shoppingcart(next_url_pos,item_id);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call deleting shopping-cart id: " + shoppingcart_id);
 	    }
 	    else {
-	    
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapi_failed = true;
-		    var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
-		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+
+		var next_url_pos = url_pos +1;
+		if (next_url_pos < ef_shoppingcart_url.length) {
+		    console.log("Warning: failed to delete shopping-cart id="+shoppingcart_id+ " from: " + url);
+		    console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
+		    delete_item_from_shoppingcart(next_url_pos,item_id);
 		}
 		else {
-		    ajax_message_error_console("Failed to delete item",jqXHR,textStatus,errorThrown);
+		    
+		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
+			ef_accessapi_failed = true;
+			var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
+			mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+			ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		    }
+		    else {
+			ajax_message_error_console("Failed to delete item",jqXHR,textStatus,errorThrown);
+		    }
 		}
 	    }
 	}
@@ -520,7 +532,7 @@ function add_items_to_shoppingcart(url_pos,add_shoppingcart_ids)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
@@ -541,26 +553,30 @@ function add_items_to_shoppingcart(url_pos,add_shoppingcart_ids)
 	    }
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-
-	    var next_url_pos = url_pos +1;
-	    if (next_url_pos < ef_shoppingcart_url.length) {
-		console.log("Warning: failed to add items to shopping-cart id="+shoppingcart_id+ "through: " + url);
-		console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
-		add_items_to_shoppingcart(next_url_pos,add_shoppingcart_ids)
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call adding to shopping-cart id: " + shoppingcart_id);
 	    }
-	    else {	    
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapi_failed = true;
-		    
-		    var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
-		    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    else {
+
+		var next_url_pos = url_pos +1;
+		if (next_url_pos < ef_shoppingcart_url.length) {
+		    console.log("Warning: failed to add items to shopping-cart id="+shoppingcart_id+ "through: " + url);
+		    console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
+		    add_items_to_shoppingcart(next_url_pos,add_shoppingcart_ids)
 		}
-		else {
-		    ajax_message_error_console("Failed to add item",jqXHR,textStatus,errorThrown);
+		else {	    
+		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
+			ef_accessapi_failed = true;
+			
+			var mess = "<b>Failed to add item '"+item_id+"' to shopping-cart when accessing URL: ";
+			mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+			ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		    }
+		    else {
+			ajax_message_error_console("Failed to add item",jqXHR,textStatus,errorThrown);
+		    }
 		}
-	    
 	    }
 	}
     });
@@ -776,7 +792,7 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: url, 
 	data: {
@@ -811,25 +827,30 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 	    }
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-
-	    var next_url_pos = url_pos +1;
-	    if (next_url_pos < ef_shoppingcart_url.length) {
-		console.log("Warning: failed to delete items to shopping-cart id="+shoppingcart_id+ "through: " + url);
-		console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
-		delete_items_from_shoppingcart(next_url_pos,del_shoppingcart_ids)
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call deleting items from shopping-cart id: " + shoppingcart_id);
 	    }
-	    else {	    
-	    
-		//$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
-		if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
-		    ef_accessapi_failed = true;
-		    
-		    var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
-		    mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
-		    ajax_message_error(jqXHR, textStatus, errorThrown);
+	    else {
+
+		var next_url_pos = url_pos +1;
+		if (next_url_pos < ef_shoppingcart_url.length) {
+		    console.log("Warning: failed to delete items to shopping-cart id="+shoppingcart_id+ "through: " + url);
+		    console.log("Trying next URL:" + ef_shoppingcart_url[next_url_pos]);
+		    delete_items_from_shoppingcart(next_url_pos,del_shoppingcart_ids)
 		}
-		else {
-		    ajax_message_error_console("Failed to delete all items",jqXHR, textStatus, errorThrown);
+		else {	    
+		    
+		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
+			ef_accessapi_failed = true;
+			
+			var mess = "<b>Failed to delete all items from shopping-cart key '"+shoppingcart_key+"' when accessing URL: ";
+			mess +=  '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +"</div></b>";
+			ajax_message_error(jqXHR, textStatus, errorThrown);
+		    }
+		    else {
+			ajax_message_error_console("Failed to delete all items",jqXHR, textStatus, errorThrown);
+		    }
 		}
 	    }
 	}

@@ -113,7 +113,7 @@ function load_workset_id_old_api(workset_id)
     $.ajax({
 	type: "GET",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	cache: false,
 	headers: { "cache-control": "no-cache" },
 	url: workset_items_url,
@@ -126,10 +126,15 @@ function load_workset_id_old_api(workset_id)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    var mess = '<b>Loading Workset ID failed to access URL:';
-	    mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
-
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown)
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call when loading Workset ID from URL: " + workset_items_url);
+	    }
+	    else {
+		var mess = '<b>Loading Workset ID failed to access URL:';
+		mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
+		
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });
 }
@@ -149,7 +154,7 @@ function load_workset_id(workset_id_url)
     $.ajax({
 	type: "GET", 
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	cache: false,
 	headers: { "cache-control": "no-cache" },
 	url: workset_items_url,
@@ -161,10 +166,16 @@ function load_workset_id(workset_id_url)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
 	    iprogressbar.cancel();
-	    var mess = '<b>Loading Workset ID failed to access URL:';
-	    mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call when loading Workset ID from URL: " + workset_items_url);
+	    }
+	    else {
 
-	    ajax_message_error(mess,jqXHR,textStatus,errorThrown)
+		var mess = '<b>Loading Workset ID failed to access URL:';
+		mess += '<div style="margin: 0 0 0 10px">' + workset_items_url +'</div></b>';
+		
+		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    }
 	}
     });    
 }
@@ -345,7 +356,7 @@ function workset_enrich_results(itemURLs)
     $.ajax({
 	type: "GET", 
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	cache: false,
 	headers: { "cache-control": "no-cache" },
 	url: worksets_api_url,

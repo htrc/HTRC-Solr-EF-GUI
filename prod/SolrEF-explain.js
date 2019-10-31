@@ -123,7 +123,7 @@ function explain_add2any_dom(store_value)
     $.ajax({
 	type: "POST",
 	async: true,
-	timeout: 60000,
+	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url,
 	data: {
@@ -251,21 +251,27 @@ function explain_add2any_dom(store_value)
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto");
 	    //iprogressbar.cancel();
-	    if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
-		ef_accessapi_failed = true;
-
-		var mess = '<b>Failed to convert query string:';
-		mess += '<div style="margin: 0 0 0 10px"><i>'+value+'</i></div>';
-		mess += 'to Solr query-key form. ';
-		mess += 'Unable to access URL: ';
-		mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div>';
-		mess += 'Unable to retain query in browser history</b>';
-		
-		ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+		console.warn("Interrupted call converting query string: " + value + " through URL: " + ef_accessapi_url);
 	    }
 	    else {
-		ajax_message_error_console("Failed to convert query string to Solr query-key form",
-					   jqXHR,textStatus,errorThrown);
+
+		if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
+		    ef_accessapi_failed = true;
+		    
+		    var mess = '<b>Failed to convert query string:';
+		    mess += '<div style="margin: 0 0 0 10px"><i>'+value+'</i></div>';
+		    mess += 'to Solr query-key form. ';
+		    mess += 'Unable to access URL: ';
+		    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div>';
+		    mess += 'Unable to retain query in browser history</b>';
+		    
+		    ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+		}
+		else {
+		    ajax_message_error_console("Failed to convert query string to Solr query-key form",
+					       jqXHR,textStatus,errorThrown);
+		}
 	    }
 	}
     });

@@ -1061,6 +1061,6 @@ $(document).ready(function() {
     //recompute_shoppingcart_on_history_back(); // **** 
     solref_home_pathname = document.location.pathname;
 
-    websocket_init();
+    //websocket_init();
 });
 
