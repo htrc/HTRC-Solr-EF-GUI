@@ -427,7 +427,8 @@ function domready_help_dialogs()
 }
 
 function solref_dom_ready() {
-
+    //console.log("**** solref_dom_ready() called!!");
+    
     var solr_col = getURLParameter("solr-col");
     if (solr_col != null) {
 	solr_collection = solr_col;
@@ -1030,6 +1031,7 @@ function recompute_shoppingcart_on_history_back()
 
 $(document).ready(function() {
     //console.log("*** Away to call solref_dom_ready()");
+    
     solref_dom_ready();
 
     // The following was planned, but was in the end found not to be
