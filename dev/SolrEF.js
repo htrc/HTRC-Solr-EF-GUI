@@ -161,7 +161,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 		// => don't show page-bar, only give 'next' and 'prev'
 		$('#page-bar').hide();
 		$('#next-prev').show();
-		show_results(jsonData,newSearch,newResultPage);		
+		show_results(jsonData,newSearch,newResultPage);
 	    }
 	    else {
 		// No merging of search result items possible
