@@ -52,7 +52,11 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
 	close: function() {
 	    $('#htrc-alert-body').html("");
 	    $('.search-in-progress').css("cursor","auto");
-	    $('.facet-search').removeClass("disabled-div");
+	    // **** 
+	    // don't want to switch it off here, as a valid confirm calls close,
+	    // and we still want the facets disabled at this point so the user can't
+	    // trigger another filter before the last one is finished
+	    //$('.facet-search').removeClass("disabled-div");
 	}
     });
 
@@ -85,7 +89,11 @@ function htrc_continue(message,continue_callback,cancel_callback)
 	close: function() {
 	    $('#htrc-alert-body').html("");
 	    $('.search-in-progress').css("cursor","auto");
-	    $('.facet-search').removeClass("disabled-div");
+	    // **** 
+	    // don't want to switch it off here, as a valid continue calls close,
+	    // and we still want the facets disabled at this point so the user can't
+	    // trigger another filter before the last one is finished
+	    //$('.facet-search').removeClass("disabled-div"); 
 	}
     });
 

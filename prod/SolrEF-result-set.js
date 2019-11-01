@@ -511,10 +511,10 @@ function show_results(jsonData,newSearch,newResultPage)
 	    $('#export-by').hide(); // hide until volume count is in
 
 	}
-	
+
 	facet_filter.display(jsonData.facet_counts)
     }
-   
+
     var volume_level_desc = explain_search.volume_level_desc;
     if (volume_level_desc != null) {
 	var volume_level_terms = explain_search.volume_level_terms;
@@ -704,6 +704,7 @@ function show_results(jsonData,newSearch,newResultPage)
     }
 
     $('.search-in-progress').css("cursor","auto");
+    //console.log("*** away to reenable filter area");
     $('.facet-search').removeClass("disabled-div");
     if ($('#search-results-page').is(":hidden")) {
 	$('#search-results-page').show("slide", { direction: "up" }, 1000);
@@ -1029,7 +1030,6 @@ function show_results(jsonData,newSearch,newResultPage)
 	rows: ids.length,
 	fl: fl_args_str
     };
-
     
     $.ajax({
 	type: "POST",
