@@ -327,6 +327,8 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	this.value = terms.join(" ");
 	return false;
     }
+
+    //console.log("**** away to convert #"+textbox_id+" into an autocomplete box");
     
     $('#'+textbox_id )
 	.on( "keydown", autocomplete_keydown)
