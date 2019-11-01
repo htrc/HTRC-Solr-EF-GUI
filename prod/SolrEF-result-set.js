@@ -704,6 +704,7 @@ function show_results(jsonData,newSearch,newResultPage)
     }
 
     $('.search-in-progress').css("cursor","auto");
+    $('.facet-search').removeClass("disabled-div");
     if ($('#search-results-page').is(":hidden")) {
 	$('#search-results-page').show("slide", { direction: "up" }, 1000);
     }

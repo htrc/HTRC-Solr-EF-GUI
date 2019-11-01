@@ -58,6 +58,7 @@ function retrieve_shoppingcart(url_pos)
 		}
 		else {
 		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    // $('.facet-search').removeClass("disabled-div"); // And would the facet area need any change?
 		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
 			ef_accessapit_failed = true;
 			var mess = '<b>Failed to retrieve shopping-cart information when accessing URL:'
@@ -420,6 +421,7 @@ function delete_item_from_shoppingcart(url_pos,item_id)
 		else {
 		    
 		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    // $('.facet-search').removeClass("disabled-div"); // And would the facet area need any change?
 		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
 			ef_accessapi_failed = true;
 			var mess = "<b>Failed to delete item '"+item_id+"' from shopping-cart when accessing URL: ";
@@ -566,6 +568,7 @@ function add_items_to_shoppingcart(url_pos,add_shoppingcart_ids)
 		}
 		else {	    
 		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    // $('.facet-search').removeClass("disabled-div"); // And would the facet area need any change?
 		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
 			ef_accessapi_failed = true;
 			
@@ -841,6 +844,7 @@ function delete_items_from_shoppingcart(url_pos,del_shoppingcart_ids)
 		else {	    
 		    
 		    //$('.search-in-progress').css("cursor","auto"); // Do this, but over the shoppingcart icon? // ******
+		    // $('.facet-search').removeClass("disabled-div"); // And would the facet area need any change?
 		    if ((runtime_mode == "dev") || (runtime_mode == "prod" && !ef_accessapi_failed)) {
 			ef_accessapi_failed = true;
 			

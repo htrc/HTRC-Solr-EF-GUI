@@ -52,6 +52,7 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
 	close: function() {
 	    $('#htrc-alert-body').html("");
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	}
     });
 
@@ -84,6 +85,7 @@ function htrc_continue(message,continue_callback,cancel_callback)
 	close: function() {
 	    $('#htrc-alert-body').html("");
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	}
     });
 

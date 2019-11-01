@@ -559,6 +559,7 @@ $(document).ready(function() {
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
 		$('.search-in-progress').css("cursor","auto");
+		$('.facet-search').removeClass("disabled-div");
 		iprogressbar.cancel();
 		$('#json-page-viewer-container-loading').hide(); // ****
 		$('#json-page-viewer-container-dynamic-load').show("slide", { direction: "up" }, 1000); // ****

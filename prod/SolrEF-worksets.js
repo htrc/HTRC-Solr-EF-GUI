@@ -64,6 +64,7 @@ function parse_workset_results(jsonData)
     //console.log("jsonData = " + JSON.stringify(jsonData));
     
     // $('.search-in-progress').css("cursor","auto");
+    // $('.facet-search').removeClass("disabled-div");
     
     initialize_new_solr_search();
 
@@ -125,6 +126,7 @@ function load_workset_id_old_api(workset_id)
 	success: function(jsonData) { parse_workset_results(jsonData); },
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	    iprogressbar.cancel();
 	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
 		console.warn("Interrupted call when loading Workset ID from URL: " + workset_items_url);
@@ -165,6 +167,7 @@ function load_workset_id(workset_id_url)
 	success: function(jsonData) { parse_workset_results(jsonData); },
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	    iprogressbar.cancel();
 	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
 		console.warn("Interrupted call when loading Workset ID from URL: " + workset_items_url);

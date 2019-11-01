@@ -335,6 +335,7 @@ FacetFilter.prototype.refine_query_unused = function()
 	$('#search-results-page').hide();
     }
     $('.search-in-progress').css("cursor","wait");
+    $('.facet-search').addClass("disabled-div");
     
     store_search_args.start = 0;
     iprogressbar.trigger_delayed_display(SolrEFSettings.iprogressbar_delay_threshold,

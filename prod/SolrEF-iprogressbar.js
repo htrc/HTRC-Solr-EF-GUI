@@ -13,6 +13,7 @@ IndeterminateProgressbar.prototype.abort = function()
 {
     this.cancel();
     $('.search-in-progress').css("cursor","auto");
+    $('.facet-search').removeClass("disabled-div");
     store_search_xhr.abort();
     htrc_alert("Query canceled");
     store_search_xhr = null;
