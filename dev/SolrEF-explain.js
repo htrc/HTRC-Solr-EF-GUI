@@ -250,6 +250,7 @@ function explain_add2any_dom(store_value)
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    //$('.search-in-progress').css("cursor","auto");
+	    // $('.facet-search').removeClass("disabled-div");
 	    //iprogressbar.cancel();
 	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
 		console.warn("Interrupted call converting query string: " + value + " through URL: " + ef_accessapi_url);

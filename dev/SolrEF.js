@@ -185,6 +185,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 				//store_search_args.start=start; // **** jump-start
 				num_found=0;
 				$('.search-in-progress').css("cursor","wait");
+				$('.facet-search').addClass("disabled-div");
 				$('#page-bar').html('');
 				ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
 			    },
@@ -203,6 +204,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	    iprogressbar.cancel();
 	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
 		console.warn("Interrupted call when performing Solr-EF query: " + store_search_args.q);
@@ -221,6 +223,7 @@ function ajax_solr_text_search(newSearch,newResultPage)
 function show_updated_results()
 {
     $('.search-in-progress').css("cursor","wait");
+    $('.facet-search').addClass("disabled-div");
     
     ajax_solr_text_search(false,true); // newSearch=false, newResultPage=true
 }
@@ -498,7 +501,8 @@ function initialize_new_solr_search()
 	$('#search-results-page').hide();
     }
     $('.search-in-progress').css("cursor","wait");
-
+    $('.facet-search').addClass("disabled-div");
+    
     // determine if publishing result will need login authentication
     authentication_check_for_publish_workset();
 
@@ -560,6 +564,7 @@ function submit_action(event) {
 	    var advanced_q_text = $('#advanced-q').val().trim();
 	    if (advanced_q_text === "") {
 		$('.search-in-progress').css("cursor","auto");
+		$('.facet-search').removeClass("disabled-div");
 		htrc_alert("No query term(s) entered");
 		return;
 	    }
@@ -571,6 +576,7 @@ function submit_action(event) {
 	else {
 	    if ((q_text === "") && (vq_text === "")) {
 		$('.search-in-progress').css("cursor","auto");
+		$('.facet-search').removeClass("disabled-div");
 		htrc_alert("No query term(s) entered");
 		return;
 	    }
@@ -593,6 +599,7 @@ function submit_action(event) {
 		    // arg_vq was empty to start with, but attempt to expand non-empty arg_q
 		    //   lead to an empty arg_q being returned
 		    $('.search-in-progress').css("cursor","auto");
+		    $('.facet-search').removeClass("disabled-div");
 		    htrc_alert("No languages selected");
 		    return;
 		} else {
@@ -768,6 +775,7 @@ function submit_action(event) {
 			  },
 			  function() {
 			      $('.search-in-progress').css("cursor","auto");
+			      $('.facet-search').removeClass("disabled-div");
 			      $(this).dialog("close");
 			  }
 			 );
@@ -847,6 +855,7 @@ function submit_action(event) {
 	var advanced_q_text = $('#advanced-q').val().trim();
 	if (advanced_q_text === "") {
 	    $('.search-in-progress').css("cursor","auto");
+	    $('.facet-search').removeClass("disabled-div");
 	    htrc_alert("No query term(s) entered");
 	    return;
 	}
