@@ -1006,8 +1006,9 @@ function solref_dom_ready() {
 	volume_available_tags.push({'key':key, 'label': volume_metadata_dic[key]});
     });
     
-    
-    domready_volume_autocomplete('vq',volume_available_tags);
+    if (runtime_mode == "dev")  {    
+	domready_volume_autocomplete('vq',volume_available_tags);
+    }
     
 }
 
