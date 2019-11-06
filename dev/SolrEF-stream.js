@@ -194,7 +194,8 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	success: function(textData) {
 	    var key = textData;
 	    var url = ef_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
-
+	    var ws_url = ws_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
+	    
 	    if (solref_verbosity >= 2) {
 		console.log("SolrEF-Stream::stream_export_ef(): download url = " + url);
 	    }
@@ -212,16 +213,64 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
 	    href_id += output_format;
 
+	    if (runtime_mode != "dev") {
+		$(href_id).attr('href',url);
+		// Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
+		//   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
+		//$(href_id).trigger("click");
+		$(href_id)[0].click();
 
-	    $(href_id).attr('href',url);
-	    // Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
-	    //   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
-	    //$(href_id).trigger("click");
-	    $(href_id)[0].click();
-
-	    //window.location.href = url;// **** (more basic alternative)
+		//window.location.href = url;// **** (more basic alternative)
 	    }
-	});
+	    else {
+		var ws = new WebSocket(ws_url);
+
+		ws.onopen = function() {
+		    console.log("Successfully opened WebSocket connection to: " + ws_url);
+		    ws.send("start-download");
+		};
+
+		ws.onmessage = function (evt) {
+		    try {
+			var json_mess = JSON.parse(evt.data);
+		    
+			if (json_mess.status != 200) {
+			    console.error("WebSocket Error occurred on the server processing 'start-download'");
+			    console.error(evt.data);
+			}
+			else {
+			    // Assume OK
+			    if (json_mess.action == "progress") {
+				var percentage = json_mess.percentage;
+				var percentage_rounded = Math.round(percentage * 100) / 100;
+				console.log("Export/Download WebSocket progress: " + percentage_rounded);
+			    }
+			    else if (json_mess.action == "download-complete") {
+				console.log("Export/Download WebSocket download complete");
+				ws.close();
+			    }
+			    
+			    else {			
+				console.log("Export/Download WebSocket received message: " + evt.data);
+			    }
+			}
+		    }
+		    catch(error) {
+			console.error("WebSocket onmessage() response not valid JSON syntax: " + evt.data);
+		    }
+		};
+		
+		ws.onclose = function() {
+		    console.log("Export/Download WebSocket closed");
+		};
+		
+		ws.onerror = function(err) {
+		    alert("Error: " + err); // **** // change to htrc_alert?
+		};
+		
+	    }
+	}
+    });
 }
 
 function stream_export_ef_zip(jsonData)

@@ -1032,7 +1032,7 @@ function recompute_shoppingcart_on_history_back()
 
 function websocket_init()
 {
-    var ws = new WebSocket(ws_accessapi_url);
+    var ws = new WebSocket(ws_accessapi_url + "?test=foo");
 
     ws.onopen = function() {
 	alert("Opened!");
