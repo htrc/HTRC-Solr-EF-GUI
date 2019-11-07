@@ -228,6 +228,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 		ws.onopen = function() {
 		    console.log("Successfully opened WebSocket connection to: " + ws_url);
 		    ws.send("start-download");
+		    $('#export-ef-progress-div').show();
 		};
 
 		ws.onmessage = function (evt) {
@@ -243,11 +244,17 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 			    if (json_mess.action == "progress") {
 				var percentage = json_mess.percentage;
 				var percentage_rounded = Math.round(percentage * 100) / 100;
-				console.log("Export/Download WebSocket progress: " + percentage_rounded);
+				$('#export-ef-progress').html(percentage_rounded + "%");
+				
+				//console.log("Export/Download WebSocket progress: " + percentage_rounded + "%");
 			    }
 			    else if (json_mess.action == "download-complete") {
 				console.log("Export/Download WebSocket download complete");
 				ws.close();
+
+				console.log("Initiating browser download");
+				$(href_id).attr('href',url);
+				$(href_id)[0].click();
 			    }
 			    
 			    else {			
@@ -261,6 +268,8 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 		};
 		
 		ws.onclose = function() {
+		    $('#export-ef-progress-div').hide();
+		    $('#export-ef-progress').html("0.00%");
 		    console.log("Export/Download WebSocket closed");
 		};
 		
