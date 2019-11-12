@@ -168,6 +168,135 @@ function stream_export(jsonData)
     download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
 }
 
+function stream_export_ef_key(key,ids,output_format,only_metadata)
+{
+    var url = ef_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
+    var ws_url = ws_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
+    
+    if (solref_verbosity >= 2) {
+	console.log("SolrEF-Stream::stream_export_ef(): download url = " + url);
+    }
+    
+    $('.export-item').css("cursor","auto");
+    
+    if (ids.length>export_ef_limit) {
+	var alert_mess = "Exporting Extracted Features is currently in development.<br />";
+	alert_mess += "Currently only the first "
+	    + export_ef_limit + " JSON files in the search list are exported";
+	
+	htrc_alert(alert_mess);
+    }
+    
+    var href_id = (only_metadata) ? "export-ef-metadata-" : "export-ef-";
+    href_id += output_format;
+    
+    //var div_id = href_id + "-div";
+    var prog_id = href_id + "-prog";
+    var prog_numeric_id = href_id + "-prog-numeric";
+
+    if ((runtime_mode != "dev") || (window.location.hostname == "solr2.htrc.illinois.edu")) {	
+	$('#'+href_id).attr('href',url);
+	// Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
+	//   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
+	//$('#'+href_id).trigger("click");
+	$('#'+href_id)[0].click();
+	
+	//window.location.href = url;// **** (more basic alternative)
+    }
+    else {
+	var ws = new WebSocket(ws_url);
+	
+	// **** use solr-key not ids->key shorten
+	// give download name for TXT ids
+	
+	// *** !!! server code is a bit convoluted for download, getting a BZ which is uncompresses in the cache
+	// to then only compress it when it writes it out to file (if it does not exist on the system) ...
+	// ... so File reference can be returned (which in outputVolumes is then decompressed!!)
+	// *** !!! reading bz file done 1 val at a time!!!
+	
+	var progress_displayed = false;
+	
+	ws.onopen = function() {
+	    console.log("Successfully opened WebSocket connection to: " + ws_url);
+	    $prog_div = $('<div>').attr("id",prog_id).attr("style","display:none;")
+		.html("Preparing "+output_format.toUpperCase()+" Download:");
+
+	    // Preparing Download: <span id="export-ef-progress" class="export-item">0.00%</span>
+	    var $prog_numeric = $('<span>').attr("id",prog_numeric_id).attr("class","export-item").html("0.00%");
+	    
+	    $prog_div.append($prog_numeric);
+	    $('#export-ef-progress-div').append($prog_div);
+	    
+	    ws.send("start-download");
+	};
+	
+	ws.onmessage = function (evt) {
+	    try {
+		var json_mess = JSON.parse(evt.data);
+		
+		if (json_mess.status != 200) {
+		    console.error("WebSocket Error occurred on the server processing 'start-download'");
+		    console.error(evt.data);
+		}
+		else {
+		    // Assume OK
+		    if (json_mess.action == "progress") {
+			var percentage = json_mess.percentage;
+			if (!progress_displayed && (percentage>0 && percentage<100)) {
+			    progress_displayed = true;
+			    $('#'+prog_id).show();
+			    $('#'+href_id).addClass("disabled-div");
+			    $('#export-ef-progress-div').show();
+			}
+			var percentage_formatted = json_mess["percentage-formatted"];
+			$('#'+prog_numeric_id).html(percentage_formatted + "%");
+			
+			//console.log("Export/Download WebSocket progress: " + percentage_rounded + "%");
+		    }
+		    else if (json_mess.action == "download-complete") {
+			console.log("Export/Download WebSocket download complete");				
+			ws.close();
+			
+			console.log("Initiating browser download");
+			$('#'+href_id).attr('href',url);
+			$('#'+href_id)[0].click();
+		    }
+		    
+		    else {			
+			console.log("Export/Download WebSocket received message: " + evt.data);
+		    }
+		}
+	    }
+	    catch(error) {
+		console.error("WebSocket onmessage() response not valid JSON syntax: " + evt.data);
+	    }
+	};
+	
+	ws.onclose = function() {
+	    $('#'+prog_id).remove();
+	    if (progress_displayed) {
+		progress_displayed = false;
+		$('#'+href_id).removeClass("disabled-div");
+	    }
+	    
+	    if ($('#export-ef-progress-div').children().length  == 0) {
+		// No other preparing for downloads being displayed
+		$('#export-ef-progress-div').hide();
+	    }
+	    console.log("Export/Download WebSocket closed");
+	};
+	
+	ws.onerror = function(err) {
+	    alert("Error: " + err); // **** // change to htrc_alert?
+	    if ($('#'+prog_id).length>0) {
+		$('#'+prog_id).remove();
+	    }
+	};
+	
+    }
+}
+
+    
 function stream_export_ef(jsonData,output_format,only_metadata)
 {
     var ids = stream_get_ids(jsonData);
@@ -193,6 +322,9 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	dataType: "text",
 	success: function(textData) {
 	    var key = textData;
+	    stream_export_ef_key(key,ids,output_format,only_metadata);
+	}
+/*	    
 	    var url = ef_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
 	    var ws_url = ws_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
 	    
@@ -210,25 +342,48 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 		htrc_alert(alert_mess);
 	    }
 	    
-	    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
+	    var href_id = (only_metadata) ? "export-ef-metadata-" : "export-ef-";
 	    href_id += output_format;
 
+	    //var div_id = href_id + "-div";
+	    var prog_id = href_id + "-prog";
+	    var prog_numeric_id = href_id + "-prog-numeric";
+	    
 	    if ((runtime_mode != "dev") || (window.location.hostname == "solr2.htrc.illinois.edu")) {
-		$(href_id).attr('href',url);
+		$('#'+href_id).attr('href',url);
+
 		// Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
 		//   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
-		//$(href_id).trigger("click");
-		$(href_id)[0].click();
+		//$('#'+href_id).trigger("click");
+		$('#'+href_id)[0].click();
 
 		//window.location.href = url;// **** (more basic alternative)
 	    }
 	    else {
 		var ws = new WebSocket(ws_url);
 
+		// **** use solr-key not ids->key shorten
+		// give download name for TXT ids
+		
+		// *** !!! server code is a bit convoluted for download, getting a BZ which is uncompresses in the cache
+		// to then only compress it when it writes it out to file (if it does not exist on the system) ...
+		// ... so File reference can be returned (which in outputVolumes is then decompressed!!)
+		// *** !!! reading bz file done 1 val at a time!!!
+
+		var progress_displayed = false;
+		
 		ws.onopen = function() {
 		    console.log("Successfully opened WebSocket connection to: " + ws_url);
+		    $prog_div = $('<div>').attr("id",prog_id).attr("style","display:none;")
+			.html("Preparing "+output_format.toUpperCase()+" Download:");
+
+		    // Preparing Download: <span id="export-ef-progress" class="export-item">0.00%</span>
+		    var $prog_numeric = $('<span>').attr("id",prog_numeric_id).attr("class","export-item").html("0.00%");
+		    
+		    $prog_div.append($prog_numeric);
+		    $('#export-ef-progress-div').append($prog_div);
+		    
 		    ws.send("start-download");
-		    $('#export-ef-progress-div').show();
 		};
 
 		ws.onmessage = function (evt) {
@@ -243,18 +398,24 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 			    // Assume OK
 			    if (json_mess.action == "progress") {
 				var percentage = json_mess.percentage;
-				var percentage_rounded = Math.round(percentage * 100) / 100;
-				$('#export-ef-progress').html(percentage_rounded + "%");
+				if (!progress_displayed && (percentage>0 && percentage<100)) {
+				    progress_displayed = true;
+				    $('#'+prog_id).show();
+				    $('#'+href_id).addClass("disabled-div");
+				    $('#export-ef-progress-div').show();
+				}
+				var percentage_formatted = json_mess["percentage-formatted"];
+				$('#'+prog_numeric_id).html(percentage_formatted + "%");
 				
 				//console.log("Export/Download WebSocket progress: " + percentage_rounded + "%");
 			    }
 			    else if (json_mess.action == "download-complete") {
-				console.log("Export/Download WebSocket download complete");
+				console.log("Export/Download WebSocket download complete");				
 				ws.close();
-
+				
 				console.log("Initiating browser download");
-				$(href_id).attr('href',url);
-				$(href_id)[0].click();
+				$('#'+href_id).attr('href',url);
+				$('#'+href_id)[0].click();
 			    }
 			    
 			    else {			
@@ -268,17 +429,29 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 		};
 		
 		ws.onclose = function() {
-		    $('#export-ef-progress-div').hide();
-		    $('#export-ef-progress').html("0.00%");
+		    $('#'+prog_id).remove();
+		    if (progress_displayed) {
+			progress_displayed = false;
+			$('#'+href_id).removeClass("disabled-div");
+		    }
+		    
+		    if ($('#export-ef-progress-div').children().length  == 0) {
+			// No other preparing for downloads being displayed
+			$('#export-ef-progress-div').hide();
+		    }
 		    console.log("Export/Download WebSocket closed");
 		};
 		
 		ws.onerror = function(err) {
 		    alert("Error: " + err); // **** // change to htrc_alert?
+		    if ($('#'+prog_id).length>0) {
+			$('#'+prog_id).remove();
+		    }
 		};
 		
 	    }
 	}
+*/
     });
 }
 
