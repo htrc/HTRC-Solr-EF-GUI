@@ -213,7 +213,7 @@ function stream_export_ef(jsonData,output_format,only_metadata)
 	    var href_id = (only_metadata) ? "#export-ef-metadata-" : "#export-ef-";
 	    href_id += output_format;
 
-	    if (runtime_mode != "dev") {
+	    if ((runtime_mode != "dev") || (window.location.hostname == "solr2.htrc.illinois.edu")) {
 		$(href_id).attr('href',url);
 		// Trigger click with W3C version, as jquery trigger("click") reported to not work when an 'href
 		//   https://stackoverflow.com/questions/7999806/jquery-how-to-trigger-click-event-on-href-element
