@@ -689,11 +689,27 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	// Now explain_html has been added into page, figure out the shortened URL that
 	// is needed for add2any, and add that into the marked <span> tag
-	var raw_q = $('#raw-q-base').text();
-	raw_q += " " + $('#raw-q-facets').text();
-	raw_q += " " + $('#raw-q-exclude').text();
+	//var raw_q = $('#raw-q-base').text();
+	//raw_q += " " + $('#raw-q-facets').text();
+	//raw_q += " " + $('#raw-q-exclude').text();
 
-	explain_add2any_dom(raw_q);
+	var raw_q_base    = $('#raw-q-base').text().trim();
+	var raw_q_facets  = $('#raw-q-facets').text().trim();
+	var raw_q_exclude = $('#raw-q-exclude').text().trim();
+
+	var raw_q = raw_q_base;
+	if (raw_q_facets != "") {
+	    raw_q += " " + raw_q_facets;
+	}
+	if (raw_q_exclude != "") {
+	    raw_q += " " + raw_q_exclude;
+	}
+
+	var facet_filter_json = facet_filter.getJSONForSerialization();
+	
+	var raw_q_json = { 'raw_q': raw_q,  'base': raw_q_base, 'facet_filter': facet_filter_json, 'exclude_ids': store_search_not_ids };
+	
+	explain_add2any_dom(raw_q_json);
 	//explain_add2any_dom(store_search_url);
 
     }

@@ -928,37 +928,13 @@ function solref_dom_ready() {
 	    // User has clicked on a facet
 	    // => Add it to 'filters', then instigate an updated search
 
-	    //var filter_key_count = Object.keys(facet_filter.refine_query).length;
-
-	    	
 	    var facet_key = $(this).attr("data-key");
 	    var term = $(this).attr("data-term");
 
 	    var pending_filters = facet_filter.hasPendingFilters(facet_key,term);
-	    
-	    /*
-	    var pending_filters = false;
-	    for (var pending_key in facet_filter.refine_query) {
-		if (pending_key != facet_key) {
-		    pending_filters = true;
-		    break;
-		}
-		else {
-		    var refine_terms = facet_filter.refine_query[pending_key];
-		    for (var pending_term in refine_terms) {
-			
-			if (pending_term != term) {
-			    pending_filters = true;
-			}
-		    }
-		}
-	    }*/
-	    	    
+	    	    	    
 	    var clicked_elem = this;
 
-	    //var facet_key_count = facet_filter.refine_query_count[facet_key];
-	    
-	    //if ((filter_key_count>1) || (facet_key_count > 1)) {
 	    if (pending_filters) {
 		var pp_field = facet_filter.prettyPrintField(facet_key);
 		var pp_term = facet_filter.prettyPrintTerm(facet_key,term);

@@ -16,8 +16,12 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 	    'key': encodeURI(solr_key_q)
 	},
 	dataType: "text",
-	success: function(textData) {	    
-	    var text_q = textData.trim();
+	success: function(textData) {
+	    //var text_q = textData.trim(); // **** before the change to storing the query in the Access API as structured JSON
+	    
+	    var store_raw_q_json = JSON.parse(textData);
+	    var text_q = store_raw_q_json.raw_q; // change text_q to raw_q for better consistency with other parts of the code ?? // ****
+	    
 	    select_optimal_query_tab(text_q);
 	    solr_add_to_history = add_to_history;
 	    initialize_new_solr_search();
@@ -910,7 +914,7 @@ function submit_action(event) {
 
 }
 
-function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
+function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet_terms,opt_exclude_terms)
 {
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
 
@@ -923,6 +927,10 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 	facet: "on"
     };
 
+    if (opt_facet_terms) {
+	store_search_args.fq = opt_facet_terms;
+    }
+    
     store_search_not_ids = [];
     store_query_level_mix = null;
     

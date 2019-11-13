@@ -11,8 +11,8 @@ function FacetFilter()
     this.facet_level = null;
 
     this.filters = [];
-    this.refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
-    this.refine_query_count = {};   
+    this._refine_query = {}; // used to store what checkboxes the user has selected (prior to pressing apply)
+    this._refine_query_count = {};   
 }
 
 // Static member: The facet fields to display
@@ -26,11 +26,26 @@ FacetFilter.FacetFieldsDisplay =
       'classification_lcc_ss': 'Classification',
       'concept_ss': 'Concepts'
     };
+
+FacetFilter.prototype.getJSONForSerialization = function()
+{
+    // Example, facet_filter data-structure:
+    //   {"show_facet":true,"facet_level":null,"filters":[],"_refine_query":{},"_refine_query_count":{}}
+    // Don't need to keep track for the _refine_.* fields when serializing
     
+    var json_for_serialization =
+	{ "show_facet":  this.show_facet,
+	  "facet_level": this.facet_level,
+	  "filters":     this.filters
+	};
+	  
+    return json_for_serialization;
+}
+
 FacetFilter.prototype.resetRefineQuery = function()
 {
-    this.refine_query = {}; 
-    this.refine_query_count = {};
+    this._refine_query = {}; 
+    this._refine_query_count = {};
 }
 
 
@@ -91,14 +106,14 @@ FacetFilter.prototype.filterAdd = function(field,term)
 FacetFilter.prototype.hasPendingFilters = function(ignore_key,opt_ignore_term)
 {
     var pending_filters = false;
-    for (var pending_key in this.refine_query) {
+    for (var pending_key in this._refine_query) {
 	if (pending_key != ignore_key) {
 	    pending_filters = true;
 	    break;
 	}
 	else {
 	    if (opt_ignore_term) {
-		var refine_terms = this.refine_query[pending_key];
+		var refine_terms = this._refine_query[pending_key];
 		for (var pending_term in refine_terms) {
 		    
 		    if (pending_term != opt_ignore_term) {
@@ -272,7 +287,7 @@ FacetFilter.prototype.showResultsHtml = function(facet_fields)
 
 // **** Not currently used, would need updating
 
-FacetFilter.prototype.refine_query_unused = function()
+FacetFilter.prototype.__refine_query_unused = function()
 {
     // merge items in refine_query and filter into into main Solr query q= ...
     
@@ -281,7 +296,7 @@ FacetFilter.prototype.refine_query_unused = function()
     
     var facet_or_terms = [];
     
-    var terms = Object.keys(that.refine_query[facet_key]); // **** replace with keys in
+    var terms = Object.keys(that._refine_query[facet_key]); // **** replace with keys in
     for (var i=0; i<terms.length; i++) {
 	var term = terms[i];
 	term = term.replace(/\//g,"\\/").replace(/:/g,"\\:");
@@ -325,8 +340,8 @@ FacetFilter.prototype.refine_query_unused = function()
     // Now that all the selectted refine_query terms and existing filters
     // have been merged into the main query arg, reset these values
     that.filters = [];
-    that.refine_query = {};
-    that.refine_query_count = {};
+    that._refine_query = {};
+    that._refine_query_count = {};
 
     facet_filter.facetlistSet();
     
@@ -361,27 +376,27 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 	
 	if (checkbox_inc) {
 	    // just been checked on
-	    if (!(facet_key in that.refine_query)) {
-		that.refine_query[facet_key] = {};
-		that.refine_query_count[facet_key] = 0;
+	    if (!(facet_key in that._refine_query)) {
+		that._refine_query[facet_key] = {};
+		that._refine_query_count[facet_key] = 0;
 	    }
-	    that.refine_query[facet_key][term] = 1;	    
-	    that.refine_query_count[facet_key]++;
+	    that._refine_query[facet_key][term] = 1;	    
+	    that._refine_query_count[facet_key]++;
 	    
 	    //console.log("**## Added [" + facet_key + "]." + term);
 	}
 	else {
-	    delete that.refine_query[facet_key][term];
-	    that.refine_query_count[facet_key]--;
+	    delete that._refine_query[facet_key][term];
+	    that._refine_query_count[facet_key]--;
 	    //console.log("**## Removed [" + facet_key + "]." + term);
 
-	    if (that.refine_query_count[facet_key] == 0) {
-		delete that.refine_query[facet_key];
-		delete that.refine_query_count[facet_key];
+	    if (that._refine_query_count[facet_key] == 0) {
+		delete that._refine_query[facet_key];
+		delete that._refine_query_count[facet_key];
 	    }
 	}
 
-	var fk_terms_count = that.refine_query_count[facet_key] || 0;
+	var fk_terms_count = that._refine_query_count[facet_key] || 0;
 	
 	if (checkbox_inc && (fk_terms_count == 1)) {
 	    // change to filter
@@ -437,7 +452,7 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 /*
 	    var or_terms = [];
 	    
-	    for (var term in that.refine_query[facet_key]) {
+	    for (var term in that._refine_query[facet_key]) {
 		
 	    	or_terms.push(term);
 		
@@ -447,8 +462,8 @@ FacetFilter.prototype.addCheckboxHandlers = function()
 		$filter_elem.parent().remove();
 	    }
 
-	    delete that.refine_query[facet_key];
-	    delete that.refine_query_count[facet_key];
+	    delete that._refine_query[facet_key];
+	    delete that._refine_query_count[facet_key];
 
 	    var or_terms_str = or_terms.join(" OR ");
 
@@ -593,7 +608,7 @@ FacetFilter.prototype.applyMultiFilter = function(facet_key)
 
     var or_terms = [];
 	    
-    for (var term in this.refine_query[facet_key]) {
+    for (var term in this._refine_query[facet_key]) {
 	
 	or_terms.push(term);
 	

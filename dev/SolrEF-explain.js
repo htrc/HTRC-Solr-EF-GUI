@@ -108,31 +108,36 @@ window.onpopstate = function(event) {
 
 
 //function explain_add2any_dom(store_search_url) // ****
-function explain_add2any_dom(store_value)
+function explain_add2any_dom(store_raw_q_json)
 {
-    var value = store_value;
-    //if (!value.match(/^https?:/)) {
-    if (value.match(/^\/\//)) {
-	value = "https:" + value;
+    //var raw_q = store_raw_q_json.raw_q;
+    var store_raw_q_json_str = JSON.stringify(store_raw_q_json)
+    
+    //if (!raw_q.match(/^https?:/)) {
+    // ****
+    // Is the following relevant anymore? // **** (former version had url as its param)
+    /*
+    if (raw_q.match(/^\/\//)) {
+	raw_q = "https:" + raw_q;
     }
-
+    */
+    
     // **** Is this really the best place for this AJAX triggered call?
     if (store_query_display_mode != QueryDisplayModeEnum.ShoppingCart) {
-	value = value.trim();
+	//raw_q = raw_q.trim(); // calling method does .trim() now, so is this needed anymore? // ****
 	
     $.ajax({
 	type: "POST",
 	async: true,
-	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url,
 	data: {
 	    'action': 'url-shortener',
-	    'value': encodeURI(value)
+	    'value': encodeURI(store_raw_q_json_str)
 	},
 	dataType: "text",
 	success: function(textData) {
-	    var key = textData;	    
+	    var key = textData;
 	    
 	    // If query has been cause by a forward/backward browser button being pressed, then
 	    // solr_add_to_history will be false
@@ -253,15 +258,15 @@ function explain_add2any_dom(store_value)
 	    // $('.facet-search').removeClass("disabled-div");
 	    //iprogressbar.cancel();
 	    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
-		console.warn("Interrupted call converting query string: " + value + " through URL: " + ef_accessapi_url);
+		console.warn("Interrupted call converting JSON packaged query string: " + store_raw_q_json_str + " through URL: " + ef_accessapi_url);
 	    }
 	    else {
 
 		if ((runtime_mode == "dev") || (runtimemode == "prod" && !ef_accessapi_failed)) {
 		    ef_accessapi_failed = true;
 		    
-		    var mess = '<b>Failed to convert query string:';
-		    mess += '<div style="margin: 0 0 0 10px"><i>'+value+'</i></div>';
+		    var mess = '<b>Failed to convert JSON packaged query string:';
+		    mess += '<div style="margin: 0 0 0 10px"><i>'+store_raw_q_json_str+'</i></div>';
 		    mess += 'to Solr query-key form. ';
 		    mess += 'Unable to access URL: ';
 		    mess += '<div style="margin: 0 0 0 10px">' + ef_accessapi_url +'</div>';
@@ -301,6 +306,9 @@ function filter_fq_args(filters)
     
 }
 
+// ****
+// 'store_search_url' no longer used in function as a result of the decision to subpress the add2any feature
+// => no need to have the direct URL the initiates the query that has been performed
 function show_results_explain_html(query_level_mix,store_search_url)
 {
     
