@@ -84,7 +84,6 @@ function ajax_solr_stream_volume_count(arg_q,doRollup,callback)
     $.ajax({
 	type: "POST",
 	async: true,
-	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: solr_stream_action,
 	data: data_str,
@@ -165,13 +164,48 @@ function stream_export(jsonData)
     var ids = stream_get_ids(jsonData);
     $('.export-item').css("cursor","auto");
 
-    download(JSON.stringify(ids), "htrc-export.json", "text/plain");    
+    var ids_line_by_line = ids.join("\r\n"); // Notepad friendly, other more fancy text editors typically auto detect
+    
+    var output_filename = "htrc-export";
+
+    if ((ids.length>0) && (ids[0].match(/\.page-\d+$/))) {
+	output_filename += "-pages";
+    }
+
+    var solr_key_q = getURLParameter("solr-key-q");
+    if (solr_key_q) {
+	output_filename += "-"+solr_key_q;
+    }
+    
+    output_filename += ".txt";
+
+    //download(JSON.stringify(ids), "htrc-export.json", "text/plain");     // ****
+    download(ids_line_by_line, output_filename, "text/plain");    
 }
 
 function stream_export_ef_key(key,ids,output_format,only_metadata)
 {
+    var output_filename_root;
+
+    var solr_key_q = getURLParameter("solr-key-q");
+    if (solr_key_q != null) {
+	if (output_format == "zip") {
+	    output_filename_root="htrc-ef-export";
+	}
+	else {
+	    output_filename_root="htrc-metadata-export";
+	}
+
+	output_filename_root += "-"+solr_key_q;
+    }
+    
     var url = ef_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
     var ws_url = ws_accessapi_url + '?action=download-ids&key='+key + "&output="+output_format;;
+
+    if (output_filename_root) {
+	url += "&output-filename-root="+output_filename_root;
+	ws_url += "&output-filename-root="+output_filename_root;
+    }
     
     if (solref_verbosity >= 2) {
 	console.log("SolrEF-Stream::stream_export_ef(): download url = " + url);

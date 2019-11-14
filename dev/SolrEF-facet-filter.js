@@ -42,6 +42,17 @@ FacetFilter.prototype.getJSONForSerialization = function()
     return json_for_serialization;
 }
 
+
+FacetFilter.prototype.setFromJSONSerialization = function(json_rec)
+{
+    this.show_facet  = json_rec.show_facet;
+    this.facet_level = json_rec.facet_level;
+    this.filters     = json_rec.filters;
+
+    this._refine_query = {}; 
+    this._refine_query_count = {};   
+}
+
 FacetFilter.prototype.resetRefineQuery = function()
 {
     this._refine_query = {}; 

@@ -8,7 +8,6 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
     $.ajax({
 	type: "POST",
 	async: true,
-	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url,
 	data: {
@@ -914,7 +913,7 @@ function submit_action(event) {
 
 }
 
-function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet_terms,opt_exclude_terms)
+function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet_filter,opt_search_not_ids)
 {
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
 
@@ -927,11 +926,17 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet
 	facet: "on"
     };
 
-    if (opt_facet_terms) {
-	store_search_args.fq = opt_facet_terms;
+    if (opt_facet_filter) {
+	facet_filter = opt_facet_filter;
+    }
+
+    if (opt_search_not_ids) {
+	store_search_not_ids = opt_search_not_ids;
+    }
+    else {
+	store_search_not_ids = [];
     }
     
-    store_search_not_ids = [];
     store_query_level_mix = null;
     
     if (group_by_vol_checked) {
