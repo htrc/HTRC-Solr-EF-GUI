@@ -30,6 +30,8 @@ function htrc_alert(message)
 function htrc_confirm(message,confirm_callback,cancel_callback)
 {
     if (!cancel_callback) {
+	//console.log("*** creating default cancel callback routine");
+	
     	cancel_callback = function() {
 	    $('#htrc-alert-dialog').dialog("close");
 	};
@@ -45,6 +47,7 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
 		confirm_callback();
 	    },
 	    "Cancel" : function() {
+		//console.log("*** performing Cancel!");
 		$('#htrc-alert-body').html("");
 		cancel_callback();
 	    }

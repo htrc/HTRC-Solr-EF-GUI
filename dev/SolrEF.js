@@ -541,6 +541,17 @@ function load_solr_q(solr_q)
 function submit_action(event) {
     event.preventDefault();
 
+    // Stop any current 'prepare to downloads' that might be underway
+    console.log("*** away to check for open web sockets");
+    for (var key in store_open_web_sockets) {
+	console.log("*** key = " + key + ", ws = ... ");
+	var ws = store_open_web_sockets[key] ;
+	console.log(ws);
+	//ws.onclose();
+	ws.stopdownload();
+	ws.close();
+    }
+	
     initialize_new_solr_search();
     
     var arg_q = null;

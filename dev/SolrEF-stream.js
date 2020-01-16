@@ -1,5 +1,7 @@
 //"use strict";
 
+var store_open_web_sockets = {};
+
 function get_solr_stream_search_clause(arg_q)
 {
     //	search(faceted-htrc-full-ef20,qt="/export",q="volumetitle_txt:Sherlock AND en_NOUN_htrctokentext:Holmes",
@@ -216,10 +218,17 @@ function stream_export_ef_key(key,ids,output_format,only_metadata)
     if (ids.length>export_ef_limit) {
 	var alert_mess = "Exporting Extracted Features is currently in development.<br />";
 	alert_mess += "Currently only the first "
-	    + export_ef_limit + " JSON files in the search list are exported";
+	    + export_ef_limit + " JSON files in the search list are exported. <br />";
+
+	alert_mess += "Do you want to continue?";
 	
-	htrc_alert(alert_mess);
-    }
+	htrc_confirm(alert_mess, 
+    
+ function() {
+    // only_metadata, output_format,
+    // runtime_mode (global?)
+    // url, ws_url
+    // store_open_web_sockets (global?)
     
     var href_id = (only_metadata) ? "export-ef-metadata-" : "export-ef-";
     href_id += output_format;
@@ -252,6 +261,8 @@ function stream_export_ef_key(key,ids,output_format,only_metadata)
 	
 	ws.onopen = function() {
 	    console.log("Successfully opened WebSocket connection to: " + ws_url);
+	    store_open_web_sockets[href_id] = ws;
+	    
 	    $prog_div = $('<div>').attr("id",prog_id).attr("style","display:none;")
 		.html("Preparing "+output_format.toUpperCase()+" Download:");
 
@@ -262,6 +273,11 @@ function stream_export_ef_key(key,ids,output_format,only_metadata)
 	    $('#export-ef-progress-div').append($prog_div);
 	    
 	    ws.send("start-download");
+	};
+
+	ws.stopdownload = function () {
+	    console.log("*** ws.stopdownload() called, away to send stop-download command/action");
+	    ws.send("stop-download");
 	};
 	
 	ws.onmessage = function (evt) {
@@ -307,6 +323,9 @@ function stream_export_ef_key(key,ids,output_format,only_metadata)
 	};
 	
 	ws.onclose = function() {
+	    console.log("WebSocket.onclose(), ws = ..." );
+	    console.log(ws);
+	    
 	    $('#'+prog_id).remove();
 	    if (progress_displayed) {
 		progress_displayed = false;
@@ -318,16 +337,24 @@ function stream_export_ef_key(key,ids,output_format,only_metadata)
 		$('#export-ef-progress-div').hide();
 	    }
 	    console.log("Export/Download WebSocket closed");
+
+	    delete store_open_web_sockets[href_id];
 	};
 	
 	ws.onerror = function(err) {
-	    alert("Error: " + err); // **** // change to htrc_alert?
+	    alert("A WebSocket error occurred preventing the download preparation process to successfully complete.  Please try again"); // **** // change to htrc_alert?
 	    if ($('#'+prog_id).length>0) {
 		$('#'+prog_id).remove();
 	    }
+
+	    delete store_open_web_sockets[href_id];
 	};
-	
     }
+ } // end function()
+		     , null
+		    ); // end htrc_confirm
+    } // end if-statement that triggers htrc_confirm
+    
 }
 
     
