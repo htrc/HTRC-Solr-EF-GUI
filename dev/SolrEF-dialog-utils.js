@@ -43,6 +43,7 @@ function htrc_confirm(message,confirm_callback,cancel_callback)
 	modal: true,
 	buttons : {
 	    "Confirm" : function() {
+		$('#htrc-alert-dialog').dialog("close");
 		$('#htrc-alert-body').html("");
 		confirm_callback();
 	    },
