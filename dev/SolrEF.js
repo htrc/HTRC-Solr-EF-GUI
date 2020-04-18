@@ -994,6 +994,11 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet
 	type: "POST",
 	async: true,
 	//timeout: 60000,
+	// htrc-ef-access/get  does not appear to set mime-type, so XML presumed by browser even though plain text returned
+	//   https://stackoverflow.com/questions/7642202/xml-parsing-error-not-well-formed-in-firefox-but-good-in-chrome
+	// In Firefox this leads to an XML parsing error message in the JS console
+	// The following is a workaround
+	beforeSend: function(xhr){  xhr.overrideMimeType( "text/plain; charset=x-user-defined" );},
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, // With no data arguments, prints out a usage message
 	dataType: "text",
