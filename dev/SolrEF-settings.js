@@ -86,6 +86,11 @@ $.ajax({
     async: true,
     //timeout: 60000,
     cache: false,
+    // worksets-api does not appear to set mime-type, so XML presumed
+    //   https://stackoverflow.com/questions/7642202/xml-parsing-error-not-well-formed-in-firefox-but-good-in-chrome
+    // in Firefox this leads to an error message in the JS console
+    // The following is a workaround
+    beforeSend: function(xhr){  xhr.overrideMimeType( "text/plain; charset=x-user-defined" );},
     headers: { "cache-control": "no-cache" },
     url: worksets_api_url,
     data: 'vis=public',
