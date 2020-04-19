@@ -16,16 +16,8 @@ function FacetFilter()
 }
 
 // Static member: The facet fields to display
-FacetFilter.FacetFieldsDisplay =
-    { 'genre_ss'             : 'Genre',
-      'language_s'           : 'Language',
-      'rightsAttributes_s'   : 'Copyright Status',
-      'names_ss'             : 'Author',
-      'pubPlace_s'           : 'Place of Publication',
-      'bibliographicFormat_s': 'Original Format',
-      'classification_lcc_ss': 'Classification',
-      'concept_ss': 'Concepts'
-    };
+// 'facet_fields_display' defined in SolrEF15-lookup-vars.js or SolrEF20-lookup-vars.js appropriately
+FacetFilter.FacetFieldsDisplay = facet_fields_display; 
 
 FacetFilter.prototype.getJSONForSerialization = function()
 {
@@ -170,22 +162,22 @@ FacetFilter.prototype.prettyPrintTerm = function(field,terms_str)
     for (var i=0; i<or_terms.length; i++) {
 	var term = or_terms[i];
 	
-	if (field_neutral == "rightsAttributes_s") {
+	if (field_neutral == solr_doc_rights_field) {
 	    if (term in rights_dic) {
 		term = rights_dic[term];
 	    }
 	}
-	else if (field_neutral == "bibliographicFormat_s") {
+	else if (field_neutral == solr_doc_bibformat_field) {
 	    if (term in format_dic) {
 		term = format_dic[term];
 	    }
 	}
-	else if (field_neutral == "language_s") {
+	else if (field_neutral == solr_doc_language_field) {
 	    if (term in language_dic) {
 		term = language_dic[term];
 	    }
 	}
-	else if (field_neutral == "pubPlace_s") {
+	else if (field_neutral == solr_doc_pubplace_field) {
 	    // fix the place code ending with whitespace
 	    term = term.trim();
 	    if (term in place_dic) {

@@ -35,7 +35,8 @@
 
     <script>
       var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/,"\/")) ? "dev" : "prod";
-
+      var json_ef_version = (document.location.pathname.match(/\/solr-ef2\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
+      
       $(document).ready(function() {
         var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
         $.get(abs_url_prefix+"json-page-viewer-body-dl.html", function(data,status) {

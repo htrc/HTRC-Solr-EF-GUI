@@ -1,14 +1,63 @@
+function _getURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+
+    for (var i=0; i<sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam)
+	{
+	    return sParameterName[1];
+	}
+    }
+
+    return null;
+}
+
 
 var base_domain_url = window.location.protocol + "//" + window.location.hostname;
 
-var solr_prefix_url = base_domain_url+"/solr/";
-var robust_solr_prefix_url = base_domain_url+"/robust-solr/";
-//var solr_collection = "faceted-htrc-full-ef20"; // ****
-var solr_collection = "solr3456-faceted-htrc-full-ef16"
-var do_solr_field_optimization = 0;
+var solr_prefix_url =  base_domain_url;
+solr_prefix_url += (json_ef_version == "2.0") ? "/solr8/" : "/solr/";
 
-var solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
-var solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+var robust_solr_prefix_url = base_domain_url;
+robust_solr_prefix_url += (json_ef_version == "2.0") ? "/robust-solr8/" : "/robust-solr/";
+
+
+var _solr_col = _getURLParameter("solr-col");
+var solr_collection;
+if (_solr_col != null) {
+    solr_collection = _solr_col;
+}
+else {
+    // If not specified, default solr collection based on version of
+    // Extracted Features JSON file format (jsno_ef_version),
+    // which in turn is driven by the URL visited: /solr-ef/ or /solr-ef2/
+
+    if (json_ef_version == "2.0") {
+	// Accessing solr cloud running in solr1+solr2 through /solr8 API
+	solr_collection = "solr12-dbbridge-test-htrc-configs-docvals"; // ****
+    }
+    else {
+	solr_collection = "solr3456-faceted-htrc-full-ef16";
+	//solr_collection = "faceted-htrc-full-ef20"; // original solr12 full collection
+    }
+
+}
+
+var solr_search_action;
+var solr_stream_action;
+if (solr_collection.match(/^solr3456-/)) {    
+    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
+    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+}
+else {
+    solr_search_action = solr_prefix_url+solr_collection+"/select";
+    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+}
+
+
+var do_solr_field_optimization = 0;
 
 var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";

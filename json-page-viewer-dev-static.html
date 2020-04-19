@@ -32,10 +32,15 @@
         <script type="text/javascript" src="assets/uploadws.js"></script>
         <script type="text/javascript" src="assets/ga-download-tracking.js"></script>
 	<script type="text/javascript" src="assets/paging.js"></script>
-	
+
+	<script>
+	  var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/)) ? "dev" : "prod";
+	  var json_ef_version = (document.location.pathname.match(/\/solr-ef2\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
+	</script>	
+
 	<script src="dev/iso-639-1.js"></script> <!-- defines var 'isoLangs' -->
 	<script src="dev/opennlp-lang-pos-mapping.js"></script> <!-- defines var 'universalPOSMapping' -->
-	<script src="dev/lookup-vars.js"></script>
+	<script src="dev/SolrEF20-lookup-vars.js"></script>
 
 	<script src="dev/SolrEF-settings.js"></script>
 	<script src="dev/SolrEF-utils.js"></script>

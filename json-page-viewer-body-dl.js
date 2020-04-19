@@ -18,6 +18,14 @@ var page_viewer_async_link_css_urls = [
     "assets/pager-icons.css"
 ];
 
+var versioned_lookup_vars;
+if (json_ef_version == "2.0") {
+    versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+}
+else {
+    versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+}
+
 var page_viewer_async_script_urls = [ 
     //"assets/highlight.js",
     //"assets/stupidtable.js",
@@ -28,7 +36,7 @@ var page_viewer_async_script_urls = [
     "assets/paging.js",
     runtime_mode+"/iso-639-1.js",
     runtime_mode+"/opennlp-lang-pos-mapping.js", // defines var 'universalPOSMapping'
-    runtime_mode+"/lookup-vars.js",
+    runtime_mode+versioned_lookup_vars,
     runtime_mode+"/SolrEF-settings.js",
     runtime_mode+"/SolrEF-utils.js",
     runtime_mode+"/SolrEF-dialog-utils.js",

@@ -68,6 +68,81 @@ var volume_metadata_dic = {
     "volumeIdentifier_t": "A unique identifier for the current volume. This is the same identifier used in the HathiTrust and HathiTrust Research Center corpora."
 };
 
+var facet_fields_display = {
+    'genre_ss'             : 'Genre',
+    'language_s'           : 'Language',
+    'rightsAttributes_s'   : 'Copyright Status',
+    'names_ss'             : 'Author',
+    'pubPlace_s'           : 'Place of Publication',
+    'bibliographicFormat_s': 'Original Format',
+    'classification_lcc_ss': 'Classification',
+    'concept_ss'           : 'Concepts'
+};
+
+
+var solr_doc_id_url_field    = "handleUrl_s";
+var solr_doc_rights_field    = "rightsAttributes_s";
+var solr_doc_language_field  = "language_s";
+var solr_doc_bibformat_field = "'bibliographicFormat_s";
+var solr_doc_pubplace_field  = "pubPlace_s";
+
+var solr_doc_fl_args = [
+    "id", "title_s",
+    solr_doc_id_url_field, solr_doc_rights_field,
+    "genre_ss", "names_ss", "pubDate_s",
+    solr_doc_pubplace_field, solr_doc_language_field,
+    "typeOfResource_s", "classification_lcc_ss", "concept_ss"
+];
+
+function title_and_authors_tooltip_details(doc_val,title)
+{
+    var title_tidied = title.replace(/\.\s*$/,""); // remove any trailing fullstop, in anticipation of "by ..." author(s)
+    var title_and_authors = title_tidied;
+    
+    var details = [];
+    details.push("Title: " + title_tidied);
+
+    
+    if (doc_val['names_ss']) {
+	var names = doc_val['names_ss'].map(strtrim).join(", ");
+	if (!names.match(/^\s*$/)) {
+	    details.push("Author(s): " + names);
+	    title_and_authors += " by " + names;
+	}
+    }
+    if (doc_val['genre_ss']) {
+	var genres = doc_val['genre_ss'].map(strtrim).join(", ");
+	if (!genres.match(/^\s*$/)) {
+	    details.push("Genre: " + genres.capitalize() );
+	}
+    }
+    if (doc_val['pubDate_s'] && !doc_val['pubDate_s'].match(/^\s*$/)) {
+	details.push("Publication date: " + doc_val['pubDate_s']);
+    }
+    if (doc_val['pubPlace_s'] && !doc_val['pubPlace_s'].match(/^\s*$/)) {
+	var pp_val = facet_filter.prettyPrintTerm("pubPlace_s",doc_val['pubPlace_s'])
+	details.push("Place of Publication: " + pp_val);
+    }
+    if (doc_val['language_s'] && !doc_val['language_s'].match(/^\s*$/)) {
+	var pp_val = facet_filter.prettyPrintTerm("language_s",doc_val['language_s'])
+	details.push("Language: " + pp_val);
+    }
+    if (doc_val['typeOfResource_s'] && !doc_val['typeOfResource_s'].match(/^\s*$/)) {
+	details.push("Resource type: " + doc_val['typeOfResource_s'].capitalize() );
+    }
+    if (doc_val['concept_ss']) {
+	var concepts = doc_val['concept_ss'].map(strtrim).join(", ");
+	if (!concepts.match(/^\s*$/)) {
+	    details.push("Concept(s): " + concepts.capitalize() );
+	}
+    }
+
+    return { "title_and_authors": title_and_authors, "details": details };
+}	
+
+
+
+
 var volume_metadata_help_dict = {}; // initialized in Solr-dom-ready.js
 
 /*
