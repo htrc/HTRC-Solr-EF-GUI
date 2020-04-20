@@ -415,7 +415,7 @@ function query_breakdown_volume_specific_allonefield_simplification(volume_monit
 
 function query_breakdown_volume_allonefield_simplification(volume_monitor)
 {
-    var metadata_fields = Object.keys(volume_metadata_fields);
+    var metadata_fields = Object.keys(lup_volume_metadata_fields);
 
     for (var i = 0; i < metadata_fields.length; i++) {
 	var vm_field = metadata_fields[i];
@@ -448,8 +448,8 @@ function query_breakdown_volume_allfields_simplification(volume_monitor)
 	    var field_lookup = or_terms[orkey];
 	    var field_keys = Object.keys(field_lookup);
 	    
-	    for (var vmi = 0; vmi < volume_metadata_fields_common.length; vmi++) {
-		var vm_field = volume_metadata_fields_common[vmi];
+	    for (var vmi = 0; vmi < lup_volume_metadata_fields_common.length; vmi++) {
+		var vm_field = lup_volume_metadata_fields_common[vmi];
 		
 		if (!(vm_field in field_lookup)) {
 		    simplifies = false;
@@ -550,7 +550,7 @@ function query_breakdown(query_str)
     // If get to here, then no -id:xxx entries in query_str
     var parse_tree = lucenequeryparser.parse(query_str);
 
-    console.log("*** reconstructed query = " + query_breakdown_tostring(parse_tree));
+    console.log("Reconstructed query: " + query_breakdown_tostring(parse_tree));
 
     var only_volume_metadata = query_breakdown_only_volume_metadata(parse_tree);
     if (only_volume_metadata) {

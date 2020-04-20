@@ -6,7 +6,7 @@
 // Based on: http://stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
 // Downloaded from: http://pastebin.com/raw/ppdMS687
 
-var isoLangs = {
+var lup_isoLangs = {
     "ab":{
         "name":"Abkhaz",
         "nativeName":"аҧсуа"

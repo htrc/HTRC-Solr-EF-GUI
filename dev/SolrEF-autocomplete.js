@@ -96,14 +96,14 @@ function term_split(val,strip_quotes) {
 
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
-    var dynamic_fields_dic = { 'pubPlace_t': place_dic, 'language_t': language_dic, 'format_t': format_dic };
-    var dynamic_fields     = Object.keys(dynamic_fields_dic);
+    var dynamic_fields_dict = { 'pubPlace_t': lup_place_dict, 'language_t': lup_language_dict, 'format_t': lup_format_dict };
+    var dynamic_fields      = Object.keys(dynamic_fields_dict);
     
     var dynamic_fields_re_str = "^("+dynamic_fields.join("|")+")";
     var dynamic_fields_simple_re   = new RegExp(dynamic_fields_re_str + "$");
     var dynamic_fields_compound_re = new RegExp(dynamic_fields_re_str + ":.+$");
 
-    function expand_autocomplete_field(dynamic_field,label_dic)
+    function expand_autocomplete_field(dynamic_field,label_dict)
     {
 	var expanded_fields_already_present = false;
 	var expanded_field_re = new RegExp("^"+dynamic_field+":.+$");
@@ -118,16 +118,16 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 
 	if (!expanded_fields_already_present) {
 	    // Add in all the mnemonic 'dynamic_field' (e.g., pubPlace_t) names
-	    $.each(label_dic, function(key,val) {
+	    $.each(label_dict, function(key,val) {
 		var extra_tag = {'key': dynamic_field+":"+key, 'label':val};
 		available_tags.push(extra_tag);
-		//available_tags.push({'key': dynamic_field+":"+key, 'label': label_dic[key]}); // ****
+		//available_tags.push({'key': dynamic_field+":"+key, 'label': label_dict[key]}); // ****
 	    });
 	}
 
     }
     
-    function contract_autocomplete_field(dynamic_field,label_dic)
+    function contract_autocomplete_field(dynamic_field,label_dict)
     {
 	var contracted_field_already_present = false;
 	var dynamic_field_re = new RegExp("^"+dynamic_field+":.+$");
@@ -140,7 +140,7 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	});
 
 	if (!contracted_field_already_present) {
-	    available_tags.push({'key': dynamic_field, 'label': label_dic[dynamic_field]});
+	    available_tags.push({'key': dynamic_field, 'label': label_dict[dynamic_field]});
 	}
     }
 
@@ -187,8 +187,8 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		var simple_match = dynamic_fields_simple_re.exec(last_term);
 		if (simple_match) {	   
 		    var dynamic_field = simple_match[1];
-		    var dynamic_field_dic = dynamic_fields_dic[dynamic_field];
-		    expand_autocomplete_field(dynamic_field,dynamic_field_dic);
+		    var dynamic_field_dict = dynamic_fields_dict[dynamic_field];
+		    expand_autocomplete_field(dynamic_field,dynamic_field_dict);
 		}
 
 	    }
@@ -206,7 +206,7 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		if (compound_match) {	   	    
 		    var dynamic_field = compound_match[1];
 		    // => filter out the extended entries, e.g., pubPlace_t:xxx, and add in the simpler 'pubPlace_t'
-		    contract_autocomplete_field(dynamic_field,volume_metadata_dic);			
+		    contract_autocomplete_field(dynamic_field,lup_volume_metadata_dict);			
 		}
 	    }
 	    else if (event.keyCode == $.ui.keyCode.BACKSPACE) {
@@ -226,7 +226,7 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 			if (debug_autocomplete) {
 			    console.log("contract field");
 			}
-			contract_autocomplete_field(dynamic_field,volume_metadata_dic);
+			contract_autocomplete_field(dynamic_field,lup_volume_metadata_dict);
 		    }
 		}
 	    }
@@ -305,11 +305,11 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 	var simple_match = dynamic_fields_simple_re.exec(ui.item.key);
 	if (simple_match) {	   
 	    var dynamic_field = simple_match[1];
-	    var dynamic_field_dic = dynamic_fields_dic[dynamic_field];
+	    var dynamic_field_dict = dynamic_fields_dict[dynamic_field];
 	    
 	    terms.push( ui.item.key + ":" ); // add the selected item
 	    
-	    expand_autocomplete_field(dynamic_field,dynamic_field_dic);
+	    expand_autocomplete_field(dynamic_field,dynamic_field_dict);
 	}
 	else {
 	    var compound_match = dynamic_fields_compound_re.exec(ui.item.key);
@@ -317,7 +317,7 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		var dynamic_field = compound_match[1];
 		
 		terms.push( ui.item.key + " "); // add the selected item
-		contract_autocomplete_field(dynamic_field,volume_metadata_dic);
+		contract_autocomplete_field(dynamic_field,lup_volume_metadata_dict);
 	    }	
 	    else {
 		terms.push( ui.item.key + ":" ); // add the selected item

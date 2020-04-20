@@ -240,20 +240,12 @@ function show_new_results(delta) {
     show_updated_results();
 }
 
-
 var store_search_args = null;
 var store_search_action = null;
 var store_search_url = null;
 var store_search_not_ids = null;
 var store_query_level_mix = null;
 
-
-// **** Should the following not be moved to globals, or lookup-vars?
-var volume_metadata_fields_common =
-    ["accessProfile_t", "genre_t", "imprint_t", "isbn_t", "issn_t",
-     "issuance_t", "language_t", "lccn_t", "names_t", "oclc_t",
-     "pubPlace_t", "pubDate_t", "rightsAttributes_t", "title_t", "typeOfResource_t"
-    ];
 
 function expand_vfield(q_term, search_vfield, query_level) {
     var vfields = [];
@@ -265,11 +257,13 @@ function expand_vfield(q_term, search_vfield, query_level) {
 	    vfields.push(q_term);
 	}
 	else {
-	    for (var fi = 0; fi < volume_metadata_fields_common.length; fi++) {
+	    for (var fi = 0; fi < lup_volume_metadata_fields_common.length; fi++) {
 	    
-		var vfield = volume_metadata_fields_common[fi];
+		var vfield = lup_volume_metadata_fields_common[fi];
 		if (query_level == FacetLevelEnum.Page) {
-		    vfield = "volume"+ vfield + "xt";
+		    if (vfield.match(/_t$/)) {
+			vfield = "volume"+ vfield + "xt";
+		    }
 		}
 		vfields.push(vfield + ":" + q_term);
 	    }
@@ -288,7 +282,9 @@ function expand_vfield(q_term, search_vfield, query_level) {
 	    // and prefix that to the term
 	    var vfield = search_vfield;
 	    if (query_level == FacetLevelEnum.Page) {
-		vfield = "volume"+ vfield + "xt";
+		if (vfield.match(/_t$/)) {
+		    vfield = "volume"+ vfield + "xt";
+		}
 	    }
 	    
 	    vfields.push(vfield + ":" + q_term);
@@ -595,7 +591,7 @@ function submit_action(event) {
 		return;
 	    }
 	    	    
-	    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+	    arg_q = expand_query_field_and_boolean(q_text, lup_langs_with_pos, lup_langs_without_pos, search_all_langs_checked);
 	    
 	    if (arg_q == "") {
 		// Potentially only looking at volume level terms
@@ -689,8 +685,8 @@ function submit_action(event) {
 	    for (var gli=0; gli<lang_mismatch_list.length; gli++) {
 
 		var gl = lang_mismatch_list[gli];
-		var lang_full = isoLangs[gl].name;
-		var lang_native_full = isoLangs[gl].nativeName;
+		var lang_full = lup_isoLangs[gl].name;
+		var lang_native_full = lup_isoLangs[gl].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 		
 		var $lang_span = $('<span>');

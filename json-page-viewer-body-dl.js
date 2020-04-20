@@ -19,11 +19,16 @@ var page_viewer_async_link_css_urls = [
 ];
 
 var versioned_lookup_vars;
-if (json_ef_version == "2.0") {
-    versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+if (runtime_mode == "dev") {
+    if (json_ef_version == "2.0") {
+	versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+    }
+    else {
+	versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+    }
 }
 else {
-    versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+    versioned_lookup_vars = "/lookup-vars.js";
 }
 
 var page_viewer_async_script_urls = [ 
@@ -37,6 +42,7 @@ var page_viewer_async_script_urls = [
     runtime_mode+"/iso-639-1.js",
     runtime_mode+"/opennlp-lang-pos-mapping.js", // defines var 'universalPOSMapping'
     runtime_mode+versioned_lookup_vars,
+    runtime_mode+"/SolrEF-lookup-vars-common.js",
     runtime_mode+"/SolrEF-settings.js",
     runtime_mode+"/SolrEF-utils.js",
     runtime_mode+"/SolrEF-dialog-utils.js",

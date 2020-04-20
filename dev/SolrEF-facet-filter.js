@@ -163,25 +163,30 @@ FacetFilter.prototype.prettyPrintTerm = function(field,terms_str)
 	var term = or_terms[i];
 	
 	if (field_neutral == solr_doc_rights_field) {
-	    if (term in rights_dic) {
-		term = rights_dic[term];
+	    if (term in lup_rights_dict) {
+		term = lup_rights_dict[term];
 	    }
 	}
 	else if (field_neutral == solr_doc_bibformat_field) {
-	    if (term in format_dic) {
-		term = format_dic[term];
+	    if (term in lup_format_dict) {
+		term = lup_format_dict[term];
+	    }
+	}
+	else if (field_neutral == solr_doc_genre_field) {
+	    if (term in lup_genre_dict) {
+		term = lup_genre_dict[term];
 	    }
 	}
 	else if (field_neutral == solr_doc_language_field) {
-	    if (term in language_dic) {
-		term = language_dic[term];
+	    if (term in lup_language_dict) {
+		term = lup_language_dict[term];
 	    }
 	}
 	else if (field_neutral == solr_doc_pubplace_field) {
 	    // fix the place code ending with whitespace
 	    term = term.trim();
-	    if (term in place_dic) {
-		term = place_dic[term];
+	    if (term in lup_place_dict) {
+		term = lup_place_dict[term];
 	    }
 	}
 

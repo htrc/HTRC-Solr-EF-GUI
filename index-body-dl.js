@@ -19,11 +19,16 @@ var solr_ef_async_link_css_urls = [
 ];
 
 var versioned_lookup_vars;
-if (json_ef_version == "2.0") {
-    versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+if (runtime_mode == "dev") {
+    if (json_ef_version == "2.0") {
+	versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+    }
+    else {
+	versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+    }
 }
 else {
-    versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+    versioned_lookup_vars = "/lookup-vars.js";
 }
 
 var solr_ef_async_script_urls = [ 
@@ -40,6 +45,7 @@ var solr_ef_async_script_urls = [
     "assets/paging.js",
     runtime_mode+"/iso-639-1.js",
     runtime_mode+versioned_lookup_vars,
+    runtime_mode+"/SolrEF-lookup-vars-common.js",
     runtime_mode+"/SolrEF-globals.js",
     runtime_mode+"/SolrEF-settings.js",
     runtime_mode+"/SolrEF-utils.js",

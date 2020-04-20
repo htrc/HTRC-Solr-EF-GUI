@@ -19,7 +19,7 @@ function generate_query_field_menu()
     $option.attr("selected","selected");
     $select.append($option);
 
-    var metadata_fields = Object.keys(volume_metadata_fields);
+    var metadata_fields = Object.keys(lup_volume_metadata_fields);
 
     for (var i = 0; i < metadata_fields.length; i++) {
 	var field = metadata_fields[i];
@@ -44,10 +44,10 @@ function generate_query_field_menu()
 
 }
 
-function generate_volume_field_help_dic()
+function generate_volume_field_help_dict()
 {
     var restructured_dict = {}
-    $.each(volume_metadata_dic, function(field,help_text) {
+    $.each(lup_volume_metadata_dict, function(field,help_text) {
 	var label = volumeFieldToLabel(field);
 	restructured_dict[label] = field+"</td><td>"+help_text ;
     });
@@ -72,11 +72,11 @@ function generate_pos_langs() {
 
 	var $pos_fieldsets = $('#pos-fieldsets');
 
-	for (var li = 0; li < langs_with_pos.length; li++) {
+	for (var li = 0; li < lup_langs_with_pos.length; li++) {
 
-		var l = langs_with_pos[li];
-		var lang_full = isoLangs[l].name;
-		var lang_native_full = isoLangs[l].nativeName;
+		var l = lup_langs_with_pos[li];
+		var lang_full = lup_isoLangs[l].name;
+		var lang_native_full = lup_isoLangs[l].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 
 		var opt_enabled = (l == "en") ? 'checked="checked"' : "";
@@ -137,12 +137,12 @@ function generate_pos_langs() {
 
 function generate_other_langs() {
 	// setup other languages
-	// for each 'langs_without_pos' generate HTML of the form:
+	// for each 'lup_langs_without_pos' generate HTML of the form:
 	//    <input type="checkbox" name="fr-enabled" id="fr-enabled" />French
 	var $other_langs = $('#other-langs');
 
-	for (var i = 0; i < langs_without_pos.length; i++) {
-		var lang = langs_without_pos[i];
+	for (var i = 0; i < lup_langs_without_pos.length; i++) {
+		var lang = lup_langs_without_pos[i];
 		var labeled_checkbox = '<nobr>';
 
 		labeled_checkbox += '<input type="checkbox" name="' + lang + '-enabled" id="' + lang + '-enabled" />';
@@ -156,8 +156,8 @@ function generate_other_langs() {
 	    lang = "zh";
 	}
 */
-		var lang_full = isoLangs[lang].name;
-		var lang_native_full = isoLangs[lang].nativeName;
+		var lang_full = lup_isoLangs[lang].name;
+		var lang_native_full = lup_isoLangs[lang].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 
 		labeled_checkbox += '<label for="' + lang + '-enabled" style="padding-left: 5px; padding-right: 10px;" ' + opt_title + '>' + lang_full + '</label>';
@@ -326,7 +326,7 @@ function domready_help_dialogs()
     });
 */
 
-    volume_metadata_help_dict = generate_volume_field_help_dic();
+    lup_volume_metadata_help_dict = generate_volume_field_help_dict();
 
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
@@ -350,7 +350,7 @@ function domready_help_dialogs()
     // Entries in following hashmap have <td>'s spliced into them to cause an extra
     // column in the table to be produced
     var header_row = '<tr class="help-table-header"><td style="min-width:220px;">Field name</td><td style="min-width:220px;">Field name in Solr syntax</td><td>Field description</td></tr>';
-    mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
+    mnemonic_help_text(lup_volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
@@ -976,10 +976,10 @@ function solref_dom_ready() {
 	show_updated_results();
     });
 
-    var volume_available_keys = Object.keys(volume_metadata_fields).sort();
+    var volume_available_keys = Object.keys(lup_volume_metadata_fields).sort();
     var volume_available_tags = [];
     $.each(volume_available_keys,function(index,key) {
-	volume_available_tags.push({'key':key, 'label': volume_metadata_dic[key]});
+	volume_available_tags.push({'key':key, 'label': lup_volume_metadata_dict[key]});
     });
     
     if (runtime_mode == "dev")  {    
