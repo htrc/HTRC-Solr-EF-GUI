@@ -535,7 +535,7 @@ $(document).ready(function() {
 		var $vol_info = $('#vol-info');
 		var rights = getURLParameter("rights");
 		if (rights != null) {
-		    var rights_pp = facet_filter.prettyPrintTerm("rightsAttributes_s",rights)
+		    var rights_pp = facet_filter.prettyPrintTerm(solr_doc_rights_field,rights)
 		    
 		    $vol_info.append("<span>Copyright status: " + rights_pp + "</span><br />");
 		}

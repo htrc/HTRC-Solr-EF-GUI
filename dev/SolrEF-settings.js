@@ -32,11 +32,12 @@ if (_solr_col != null) {
 else {
     // If not specified, default solr collection based on version of
     // Extracted Features JSON file format (jsno_ef_version),
-    // which in turn is driven by the URL visited: /solr-ef/ or /solr-ef2/
+    // which in turn is driven by the URL visited: /solr-ef/ or /solr-ef20/
 
     if (json_ef_version == "2.0") {
 	// Accessing solr cloud running in solr1+solr2 through /solr8 API
-	solr_collection = "solr12-dbbridge-test-htrc-configs-docvals"; // ****
+	//solr_collection = "solr12-dbbridge-test-htrc-configs-docvals"; // ****
+	solr_collection = "solr12-ef2-fictfull-core20"; // ****
     }
     else {
 	solr_collection = "solr3456-faceted-htrc-full-ef16";

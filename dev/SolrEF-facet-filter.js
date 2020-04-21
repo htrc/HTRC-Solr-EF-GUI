@@ -189,6 +189,11 @@ FacetFilter.prototype.prettyPrintTerm = function(field,terms_str)
 		term = lup_place_dict[term];
 	    }
 	}
+	else if (field_neutral == solr_doc_typeofresource_field) {
+	    if (term in lup_typeofresource_dict) {
+		term = lup_typeofresource_dict[term];
+	    }
+	}
 
 	pp_or_terms.push(term);
     }

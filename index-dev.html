@@ -35,7 +35,7 @@
     <div id="solr-ef-container-dynamic-load" style="display: none;"><!-- dynamic body insert --></div>
     <script type="text/javascript">
       var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/)) ? "dev" : "prod";
-      var json_ef_version = (document.location.pathname.match(/\/solr-ef2\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
+      var json_ef_version = (document.location.pathname.match(/\/solr-ef20\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
       
       $(document).ready(function() {
       var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
@@ -61,7 +61,7 @@
 	<script type="text/javascript">
 	  if (runtime_mode == "dev") {
 	    document.writeln('<li>Currently accessing the Development Version ... <a href="index.html">Switch to public-facing production interface</a></li>');
-	    document.writeln('<li>Or access the <a href="/solr-ef2/index-dev.html?solr-col=solr12-dbbridge-test-htrc-configs-docvals">Extracted Features 2.0 (SolrV8) solr12-dbbridge-test-htrc-configs-docvals test collection</a></li>');	  
+	    document.writeln('<li>Or access the <a href="/solr-ef20/index-dev.html">Extracted Features 2.0 (SolrV8) solr12-ef2-fictfull-core20 test collection</a></li>');	  
 	  }
 	  else {	
 	    document.writeln('<li><a href="index-dev.html">Check out the newer in-development (bleeding edge) version</a></li>');
