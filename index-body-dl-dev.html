@@ -98,7 +98,7 @@
 	    <!--
 	    <i>HTRC Workset Builder 2.0 (Beta)</i> <br/>
 	    -->
-	    <i>Workset Builder 2.0</i> <br/>
+	    <i>Workset Builder 2.0 <span id="for-wb-ef-format"></span></i> <br/>
 	    <span id="subtitle">Search the Extracted Features Dataset</span>
 	  
 	    <span id="solr-col-name" style="font-size: 60%;"></span>
@@ -119,9 +119,9 @@
 	    Create an HTRC workset from your selection or download the associated metadata.
 	  </p>
 
-	  <p>This tool is still in development and we anticipate that it will change through 2019-2020.</p>
-	
-	  <p>Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
+	  <p>This tool is still in development and we anticipate that it will change through 2020-2021.</p>
+
+	  <p class="info-ef15" style="display: none;">Currently searches 15.7 million volumes (out of HathiTrust’s 17 million volumes).</p>
 
 	  <p>For help with building a workset,
 	    <a href="https://wiki.htrc.illinois.edu/x/7IAgB">
@@ -546,7 +546,7 @@
 	    
 	    <div style="position: relative;">
 	      <div id="export-by" class="narrow" style="position: absolute; left:0;top:-24px; z-index: 2;">
-		<h3 class="narrowexport" >&nbsp;</h3>
+		<h3 class="narrowexport" >&nbsp;</h3>		
 		<div>
 		  <div id="export-by-vol-div" class="tightoddevenline" style="display: none">
 		    <a id="export-by-vol"  class="export-item" 
@@ -594,6 +594,15 @@
 		  <div id="export-ef-progress-div" class="tightoddevenline" style="display: none; background-color: rgb(251,216,120);">
 		  </div>
 		</div>
+
+		<fieldset id="ef-json-format-radio-choice">
+		  <legend style="font-size: 100%; padding-top: 12px; margin-bottom: 0;">Extracted Feature JSON Format </legend>
+		    <label for="export-json-format15">Version 1.5</label>
+		    <input type="radio" name="export-json-format" id="export-json-format15">
+		    <label for="export-json-format20">Version 2.0</label>
+		    <input type="radio" name="export-json-format" id="export-json-format20">
+		  </fieldset>
+
               </div>
 	      
 	      
@@ -613,7 +622,7 @@
 	      
 	      <div id="coverup-export-by"
 		   style="position: relative; z-index: 1; visibility: hidden;">
-		<h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>
+		<h3 class="narrowexport"><span class="ui-icon ui-icon-search"></span>Export Search Results</h3>		
 		<div>
 		  <div class="tightoddevenline">
 		    <a id="coverup-export-by-vol"  class="export-item"
@@ -660,6 +669,14 @@
 		  <div id="coverup-export-ef-progress-div" class="tightoddevenline" style="display: none; background-color: rgb(251,216,120);">
 		  </div>
 
+		  <fieldset id="coverup-ef-json-format-radio-choice">
+		    <legend style="font-size: 100%; padding-top: 12px; margin-bottom: 0;">Extracted Feature JSON Format </legend>
+		    <label for="coverup-export-json-format15">Version 1.5</label>
+		    <input type="radio" name="coverup-export-json-format" id="coverup-export-json-format15">
+		    <label for="coverup-export-json-format20">Version 2.0</label>
+		    <input type="radio" name="coverup-export-json-format" id="coverup-export-json-format20">
+		  </fieldset>
+		  
 		</div>
 		
 	      </div>	  
