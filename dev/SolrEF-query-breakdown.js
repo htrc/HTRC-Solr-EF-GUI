@@ -18,13 +18,16 @@ function query_breakdown_single_term_or_phrase(term)
     return processed_term;
 }
     
-function query_breakdown_tostring(parse_tree)
+function query_breakdown_tostring(parse_tree,default_field)
 {
     var query_str = "";
 
     if (parse_tree.left) {
 
 	if (parse_tree.field) {
+	    if ((default_field) && (parse_tree.field==default_field)) {
+		query_str += "(";
+	    }
 	    query_str += parse_tree.field + ":(";
 	}
 	else {
@@ -34,7 +37,7 @@ function query_breakdown_tostring(parse_tree)
 	    }
 	}
 	
-	query_str += query_breakdown_tostring(parse_tree.left);
+	query_str += query_breakdown_tostring(parse_tree.left,default_field);
 
 	if ((!parse_tree.field) && (parse_tree.left.right)) {
 	    query_str += ")";
@@ -53,7 +56,7 @@ function query_breakdown_tostring(parse_tree)
 	    if ((parse_tree.operator == "AND") && (parse_tree.right.right)) {
 		query_str += "(";
 	    }
-	    query_str += query_breakdown_tostring(parse_tree.right);
+	    query_str += query_breakdown_tostring(parse_tree.right,default_field);
 	    if ((parse_tree.operator == "AND") && (parse_tree.right.right)) {
 		query_str += ")";
 	    }
@@ -71,7 +74,12 @@ function query_breakdown_tostring(parse_tree)
 	}
 
 	if ((parse_tree.field) && (parse_tree.field != "<implicit>")) {
-	    query_str += parse_tree.field + ":";
+	    if ((default_field) && (parse_tree.field==default_field)) {
+		// leave query_str along => no field to add on
+	    }
+	    else {
+		query_str += parse_tree.field + ":";
+	    }
 	}
 
 	if (parse_tree.term_min) {
@@ -589,9 +597,11 @@ function select_optimal_query_tab(text_q)
 	}
 	else if (form_type == QueryTabEnum.Page) {
 	    var parse_tree = query_ui_breakdown['page-q'];
-	    var simplified_parse_tree = parse_tree.left.left;
-	    simplified_parse_tree.field = "<implicit>";
-	    var query_str_simplified = query_breakdown_tostring(simplified_parse_tree);
+	    //var simplified_parse_tree = parse_tree.left.left;
+	    //simplified_parse_tree.field = "<implicit>";
+	    //var query_str_simplified = query_breakdown_tostring(simplified_parse_tree);
+
+	    var query_str_simplified = query_breakdown_tostring(parse_tree,"en_htrctokentext");
 
 	    $('#tab-page').click();
 	    $('#q').val(query_str_simplified);
