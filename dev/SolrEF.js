@@ -137,7 +137,15 @@ function ajax_solr_text_search(newSearch,newResultPage)
     }
 
     url_args = facet_filter.solrSearchAppendArgs(url_args);
-        
+
+    var query_level = facet_filter.getFacetLevel();
+    // if searching at the page level ...
+    if (query_level == FacetLevelEnum.Page) {
+	// ... then specify 'df' so the all languages full text is searched in a query
+	// term does not specify any field prefix
+	url_args.push("df=alllangs_htrctokentext");
+    }
+    
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
