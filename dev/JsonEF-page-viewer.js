@@ -109,11 +109,17 @@ JsonEFPageViewer.prototype.hashmap_to_html_table = function(hashmap)
     return $table;
 }
 
-JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
+JsonEFPageViewer.prototype._posmap_to_text= function(page,block,display_mode)
 {
     var pos_keys = [];
     var pos_keys_pp = "";
     
+    var pos_map  = {};
+    if (page[block] !== null) {
+	pos_map = page[block].tokenPosCount;
+    }
+    
+
     if (display_mode == "display-raw") {
 	for (var pos_key in pos_map) {
 	    pos_keys.push(pos_key);
@@ -210,6 +216,21 @@ JsonEFPageViewer.prototype._posmap_to_text= function(block,pos_map,display_mode)
 
 }
 
+function tokenPosCountLen(page,block)
+{
+    var pos_map_len = 0;
+
+    if (page != null) {
+	var pos_map = page[block];
+	
+	if (pos_map != null) {
+	    pos_map_len = Object.keys(pos_map).length;
+	}
+    }
+
+    return pos_map_len;   
+}
+
 JsonEFPageViewer.prototype._find_rewind_text = function(seq_num)
 {
     var found_text = false;
@@ -220,9 +241,9 @@ JsonEFPageViewer.prototype._find_rewind_text = function(seq_num)
     while (found_seq_num >= 1) {
 	var page = pages[found_seq_num-1];
 	var page_text_total = 
-	    Object.keys(page.header.tokenPosCount).length
-	    + Object.keys(page.body.tokenPosCount).length
-	    + Object.keys(page.footer.tokenPosCount).length
+	    tokenPosCountLen(page,"header")
+	    + tokenPosCountLen(page,"body")
+	    + tokenPosCountLen(page,"footer");
 
 	if (page_text_total>0) {
 	    found_text = true;
@@ -250,9 +271,9 @@ JsonEFPageViewer.prototype._find_forward_text = function(seq_num)
     while (found_seq_num <= pages.length) {
 	var page = pages[found_seq_num-1];
 	var page_text_total = 
-	    Object.keys(page.header.tokenPosCount).length
-	    + Object.keys(page.body.tokenPosCount).length
-	    + Object.keys(page.footer.tokenPosCount).length
+	    tokenPosCountLen(page,"header")
+	    + tokenPosCountLen(page,"body")
+	    + tokenPosCountLen(page,"footer");
 	//console.log("** page num: " + found_seq_num + ", total = " + page_text_total);
 	if (page_text_total>0) {
 	    found_text = true;
@@ -345,9 +366,9 @@ JsonEFPageViewer.prototype.display_ef_page_text = function(seq_num)
     }
     
 
-    var header_text_len = this._posmap_to_text("header",page.header.tokenPosCount, display_mode);
-    var body_text_len   = this._posmap_to_text("body",  page.body.tokenPosCount, display_mode);
-    var footer_text_len = this._posmap_to_text("footer",page.footer.tokenPosCount, display_mode);
+    var header_text_len = this._posmap_to_text(page,"header",display_mode);
+    var body_text_len   = this._posmap_to_text(page,"body",  display_mode);
+    var footer_text_len = this._posmap_to_text(page,"footer",display_mode);
 
     var text_len_total = header_text_len + body_text_len + footer_text_len;
     
