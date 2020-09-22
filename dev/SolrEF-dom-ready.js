@@ -433,7 +433,7 @@ function solref_dom_ready() {
     if (solr_col != null) {
 	solr_collection = solr_col;
     }
-    if (solr_collection.match(/^solr3456-/)) {
+    if (solr_collection.match(/^solr3456(78)?-/)) {
 	solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
 	solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
 	do_solr_field_optimization = 1;
@@ -444,6 +444,10 @@ function solref_dom_ready() {
 	do_solr_field_optimization = 0;
     }
 
+    if (json_ef_version == "2.0") {
+	$('#for-wb-ef-format').html('for Extracted Features 2.0');
+    }
+    
     if (runtime_mode == "dev")  {
 	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
     }
@@ -660,7 +664,38 @@ function solref_dom_ready() {
     generate_other_langs();
 
     show_hide_lang();
+    
+    //$("input[type='radio']" ).checkboxradio();
 
+    if (json_ef_version == "2.0") {
+	$("#ef-json-format-radio-choice").hide()
+	$("#coverup-ef-json-format-radio-choice").hide()
+    }
+    else {
+	$('.info-ef15').show();
+	
+	$('#export-json-format15').on("change", function(event){
+	    dynamically_set_accessapi_url("1.5");
+	});
+	$('#export-json-format20').on("change", function(event){
+	    dynamically_set_accessapi_url("2.0");
+	});
+	// Note: if-statement above now trumps the else part of this if-statement
+	// Kept in things work for 1.5, and to show how things used to go for 2.0
+	if (json_ef_version == "1.5") {
+	    $('#export-json-format15').attr('checked','checked'); //.button("refresh");
+	}
+	else {
+	    $('#export-json-format20').attr('checked','checked'); //.button("refresh");; //
+	}
+    }
+    
+//    $("#ef-json-format-radio-choice").click(function(){
+//	var ef_format_val = $("input[name='export-json-format']:checked").val();
+//	console.log("*** ef format var = " + ef_format_val);
+//    });
+	    
+    
     if (runtime_mode == "dev")  {
 	$('#additional-resources').show();
     }
