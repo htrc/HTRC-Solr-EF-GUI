@@ -226,12 +226,39 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	// multiple pages in the item => clarify dowload is the complete volume
 	download_text += " (complete volume)";
     }
-    var download_span = '<div title="'+id+'" style="color: #924a0b;">';
-    download_span +=      '<a download="'+id+'.json" href="'+ef_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
-    download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
-    download_span +=         download_text;
-    download_span +=      '</a>';
-    download_span +=    '</div>';
+//    var download_span = '<div title="'+id+'" style="color: #924a0b;">';
+
+    //var download_span = '<div title="'+id+'">';
+    //download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+    //download_span +=         download_text + ': ';
+
+    if (json_ef_version == "2.0") {
+	var download_span = '<div title="'+id+'">';
+	download_span +=      '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+
+	download_span +=      '<a download="'+id+'.json" href="'+ef20_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=        download_text + " v2.0";
+	download_span +=      '</a>';
+
+	download_span +=    '</div>';
+    }
+    else {
+	var download_span = '<div title="'+id+'">';
+	download_span +=      '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+
+	download_span +=      '<a download="'+id+'.json" href="'+ef15_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=         'Version 1.5';
+	download_span +=      '</a>';
+	
+	download_span +=      '<a download="'+id+'.json" href="'+ef20_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=         ' Version 2.0';
+	download_span +=      '</a>';
+
+        download_span +=    '</div>';
+    }
+    
+    //download_span +=    '</div>';
+
 
     var opt_dnd_style = "";
     if (store_interaction_style == null) {
