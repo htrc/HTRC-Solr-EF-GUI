@@ -18,6 +18,7 @@ var page_viewer_async_link_css_urls = [
     "assets/pager-icons.css"
 ];
 
+/*
 var versioned_lookup_vars;
 if (runtime_mode == "dev") {
     if (json_ef_version == "2.0") {
@@ -30,6 +31,15 @@ if (runtime_mode == "dev") {
 else {
     versioned_lookup_vars = "/lookup-vars.js";
 }
+*/
+
+if (json_ef_version == "2.0") {
+    versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+}
+else {
+    versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
+}
+
 
 var page_viewer_async_script_urls = [ 
     //"assets/highlight.js",
