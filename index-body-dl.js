@@ -18,6 +18,7 @@ var solr_ef_async_link_css_urls = [
     runtime_mode+"/SolrEF-progressbar.css"
 ];
 
+/*
 var versioned_lookup_vars;
 if (runtime_mode == "dev") {
     if (json_ef_version == "2.0") {
@@ -29,6 +30,14 @@ if (runtime_mode == "dev") {
 }
 else {
     versioned_lookup_vars = "/lookup-vars.js";
+}
+*/
+
+if (json_ef_version == "2.0") {
+    versioned_lookup_vars = "/SolrEF20-lookup-vars.js";
+}
+else {
+    versioned_lookup_vars = "/SolrEF15-lookup-vars.js";
 }
 
 var solr_ef_async_script_urls = [ 
