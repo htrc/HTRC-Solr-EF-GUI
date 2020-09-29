@@ -1,20 +1,118 @@
+function _getURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+
+    for (var i=0; i<sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam)
+	{
+	    return sParameterName[1];
+	}
+    }
+
+    return null;
+}
+
 
 var base_domain_url = window.location.protocol + "//" + window.location.hostname;
 
-var solr_prefix_url = base_domain_url+"/solr/";
-var robust_solr_prefix_url = base_domain_url+"/robust-solr/";
-//var solr_collection = "faceted-htrc-full-ef20"; // ****
-var solr_collection = "solr3456-faceted-htrc-full-ef16"
-var do_solr_field_optimization = 0;
+var solr_prefix_url =  base_domain_url;
+solr_prefix_url += (json_ef_version == "2.0") ? "/solr8/" : "/solr/";
 
-var solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
-var solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+var robust_solr_prefix_url = base_domain_url;
+robust_solr_prefix_url += (json_ef_version == "2.0") ? "/robust-solr8/" : "/robust-solr/";
+
+
+var _solr_col = _getURLParameter("solr-col");
+var solr_collection;
+if (_solr_col != null) {
+    solr_collection = _solr_col;
+}
+else {
+    // If not specified, default solr collection based on version of
+    // Extracted Features JSON file format (jsno_ef_version),
+    // which in turn is driven by the URL visited: /solr-ef/ or /solr-ef20/
+
+    if (json_ef_version == "2.0") {
+	// Accessing solr cloud running in solr1+solr2 through /solr8 API
+	//solr_collection = "solr12-dbbridge-test-htrc-configs-docvals"; // ****
+	//solr_collection = "solr12-ef2-fictfull-core20"; // ****
+	solr_collection = "solr345678-faceted-htrc-full-ef2-shards24x2"; // ****
+    }
+    else {
+	solr_collection = "solr3456-faceted-htrc-full-ef16";	
+	//solr_collection = "faceted-htrc-full-ef20"; // original solr12 full collection
+    }
+
+}
+
+var solr_search_action;
+var solr_stream_action;
+if (solr_collection.match(/^solr3456(78)?-/)) {    
+    solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
+    solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
+}
+else {
+    solr_search_action = solr_prefix_url+solr_collection+"/select";
+    solr_stream_action = solr_prefix_url+solr_collection+"/stream";
+}
+
+var do_solr_field_optimization = 0;
 
 var babel_prefix_url = "https://babel.hathitrust.org/cgi/pt";
 var image_server_base_url = "https://babel.hathitrust.org/cgi/imgsrv/image";
 
-var ef_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
-var ws_accessapi_url  = "wss://" + window.location.hostname +"/htrc-ef-access-ws/get";
+var ef15_accessapi_url  = base_domain_url+"/htrc-ef-access/get";
+var ws15_accessapi_url  = "wss://" + window.location.hostname +"/htrc-ef-access-ws/get";
+var ef20_accessapi_url  = base_domain_url+"/htrc-ef20-access/get";
+var ws20_accessapi_url  = "wss://" + window.location.hostname +"/htrc-ef20-access-ws/get";
+var store_export_root = "export";
+
+function dynamically_set_accessapi_url(ver)
+{
+    if (ver== "2.0") {
+	
+	ef_accessapi_url  = ef20_accessapi_url; //base_domain_url+"/htrc-ef20-access/get";
+	ws_accessapi_url  = ws20_accessapi_url; //"wss://" + window.location.hostname +"/htrc-ef20-access-ws/get";
+	store_export_root = "export20";
+	
+//	$('#search-results').find('a').each(function() {
+//	    var href = $(this).attr('href');
+//	    if (href.includes("/htrc-ef-access/get")) {
+//		var new_href = href.replace("/htrc-ef-access/get","/htrc-ef20-access/get");
+//		$(this).attr('href',new_href);
+//	    }
+//	});
+
+    }
+    else {
+	ef_accessapi_url  = ef15_accessapi_url; // base_domain_url+"/htrc-ef-access/get";
+	ws_accessapi_url  = ws15_accessapi_url; // "wss://" + window.location.hostname +"/htrc-ef-access-ws/get";
+	store_export_root = "export15";
+	
+//	$('#search-results').find('a').each(function() {
+//	    var href = $(this).attr('href');
+//	    if (href.includes("/htrc-ef20-access/get")) {
+//		var new_href = href.replace("/htrc-ef20-access/get","/htrc-ef-access/get");
+//		$(this).attr('href',new_href);
+//	    }
+//	});
+
+    }
+
+
+    if ($('#export-ef-zip').attr('href')) {
+	$('#export-ef-zip').removeAttr('href');
+    }
+
+
+    console.log("Dynamically setting export Access URL to generate JSON EF Format version " + ver);
+}
+
+var ef_accessapi_url;
+var ws_accessapi_url;
+dynamically_set_accessapi_url(json_ef_version);
 
 // Although the shopping-cart is mananaged through the HTRC Access API
 // we give it its own named variable to make it easier to manage the
@@ -73,8 +171,12 @@ var arg_wt     = "json";
 //var export_ef_limit = 1000;
 // The following used to be 5000, but this triggered 'Form too large: 210024 > 200000' in Jetty
 // Limit can be increased, but seems to be a Jetty specific way
-var export_ef_limit = 4000; 
-    
+//var export_ef_limit = 4000; 
+
+// Dropping limit to 500
+// (until clear why a CSV preparing/download interrupted at 58% didn't seem to benefit from cached
+//  files when started for a second time)
+var export_ef_limit = 500; 
 
 var SolrEFSettings = {
     iprogressbar_delay_threshold: 3000 // used to be 5000 msecs
@@ -86,6 +188,11 @@ $.ajax({
     async: true,
     //timeout: 60000,
     cache: false,
+    // worksets-api does not appear to set mime-type, so XML presumed
+    //   https://stackoverflow.com/questions/7642202/xml-parsing-error-not-well-formed-in-firefox-but-good-in-chrome
+    // in Firefox this leads to an error message in the JS console
+    // The following is a workaround
+    beforeSend: function(xhr){  xhr.overrideMimeType( "text/plain; charset=x-user-defined" );},
     headers: { "cache-control": "no-cache" },
     url: worksets_api_url,
     data: 'vis=public',

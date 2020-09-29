@@ -19,7 +19,7 @@ function generate_query_field_menu()
     $option.attr("selected","selected");
     $select.append($option);
 
-    var metadata_fields = Object.keys(volume_metadata_fields);
+    var metadata_fields = Object.keys(lup_volume_metadata_fields);
 
     for (var i = 0; i < metadata_fields.length; i++) {
 	var field = metadata_fields[i];
@@ -44,10 +44,10 @@ function generate_query_field_menu()
 
 }
 
-function generate_volume_field_help_dic()
+function generate_volume_field_help_dict()
 {
     var restructured_dict = {}
-    $.each(volume_metadata_dic, function(field,help_text) {
+    $.each(lup_volume_metadata_dict, function(field,help_text) {
 	var label = volumeFieldToLabel(field);
 	restructured_dict[label] = field+"</td><td>"+help_text ;
     });
@@ -72,11 +72,11 @@ function generate_pos_langs() {
 
 	var $pos_fieldsets = $('#pos-fieldsets');
 
-	for (var li = 0; li < langs_with_pos.length; li++) {
+	for (var li = 0; li < lup_langs_with_pos.length; li++) {
 
-		var l = langs_with_pos[li];
-		var lang_full = isoLangs[l].name;
-		var lang_native_full = isoLangs[l].nativeName;
+		var l = lup_langs_with_pos[li];
+		var lang_full = lup_isoLangs[l].name;
+		var lang_native_full = lup_isoLangs[l].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 
 		var opt_enabled = (l == "en") ? 'checked="checked"' : "";
@@ -137,12 +137,12 @@ function generate_pos_langs() {
 
 function generate_other_langs() {
 	// setup other languages
-	// for each 'langs_without_pos' generate HTML of the form:
+	// for each 'lup_langs_without_pos' generate HTML of the form:
 	//    <input type="checkbox" name="fr-enabled" id="fr-enabled" />French
 	var $other_langs = $('#other-langs');
 
-	for (var i = 0; i < langs_without_pos.length; i++) {
-		var lang = langs_without_pos[i];
+	for (var i = 0; i < lup_langs_without_pos.length; i++) {
+		var lang = lup_langs_without_pos[i];
 		var labeled_checkbox = '<nobr>';
 
 		labeled_checkbox += '<input type="checkbox" name="' + lang + '-enabled" id="' + lang + '-enabled" />';
@@ -156,8 +156,8 @@ function generate_other_langs() {
 	    lang = "zh";
 	}
 */
-		var lang_full = isoLangs[lang].name;
-		var lang_native_full = isoLangs[lang].nativeName;
+		var lang_full = lup_isoLangs[lang].name;
+		var lang_native_full = lup_isoLangs[lang].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 
 		labeled_checkbox += '<label for="' + lang + '-enabled" style="padding-left: 5px; padding-right: 10px;" ' + opt_title + '>' + lang_full + '</label>';
@@ -326,7 +326,7 @@ function domready_help_dialogs()
     });
 */
 
-    volume_metadata_help_dict = generate_volume_field_help_dic();
+    lup_volume_metadata_help_dict = generate_volume_field_help_dict();
 
     $("#volume-help-dialog").dialog({
 	autoOpen: false,
@@ -350,7 +350,7 @@ function domready_help_dialogs()
     // Entries in following hashmap have <td>'s spliced into them to cause an extra
     // column in the table to be produced
     var header_row = '<tr class="help-table-header"><td style="min-width:220px;">Field name</td><td style="min-width:220px;">Field name in Solr syntax</td><td>Field description</td></tr>';
-    mnemonic_help_text(volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
+    mnemonic_help_text(lup_volume_metadata_help_dict,'volume-help-fields',1,header_row); //numCols=1        
 
     $("#volume-help").click(function () {
 	$("#volume-help-dialog").dialog( "open" );
@@ -433,7 +433,7 @@ function solref_dom_ready() {
     if (solr_col != null) {
 	solr_collection = solr_col;
     }
-    if (solr_collection.match(/^solr3456-/)) {
+    if (solr_collection.match(/^solr3456(78)?-/)) {
 	solr_search_action = robust_solr_prefix_url+solr_collection+"/select";
 	solr_stream_action = robust_solr_prefix_url+solr_collection+"/stream";
 	do_solr_field_optimization = 1;
@@ -444,6 +444,10 @@ function solref_dom_ready() {
 	do_solr_field_optimization = 0;
     }
 
+    if (json_ef_version == "2.0") {
+	$('#for-wb-ef-format').html('for Extracted Features 2.0');
+    }
+    
     if (runtime_mode == "dev")  {
 	$('#solr-col-name').html('<br/><tt>[specified solr collection:' + solr_collection + ']</tt>');
     }
@@ -660,7 +664,38 @@ function solref_dom_ready() {
     generate_other_langs();
 
     show_hide_lang();
+    
+    //$("input[type='radio']" ).checkboxradio();
 
+    if (json_ef_version == "2.0") {
+	$("#ef-json-format-radio-choice").hide()
+	$("#coverup-ef-json-format-radio-choice").hide()
+    }
+    else {
+	$('.info-ef15').show();
+	
+	$('#export-json-format15').on("change", function(event){
+	    dynamically_set_accessapi_url("1.5");
+	});
+	$('#export-json-format20').on("change", function(event){
+	    dynamically_set_accessapi_url("2.0");
+	});
+	// Note: if-statement above now trumps the else part of this if-statement
+	// Kept in things work for 1.5, and to show how things used to go for 2.0
+	if (json_ef_version == "1.5") {
+	    $('#export-json-format15').attr('checked','checked'); //.button("refresh");
+	}
+	else {
+	    $('#export-json-format20').attr('checked','checked'); //.button("refresh");; //
+	}
+    }
+    
+//    $("#ef-json-format-radio-choice").click(function(){
+//	var ef_format_val = $("input[name='export-json-format']:checked").val();
+//	console.log("*** ef format var = " + ef_format_val);
+//    });
+	    
+    
     if (runtime_mode == "dev")  {
 	$('#additional-resources').show();
     }
@@ -928,37 +963,13 @@ function solref_dom_ready() {
 	    // User has clicked on a facet
 	    // => Add it to 'filters', then instigate an updated search
 
-	    //var filter_key_count = Object.keys(facet_filter.refine_query).length;
-
-	    	
 	    var facet_key = $(this).attr("data-key");
 	    var term = $(this).attr("data-term");
 
 	    var pending_filters = facet_filter.hasPendingFilters(facet_key,term);
-	    
-	    /*
-	    var pending_filters = false;
-	    for (var pending_key in facet_filter.refine_query) {
-		if (pending_key != facet_key) {
-		    pending_filters = true;
-		    break;
-		}
-		else {
-		    var refine_terms = facet_filter.refine_query[pending_key];
-		    for (var pending_term in refine_terms) {
-			
-			if (pending_term != term) {
-			    pending_filters = true;
-			}
-		    }
-		}
-	    }*/
-	    	    
+	    	    	    
 	    var clicked_elem = this;
 
-	    //var facet_key_count = facet_filter.refine_query_count[facet_key];
-	    
-	    //if ((filter_key_count>1) || (facet_key_count > 1)) {
 	    if (pending_filters) {
 		var pp_field = facet_filter.prettyPrintField(facet_key);
 		var pp_term = facet_filter.prettyPrintTerm(facet_key,term);
@@ -1000,10 +1011,10 @@ function solref_dom_ready() {
 	show_updated_results();
     });
 
-    var volume_available_keys = Object.keys(volume_metadata_fields).sort();
+    var volume_available_keys = Object.keys(lup_volume_metadata_fields).sort();
     var volume_available_tags = [];
     $.each(volume_available_keys,function(index,key) {
-	volume_available_tags.push({'key':key, 'label': volume_metadata_dic[key]});
+	volume_available_tags.push({'key':key, 'label': lup_volume_metadata_dict[key]});
     });
     
     if (runtime_mode == "dev")  {    

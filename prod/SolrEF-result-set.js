@@ -73,50 +73,13 @@ function add_titles_and_authors_solr(jsonData) {
     var num_docs = docs.length;
     
     $.each(docs, function (doc_index, doc_val) {
-	var htid = doc_val.id;
-	
-	var title = doc_val.title_s;
-	var title_tidied = title.replace(/\.\s*$/,""); // remove any trailing fullstop, in anticipation of "by ..." author(s)
-	var title_and_authors = title_tidied;
-	
-	var details = [];
-	details.push("Title: " + title_tidied);
+	var htid = doc_val['id'];
+	var title = doc_val['title_s'];
 
+	var tanda_details = title_and_authors_tooltip_details(doc_val,title);
+	var title_and_authors = tanda_details.title_and_authors;
+	var details = tanda_details.details;
 	
-	if (doc_val.names_ss) {
-	    var names = doc_val.names_ss.map(strtrim).join(", ");
-	    if (!names.match(/^\s*$/)) {
-		details.push("Author(s): " + names);
-		title_and_authors += " by " + names;
-	    }
-	}
-	if (doc_val.genre_ss) {
-	    var genres = doc_val.genre_ss.map(strtrim).join(", ");
-	    if (!genres.match(/^\s*$/)) {
-		details.push("Genre: " + genres.capitalize() );
-	    }
-	}
-	if (doc_val.pubDate_s && !doc_val.pubDate_s.match(/^\s*$/)) {
-	    details.push("Publication date: " + doc_val.pubDate_s);
-	}
-	if (doc_val.pubPlace_s && !doc_val.pubPlace_s.match(/^\s*$/)) {
-	    var pp_val = facet_filter.prettyPrintTerm("pubPlace_s",doc_val.pubPlace_s)
-	    details.push("Place of Publication: " + pp_val);
-	}
-	if (doc_val.language_s && !doc_val.language_s.match(/^\s*$/)) {
-	    var pp_val = facet_filter.prettyPrintTerm("language_s",doc_val.language_s)
-	    details.push("Language: " + pp_val);
-	}
-	if (doc_val.typeOfResource_s && !doc_val.typeOfResource_s.match(/^\s*$/)) {
-	    details.push("Resource type: " + doc_val.typeOfResource_s.capitalize() );
-	}
-	if (doc_val.concept_ss) {
-	    var concepts = doc_val.concept_ss.map(strtrim).join(", ");
-	    if (!concepts.match(/^\s*$/)) {
-		details.push("Concept(s): " + concepts.capitalize() );
-	    }
-	}
-
 	var details_str = details.map(strtrim).join(";\n");	    
 	var $tooltip_tanda = $('<span />').attr('title',details_str).html(title_and_authors);
 	
@@ -140,7 +103,7 @@ function add_titles_and_authors_solr(jsonData) {
 	//$("[name='" + htid + "'] ~ nobr>a[class^='seq']").each(function () {
 
 	$seq_matches.each(function() {
-	    var rights = doc_val.rightsAttributes_s;
+	    var rights = doc_val[solr_doc_rights_field];
 
 	    //if ((rights != "pd") && (rights != "pdus")) { // ****
 	    //if (rights != "pd") { // ****
@@ -180,8 +143,9 @@ function add_titles_and_authors_solr(jsonData) {
 		$(this).attr('href',href);
 	    //}
 	});
-					
-	var itemURL = doc_val.handleUrl_s;
+
+	
+	var itemURL = doc_val[solr_doc_id_url_field];	
 	itemURL = itemURL.replace(/^https:/, "http:");
 	
 	var ws_span = '<span class="workset" style="display: none;"><br />';
@@ -262,12 +226,39 @@ function generate_item(line_num, id, id_pages, merge_with_previous)
 	// multiple pages in the item => clarify dowload is the complete volume
 	download_text += " (complete volume)";
     }
-    var download_span = '<div title="'+id+'" style="color: #924a0b;">';
-    download_span +=      '<a download="'+id+'.json" href="'+ef_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
-    download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
-    download_span +=         download_text;
-    download_span +=      '</a>';
-    download_span +=    '</div>';
+//    var download_span = '<div title="'+id+'" style="color: #924a0b;">';
+
+    //var download_span = '<div title="'+id+'">';
+    //download_span +=        '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+    //download_span +=         download_text + ': ';
+
+    if (json_ef_version == "2.0") {
+	var download_span = '<div title="'+id+'">';
+	download_span +=      '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+
+	download_span +=      '<a download="'+id+'.json" href="'+ef20_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=        download_text + " v2.0";
+	download_span +=      '</a>';
+
+	download_span +=    '</div>';
+    }
+    else {
+	var download_span = '<div title="'+id+'">';
+	download_span +=      '<span class="ui-icon ui-icon-circle-arrow-s"></span>';
+
+	download_span +=      '<a download="'+id+'.json" href="'+ef15_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=         'Version 1.5';
+	download_span +=      '</a>';
+	
+	download_span +=      '<a download="'+id+'.json" href="'+ef20_accessapi_url+'?action=download-ids&id='+id+'&output=json">';
+	download_span +=         ' Version 2.0';
+	download_span +=      '</a>';
+
+        download_span +=    '</div>';
+    }
+    
+    //download_span +=    '</div>';
+
 
     var opt_dnd_style = "";
     if (store_interaction_style == null) {
@@ -689,11 +680,27 @@ function show_results(jsonData,newSearch,newResultPage)
 
 	// Now explain_html has been added into page, figure out the shortened URL that
 	// is needed for add2any, and add that into the marked <span> tag
-	var raw_q = $('#raw-q-base').text();
-	raw_q += " " + $('#raw-q-facets').text();
-	raw_q += " " + $('#raw-q-exclude').text();
+	//var raw_q = $('#raw-q-base').text();
+	//raw_q += " " + $('#raw-q-facets').text();
+	//raw_q += " " + $('#raw-q-exclude').text();
 
-	explain_add2any_dom(raw_q);
+	var raw_q_base    = $('#raw-q-base').text().trim();
+	var raw_q_facets  = $('#raw-q-facets').text().trim();
+	var raw_q_exclude = $('#raw-q-exclude').text().trim();
+
+	var raw_q = raw_q_base;
+	if (raw_q_facets != "") {
+	    raw_q += " " + raw_q_facets;
+	}
+	if (raw_q_exclude != "") {
+	    raw_q += " " + raw_q_exclude;
+	}
+
+	var facet_filter_json = facet_filter.getJSONForSerialization();
+	
+	var raw_q_json = { 'raw_q': raw_q,  'base': raw_q_base, 'facet_filter': facet_filter_json, 'exclude_ids': store_search_not_ids };
+	
+	explain_add2any_dom(raw_q_json);
 	//explain_add2any_dom(store_search_url);
 
     }
@@ -1016,11 +1023,7 @@ function show_results(jsonData,newSearch,newResultPage)
     
     //var ids_or_str = ids.map(function(id){return "(id:"+id.replace(/\//g,"\\/").replace(/:/g,"\\:")+")"}).join(" OR ");
 
-
-    
-    var fl_args = [ "id", "title_s", "handleUrl_s", "rightsAttributes_s",
-		    "genre_ss", "names_ss", "pubDate_s", "pubPlace_s", "language_s", "typeOfResource_s", "classification_lcc_ss", "concept_ss" ];
-    var fl_args_str = fl_args.join(",");
+    var solr_doc_fl_args_str = solr_doc_fl_args.join(",");
     
     var url_args = {
 	q: ids_or_str,
@@ -1028,7 +1031,7 @@ function show_results(jsonData,newSearch,newResultPage)
 	wt: "json",
 	start: 0,
 	rows: ids.length,
-	fl: fl_args_str
+	fl: solr_doc_fl_args_str
     };
     
     $.ajax({

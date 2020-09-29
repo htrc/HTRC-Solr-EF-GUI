@@ -8,7 +8,6 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
     $.ajax({
 	type: "POST",
 	async: true,
-	//timeout: 60000,
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url,
 	data: {
@@ -16,8 +15,12 @@ function trigger_solr_key_search(solr_key_q,row_start,add_to_history)
 	    'key': encodeURI(solr_key_q)
 	},
 	dataType: "text",
-	success: function(textData) {	    
-	    var text_q = textData.trim();
+	success: function(textData) {
+	    //var text_q = textData.trim(); // **** before the change to storing the query in the Access API as structured JSON
+	    
+	    var store_raw_q_json = JSON.parse(textData);
+	    var text_q = store_raw_q_json.raw_q; // change text_q to raw_q for better consistency with other parts of the code ?? // ****
+	    
 	    select_optimal_query_tab(text_q);
 	    solr_add_to_history = add_to_history;
 	    initialize_new_solr_search();
@@ -134,7 +137,15 @@ function ajax_solr_text_search(newSearch,newResultPage)
     }
 
     url_args = facet_filter.solrSearchAppendArgs(url_args);
-        
+
+    var query_level = facet_filter.getFacetLevel();
+    // if searching at the page level ...
+    if (query_level == FacetLevelEnum.Page) {
+	// ... then specify 'df' so the all languages full text is searched in a query
+	// term does not specify any field prefix
+	url_args.push("df=alllangs_htrctokentext");
+    }
+    
     var data_str = url_args.join("&");
     
     store_search_url = store_search_action + "?" + data_str;
@@ -237,20 +248,12 @@ function show_new_results(delta) {
     show_updated_results();
 }
 
-
 var store_search_args = null;
 var store_search_action = null;
 var store_search_url = null;
 var store_search_not_ids = null;
 var store_query_level_mix = null;
 
-
-// **** Should the following not be moved to globals, or lookup-vars?
-var volume_metadata_fields_common =
-    ["accessProfile_t", "genre_t", "imprint_t", "isbn_t", "issn_t",
-     "issuance_t", "language_t", "lccn_t", "names_t", "oclc_t",
-     "pubPlace_t", "pubDate_t", "rightsAttributes_t", "title_t", "typeOfResource_t"
-    ];
 
 function expand_vfield(q_term, search_vfield, query_level) {
     var vfields = [];
@@ -262,11 +265,13 @@ function expand_vfield(q_term, search_vfield, query_level) {
 	    vfields.push(q_term);
 	}
 	else {
-	    for (var fi = 0; fi < volume_metadata_fields_common.length; fi++) {
+	    for (var fi = 0; fi < lup_volume_metadata_fields_common.length; fi++) {
 	    
-		var vfield = volume_metadata_fields_common[fi];
+		var vfield = lup_volume_metadata_fields_common[fi];
 		if (query_level == FacetLevelEnum.Page) {
-		    vfield = "volume"+ vfield + "xt";
+		    if (vfield.match(/_t$/)) {
+			vfield = "volume"+ vfield + "xt";
+		    }
 		}
 		vfields.push(vfield + ":" + q_term);
 	    }
@@ -285,7 +290,9 @@ function expand_vfield(q_term, search_vfield, query_level) {
 	    // and prefix that to the term
 	    var vfield = search_vfield;
 	    if (query_level == FacetLevelEnum.Page) {
-		vfield = "volume"+ vfield + "xt";
+		if (vfield.match(/_t$/)) {
+		    vfield = "volume"+ vfield + "xt";
+		}
 	    }
 	    
 	    vfields.push(vfield + ":" + q_term);
@@ -538,6 +545,17 @@ function load_solr_q(solr_q)
 function submit_action(event) {
     event.preventDefault();
 
+    // Stop any current 'prepare to downloads' that might be underway
+    console.log("*** away to check for open web sockets");
+    for (var key in store_open_web_sockets) {
+	console.log("*** key = " + key + ", ws = ... ");
+	var ws = store_open_web_sockets[key] ;
+	console.log(ws);
+	//ws.onclose();
+	ws.stopdownload();
+	ws.close();
+    }
+	
     initialize_new_solr_search();
     
     var arg_q = null;
@@ -581,7 +599,7 @@ function submit_action(event) {
 		return;
 	    }
 	    	    
-	    arg_q = expand_query_field_and_boolean(q_text, langs_with_pos, langs_without_pos, search_all_langs_checked);
+	    arg_q = expand_query_field_and_boolean(q_text, lup_langs_with_pos, lup_langs_without_pos, search_all_langs_checked);
 	    
 	    if (arg_q == "") {
 		// Potentially only looking at volume level terms
@@ -675,8 +693,8 @@ function submit_action(event) {
 	    for (var gli=0; gli<lang_mismatch_list.length; gli++) {
 
 		var gl = lang_mismatch_list[gli];
-		var lang_full = isoLangs[gl].name;
-		var lang_native_full = isoLangs[gl].nativeName;
+		var lang_full = lup_isoLangs[gl].name;
+		var lang_native_full = lup_isoLangs[gl].nativeName;
 		var opt_title = (lang_full !== lang_native_full) ? 'title="' + lang_native_full + '"' : "";
 		
 		var $lang_span = $('<span>');
@@ -910,7 +928,7 @@ function submit_action(event) {
 
 }
 
-function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
+function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked,opt_facet_filter,opt_search_not_ids)
 {
     var num_rows = (group_by_vol_checked) ? 10*num_results_per_page : num_results_per_page;
 
@@ -923,7 +941,17 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 	facet: "on"
     };
 
-    store_search_not_ids = [];
+    if (opt_facet_filter) {
+	facet_filter = opt_facet_filter;
+    }
+
+    if (opt_search_not_ids) {
+	store_search_not_ids = opt_search_not_ids;
+    }
+    else {
+	store_search_not_ids = [];
+    }
+    
     store_query_level_mix = null;
     
     if (group_by_vol_checked) {
@@ -970,6 +998,11 @@ function initiate_new_solr_search(arg_q,arg_start,group_by_vol_checked)
 	type: "POST",
 	async: true,
 	//timeout: 60000,
+	// htrc-ef-access/get  does not appear to set mime-type, so XML presumed by browser even though plain text returned
+	//   https://stackoverflow.com/questions/7642202/xml-parsing-error-not-well-formed-in-firefox-but-good-in-chrome
+	// In Firefox this leads to an XML parsing error message in the JS console
+	// The following is a workaround
+	beforeSend: function(xhr){  xhr.overrideMimeType( "text/plain; charset=x-user-defined" );},
 	headers: { "cache-control": "no-cache" },
 	url: ef_accessapi_url, // With no data arguments, prints out a usage message
 	dataType: "text",
