@@ -1,0 +1,42 @@
+Solr query syntax
+=================
+
+collection name:
+  solr345678-faceted-htrc-full-ef2-shards24x2/select?q=title_t%3A*
+
+Base URL for searching:
+  https://solr2.htrc.illinois.edu/robust-solr8/solr345678-faceted-htrc-full-ef2-shards24x2/select
+  
+
+Makes use of dynamic fields
+
+Volume level
+
+q=(title_t:Sherlock)
+  &indent=on
+  &wt=json
+  &start=0
+  &rows=15
+  &facet=on
+  &facet.field=genre_ss
+  &facet.field=language_s
+  &facet.field=rightsAttributes_s
+  &facet.field=names_ss
+  &facet.field=pubPlace_s
+  &facet.field=bibliographicFormat_s
+
+Volume level, multi field search
+
+q=(accessProfile_t:sherlock OR genre_ss:sherlock OR publisherName_t:sherlock OR language_ss:sherlock OR contributorName_t:sherlock OR oclc_ss:sherlock OR pubPlaceName_t:sherlock OR accessRights_t:sherlock OR title_t:sherlock OR typeOfResource_s:sherlock)
+
+
+Page level, text
+
+q=(en_VERB_htrctokentext:violin OR en_NOUN_htrctokentext:violin OR en_ADJ_htrctokentext:violin OR en_ADV_htrctokentext:violin OR en_ADP_htrctokentext:violin OR en_CONJ_htrctokentext:violin OR en_DET_htrctokentext:violin OR en_NUM_htrctokentext:violin OR en_PRT_htrctokentext:violin OR en_X_htrctokentext:violin)
+
+
+Page level, volume + text
+
+q=((volumetitle_txt:sherlock)) AND ((en_VERB_htrctokentext:violin OR en_NOUN_htrctokentext:violin OR en_ADJ_htrctokentext:violin OR en_ADV_htrctokentext:violin OR en_ADP_htrctokentext:violin OR en_CONJ_htrctokentext:violin OR en_DET_htrctokentext:violin OR en_NUM_htrctokentext:violin OR en_PRT_htrctokentext:violin OR en_X_htrctokentext:violin))
+
+
