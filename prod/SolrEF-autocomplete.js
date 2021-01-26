@@ -96,7 +96,15 @@ function term_split(val,strip_quotes) {
 
 function domready_volume_autocomplete(textbox_id,available_tags)
 {
-    var dynamic_fields_dict = { 'pubPlace_t': lup_place_dict, 'language_t': lup_language_dict, 'format_t': lup_format_dict };
+    var dynamic_fields_dict = null;
+
+    if (json_ef_version = "2.0") {
+	dynamic_fields_dict = { 'pubPlaceName_t': lup_place_dict, 'language_t': lup_language_dict, 'format_t': lup_format_dict };
+    }
+    else {
+	dynamic_fields_dict = { 'pubPlace_t': lup_place_dict, 'language_t': lup_language_dict, 'format_t': lup_format_dict };
+    }
+
     var dynamic_fields      = Object.keys(dynamic_fields_dict);
     
     var dynamic_fields_re_str = "^("+dynamic_fields.join("|")+")";
@@ -172,18 +180,27 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		    console.log("Pressed ':' =>  typed text = " + typed_text);
 		}
 		var last_term = extract_last_term(typed_text);
-		if (!last_term.match(/_t$/)) {
+		if (!last_term.match(/_(i|t)$/)) {
 		    // auto-correct to include it
+		    var type_endings = [ "i", "t" ]; // last val of array taken to be the default
+
+		    var tend = null;
+		    var add_in_char = "_";
 		    if (last_term.match(/_$/)) {
-			last_term += "t"; // ******
-			$(this).val(typed_text + "t");
+			add_in_char = "";
 		    }
-		    else {
-			last_term += "_t"; // ******
-			$(this).val(typed_text + "_t");
+
+		    for (var i=0; i<type_endings.length; i++) {
+			tend = add_in_char + type_endings[i];
+			var trial_last_term = last_term + tend;
+			if (lup_volume_metadata_dict[trial_last_term]) {
+			    break;
+			}
 		    }
+		    last_term += tend; 
+		    $(this).val(typed_text + tend);
 		}
-		    
+
 		var simple_match = dynamic_fields_simple_re.exec(last_term);
 		if (simple_match) {	   
 		    var dynamic_field = simple_match[1];

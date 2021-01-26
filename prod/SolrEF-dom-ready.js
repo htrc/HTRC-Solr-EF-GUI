@@ -670,8 +670,12 @@ function solref_dom_ready() {
     if (json_ef_version == "2.0") {
 	$("#ef-json-format-radio-choice").hide()
 	$("#coverup-ef-json-format-radio-choice").hide()
+
+	$('.info-ef15').hide();
+	$('.info-ef20').show();
     }
     else {
+	$('.info-ef20').hide();
 	$('.info-ef15').show();
 	
 	$('#export-json-format15').on("change", function(event){
