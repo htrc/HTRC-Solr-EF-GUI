@@ -35,7 +35,8 @@
     <div id="solr-ef-container-dynamic-load" style="display: none;"><!-- dynamic body insert --></div>
     <script type="text/javascript">
       var runtime_mode = (document.location.pathname.match(/\/[^\/]*-dev.*$/)) ? "dev" : "prod";
-      var json_ef_version = (document.location.pathname.match(/\/solr-ef20\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
+      //var json_ef_version = (document.location.pathname.match(/\/solr-ef20\/[^\/]+\..*?$/)) ? "2.0" : "1.5";
+      var json_ef_version = (document.location.pathname.match(/\/solr-ef20\//)) ? "2.0" : "1.5";
       
       $(document).ready(function() {
       var abs_url_prefix = document.location.pathname.replace(/\/[^\/]*$/,"\/");
