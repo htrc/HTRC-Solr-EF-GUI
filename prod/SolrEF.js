@@ -152,6 +152,9 @@ function ajax_solr_text_search(newSearch,newResultPage)
     // Clear out any export-item download links generated previously
     $('a.export-item').attr('href',null);
 
+    ajax_solr_text_search_first_call(newSearch,newResultPage,data_str);
+
+    /*
     store_search_xhr = new window.XMLHttpRequest();
     
     $.ajax({
@@ -228,8 +231,131 @@ function ajax_solr_text_search(newSearch,newResultPage)
 	    }
 	}
     });
+
+*/
 }
 
+
+function ajax_solr_text_search_success(newSearch,newResultPage,jsonData)
+{
+    if (group_by_vol_checked) {
+	// Possible merging of items in search results means
+	// page-bar next pages not directly computable
+	// => don't show page-bar, only give 'next' and 'prev'
+	$('#page-bar').hide();
+	$('#next-prev').show();
+	show_results(jsonData,newSearch,newResultPage);
+    }
+    else {
+	// No merging of search result items possible
+	// => can provide page-bar to user
+	if (num_found==0) {
+	    num_found=jsonData.response.numFound;
+	    if (num_found>0) {
+		
+		$('#next-prev').hide();
+		$('#page-bar').show();
+		
+		var start = (store_search_args.start>0) ? store_search_args.start : 0;
+		
+		$('#page-bar').Paging({
+		    pagesize: num_results_per_page,
+		    count: num_found,
+		    current: Math.floor(store_search_args.start / num_results_per_page) +1,
+		    toolbar: true ,changePagesize: function(ps) {
+			num_results_per_page=ps;
+			store_search_args.rows=ps;
+			//store_search_args.start=start; // **** jump-start
+			num_found=0;
+			$('.search-in-progress').css("cursor","wait");
+			$('.facet-search').addClass("disabled-div");
+			$('#page-bar').html('');
+			ajax_solr_text_search(true,true); // newSearch=true, newResultPage=true
+		    },
+		    callback: function(a) {
+			store_search_args.start = (a-1)* parseInt(num_results_per_page);
+			show_updated_results();
+		    }
+		});
+	    }
+	}
+	if (jsonData.response.numFound==0) {
+	    $('#page-bar').html('');
+	}
+	show_results(jsonData,newSearch,newResultPage);
+    }
+}
+
+function ajax_solr_text_search_error(jqXHR, textStatus, errorThrown) {
+    $('.search-in-progress').css("cursor","auto");
+    $('.facet-search').removeClass("disabled-div");
+    iprogressbar.cancel();
+    if ((jqXHR.readyState == 0) && (jqXHR.status == 0)) {
+	console.warn("Interrupted call when performing Solr-EF query: " + store_search_args.q);
+    }
+    else {
+	
+	var mess = "<b>Failed to perform Solr-EF query: '" + store_search_args.q + "' when accessing the URL:";
+	mess +=  '<div style="margin: 0 0 0 10px">' + store_search_action +"</div></b>";
+	ajax_message_error(mess,jqXHR,textStatus,errorThrown);
+    }
+}
+
+function ajax_solr_text_search_first_call(newSearch,newResultPage,data_str)
+{
+
+    store_search_xhr = new window.XMLHttpRequest();
+    
+    $.ajax({
+	type: "POST", 
+	async: true,
+	//timeout: 60000,
+	headers: { "cache-control": "no-cache" },
+	url: store_search_action,
+	data: data_str,
+	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
+	success: function(jsonData) {
+	    ajax_solr_text_search_success(newSearch,newResultPage,jsonData);
+	    // Following is a way to force a test of the second call
+	    //ajax_solr_text_search_second_call(newSearch,newResultPage,data_str);
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    ajax_solr_text_search_second_call(newSearch,newResultPage,data_str);
+	}
+    });
+
+}
+
+function ajax_solr_text_search_second_call(newSearch,newResultPage,data_str)
+{
+    var store_search_action_alt = store_search_action.replace("/robust-solr8/","/robust-solr8-alt/");
+    // console.log("*** store_search_action_alt = " + store_search_action_alt);
+    
+    store_search_xhr = new window.XMLHttpRequest();
+    
+    $.ajax({
+	type: "POST", 
+	async: true,
+	//timeout: 60000,
+	headers: { "cache-control": "no-cache" },
+	url: store_search_action_alt,
+	data: data_str,
+	dataType: "json",
+	xhr : function() {
+	    return store_search_xhr;
+	},
+	success: function(jsonData) {
+	    ajax_solr_text_search_success(newSearch,newResultPage,jsonData);
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    ajax_solr_text_search_error(jqXHR, textStatus, errorThrown);
+	}
+    });
+
+}
 
 function show_updated_results()
 {

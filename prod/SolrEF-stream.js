@@ -197,6 +197,10 @@ function stream_export(jsonData)
     download(ids_line_by_line, output_filename, "text/plain");
 }
 
+// Following functioned named 'download4' to avoid clash with
+// 'assets/download.js' version of the same name.  Thie '4'
+// signifies that this version of downloading takes 4 args
+
 function download4(only_metadata, output_format, url, ws_url)
 {
     // only_metadata, output_format,
