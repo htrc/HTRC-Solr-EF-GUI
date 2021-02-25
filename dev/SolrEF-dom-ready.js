@@ -6,7 +6,7 @@ function volumeFieldToLabel(field)
     label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
 
     label = label.replace(/^id$/i,"Volume Identifier");
-
+    label = label.replace(/^htid$/i,"HathiTrust URL Id");
     
     return label;
 }
