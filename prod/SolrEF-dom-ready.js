@@ -1,10 +1,13 @@
 function volumeFieldToLabel(field)
 {
     var label = camelCaseToDisplayLabel(field);
-    label = label.replace(/_t$/,"");
+    label = label.replace(/_(t|s|i|ss)$/,"");
     label = label.replace(/_(ddc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
     label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
 
+    label = label.replace(/^id$/i,"Volume Identifier");
+
+    
     return label;
 }
 
@@ -25,12 +28,6 @@ function generate_query_field_menu()
 	var field = metadata_fields[i];
 
 	var label = volumeFieldToLabel(field);
-	/*
-	var label = camelCaseToDisplayLabel(field);
-	label = label.replace(/_t$/,"");
-	label = label.replace(/_(ddc|lcc)$/, function(match,capture) { return " "+capture.toUpperCase(); });
-	label = label.replace(/(?:^|\s+)(Isbn|Issn|Lccn|Oclc|Ht|Url)/g,function(match,capture) { return match.toUpperCase(); });
-	*/
 	
 	var $option = $("<option>");
 	$option.attr("value",field);

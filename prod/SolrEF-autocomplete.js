@@ -180,7 +180,7 @@ function domready_volume_autocomplete(textbox_id,available_tags)
 		    console.log("Pressed ':' =>  typed text = " + typed_text);
 		}
 		var last_term = extract_last_term(typed_text);
-		if (!last_term.match(/_(i|t)$/)) {
+		if ((!last_term.match(/_(i|t)$/)) && (!last_term.match(/^id$/i))) {
 		    // auto-correct to include it
 		    var type_endings = [ "i", "t" ]; // last val of array taken to be the default
 
