@@ -39,7 +39,7 @@ var lup_volume_metadata_fields = {
     "sourceInstitution_t": null,
     //"sourceInstitutionRecordNumber_t": null,
     "title_t": null,
-    "typeOfResource_s": null           // used to be typeOfResource_t
+    "typeOfResource_s": null,           // used to be typeOfResource_t
 
     // !!!!
     // e.g. coo.123452532
@@ -47,6 +47,7 @@ var lup_volume_metadata_fields = {
     // at the volume-level as 'id' and volumeid_s at page-level
     // 'id' at the page level is of the form coo.123452532.page-000133
     //"volumeIdentifier_t": null
+    "id": null                         // used to be volumeIdentifier
 };
 
 var lup_volume_metadata_dict = {
@@ -76,8 +77,9 @@ var lup_volume_metadata_dict = {
     "sourceInstitution_t": "The original institution who contributed the volume.",
     //"sourceInstitutionRecordNumber_t": "The unique record number for the volume from its original institution.",
     "title_t": "Title of the volume.",
-    "typeOfResource_s": "The format type of a volume."
+    "typeOfResource_s": "The format type of a volume.",
     //"volumeIdentifier_t": "A unique identifier for the current volume. This is the same identifier used in the HathiTrust and HathiTrust Research Center corpora."
+    "id": "A unique identifier for the current volume. This is the same identifier used in the HathiTrust and HathiTrust Research Center corpora."
 };
 
 // The following are the fields that get search if the user enters a query
