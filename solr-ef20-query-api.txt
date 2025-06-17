@@ -5,7 +5,7 @@ collection name:
   solr345678-faceted-htrc-full-ef2-shards24x2/select?q=title_t%3A*
 
 Base URL for searching:
-  https://solr2.htrc.illinois.edu/robust-solr8/solr345678-faceted-htrc-full-ef2-shards24x2/select
+  https://worksetbuilder.htrc.illinois.edu/robust-solr8/solr345678-faceted-htrc-full-ef2-shards24x2/select
   
 
 Makes use of dynamic fields
